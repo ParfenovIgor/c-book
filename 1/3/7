@@ -1,0 +1,31 @@
+<p>Рассмотрим такую функцию <code>set_args</code>, которая записывает значение второго аргумента по всем остальным аргументам-адресам.</p>
+
+<p>Пока необязательно понимать манипуляции с адресами, но кое-что проясню:</p>
+
+<ul>
+	<li><code>int*</code> — это адрес типа <code>int</code>. То есть <code>va_arg(lst, int*)</code> достает следующий адрес.</li>
+	<li><code>*a = b</code> выполняет запись значения <code>b</code> в адрес <code>a</code>.</li>
+</ul>
+
+<pre><code class="language-cpp">#include &lt;stdarg.h&gt;
+
+void set_args(int n, int val, ...) {
+    va_list lst;
+    va_start(lst, val);
+    
+    int i;
+    for (i = 0; i &lt; n; i++) {
+        *va_arg(lst, int*) = val;
+    }
+    
+    va_end(lst);
+}
+
+int main() {
+    int a, b, c;
+    set_args(3, 31, &amp;a, &amp;b, &amp;c);
+    printf("%d %d %d\n", a, b, c);
+    return 0;
+}</code></pre>
+
+<p>Представьте, что пользователь может вводить данные и передавать их в <code>set_args</code> без каких либо проверок. Какую атаку можно здесь произвести (потенциально нехорошее действие)?</p>

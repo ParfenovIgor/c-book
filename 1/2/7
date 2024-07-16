@@ -1,0 +1,9 @@
+<p> Немного изменим второй цикл из программы на предыдущем шаге.</p>
+
+<pre><code class="language-cpp">int main() {
+    int i = 0;
+    for (; i &lt; 10; i++ &amp;&amp; printf("%d", i));
+    return 0;
+}</code></pre>
+
+<p>Какой будет вывод у этой программы и почему?</p>

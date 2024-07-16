@@ -1,0 +1,40 @@
+<p>Сложно анализировать выполнение программы не имея возможности ввода и вывода. Научимся выводить. Первой функцией для вывода будет <code>int puts(const char *str)</code>. Давайте изучим её сигнатуру.</p>
+
+<p>Во первых, функция принимает один аргумент типа <code>const char *str</code>. Пока не будем расшифровывать этот сложный тип, и поверим, что это строка, известная на этапе компиляции (то есть, мы не сможем её сформировать интерактивно). Очевидно эта строка будет напечатана. Позже мы узнаем, что такое потоки <em>streams</em>, пока будем считать, что вывод идет в консоль.</p>
+
+<p>Во вторых, функция возвращает тип <code>int</code>, и, если мы посмотрим в документацию <em>cppreference</em>, мы увидим, что то, что она возвращает, описано с большой свободой.</p>
+
+<blockquote>
+<p>On success, returns a non-negative value.</p>
+
+<p>On failure, returns <a href="https://en.cppreference.com/w/c/io" rel="noopener noreferrer nofollow" title="c/io">EOF</a> and sets the <em>error</em> indicator (see <a href="https://en.cppreference.com/w/c/io/ferror" rel="noopener noreferrer nofollow" title="c/io/ferror">ferror()</a>) on <code>stream</code>.</p>
+</blockquote>
+
+<p>В свою очередь: </p>
+
+<blockquote>
+<table>
+	<tbody>
+		<tr>
+			<td>
+			<p>EOF</p>
+			</td>
+			<td>integer constant expression of type int and negative value</td>
+		</tr>
+	</tbody>
+</table>
+</blockquote>
+
+<p>Такую картину мы будем видеть во многих функциях. Можно посмотреть и <code>ferror()</code>, но нам это пока неинтересно.</p>
+
+<p>Давайте, наконец, напечатаем что-либо.</p>
+
+<pre><code class="language-cpp">int main() {
+    puts("Hello");
+    puts("Test");
+    return 0;
+}</code></pre>
+
+<p>Обратите внимание: в этой программе я не написал <code>#include &lt;stdio.h&gt;</code>, несмотря на то, что так обычно делают. Дело в том, что мы пока не понимаем, что такое <code>#include</code>, но он и не нужен. Вы получите предупреждение о том, что <code>puts</code>не был объявлен, но исполняемый файл вы все равно получите.</p>
+
+<p>При запуске этой программы будет выполнена функция <code>main</code>, в которой будет вызвана функция <code>puts("Hello")</code>, в результате чего будет выполнена печать строки <em>Hello</em> и перевод строки, а затем будет вызвана функция <code>puts("Test")</code>, в результате чего будет выполнена печать строки <em>Test</em> и перевод строки.</p>

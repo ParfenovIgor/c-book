@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html">    
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>C - Язык Программирования</title>
+  <style>      :root{
+         --nav-width: 26em;
+         --nav-margin-l: 1em;
+      }
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+      header {
+        padding: 0 1em;
+      }
+      #contents {
+        max-width: 60em;
+        margin: auto;
+        padding: 0 1em;
+      }
+      #navigation {
+        padding: 0 1em;
+      }
+      table ul {
+        list-style-type: none;
+        padding: 0em;
+      }
+      table li {
+        padding-bottom: 1em;
+        line-height:1.2em;
+      }
+      table, th, td {
+        border-collapse: collapse;
+        border: 1px solid grey;
+      }
+      th, td {
+        padding: 0.5em;
+      }
+      th[scope=row] {
+          text-align: left;
+          font-weight: normal;
+      }
+
+      @media screen and (min-width: 1025px) {
+        header {
+          margin-left: calc(var(--nav-width) + var(--nav-margin-l));
+        }
+        header h1 {
+          margin: auto;
+          max-width: 30em;
+        }
+        #navigation {
+          overflow: auto;
+          width: var(--nav-width);
+          height: 100vh;
+          position: fixed;
+          top:0;
+          left:0;
+          bottom:0;
+          padding: unset;
+          margin-left: var(--nav-margin-l);
+        }
+        #navigation nav ul {
+          padding-left: 1em;
+        }
+        #contents-wrapper {
+          margin-left: calc(var(--nav-width) + var(--nav-margin-l));
+        }
+      }
+
+      a:hover,a:focus {
+        background: #fff2a8;
+      }
+      dt {
+        font-weight: bold;
+      }
+      .sgr-1m {
+        font-weight: bold;
+      }
+      .sgr-2m {
+        color: #575757;
+      }
+      .sgr-31_1m {
+        color: #b40000;
+      }
+      .sgr-32_1m {
+        color: green;
+      }
+      .sgr-36_1m {
+        color: #005C7A;
+      }
+      .file {
+        font-weight: bold;
+        border: unset;
+      }
+      code {
+        background: #f8f8f8;
+        border: 1px dotted silver;
+        padding-left: 0.3em;
+        padding-right: 0.3em;
+      }
+      pre > code {
+        display: block;
+        overflow: auto;
+        padding: 0.5em;
+        border: 1px solid #eee;
+        line-height: normal;
+      }
+      samp {
+        background: #fafafa;
+      }
+      pre > samp {
+        display: block;
+        overflow: auto;
+        padding: 0.5em;
+        border: 1px solid #eee;
+        line-height: normal;
+      }
+      kbd {
+        font-weight: normal;
+      }
+      .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+
+      figure {
+        margin: auto 0;
+      }
+      figure pre {
+        margin-top: 0;
+      }
+
+      figcaption {
+        padding-left: 0.5em;
+        font-size: small;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+      }
+      figcaption.zig-cap {
+        background: #fcdba5;
+      }
+      figcaption.c-cap {
+        background: #a8b9cc;
+        color: #000;
+      }
+      figcaption.peg-cap {
+        background: #fcdba5;
+      }
+      figcaption.javascript-cap {
+        background: #365d95;
+        color: #fff;
+      }
+      figcaption.shell-cap {
+        background: #ccc;
+        color: #000;
+      }
+
+      aside {
+        border-left: 0.25em solid #f7a41d;
+        padding: 0 1em 0 1em;
+      }
+
+      h1 a, h2 a, h3 a, h4 a, h5 a {
+        text-decoration: none;
+        color: #333;
+      }
+
+      a.hdr {
+        visibility: hidden;
+      }
+      h1:hover > a.hdr, h2:hover > a.hdr, h3:hover > a.hdr, h4:hover > a.hdr, h5:hover > a.hdr {
+        visibility: visible;
+      }
+
+      th pre code {
+          background: none;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#121212;
+            color: #ccc;
+        }
+        a {
+            color: #88f;
+        }
+        a:hover,a:focus {
+            color: #000;
+        }
+        table, th, td {
+            border-color: grey;
+        }
+        .sgr-2m {
+            color: grey;
+        }
+        .sgr-31_1m {
+            color: red;
+        }
+        .sgr-32_1m {
+            color: #00B800;
+        }
+        .sgr-36_1m {
+            color: #0086b3;
+        }
+        code {
+          background: #222;
+          border-color: #444;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        samp {
+          background: #000;
+          color: #ccc;
+        }
+        pre > samp {
+          border: unset;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+        h1 a, h2 a, h3 a, h4 a, h5 a {
+            color: #aaa;
+        }
+        figcaption.zig-cap {
+            background-color: #b27306;
+            color: #000;
+        }
+        figcaption.peg-cap {
+            background-color: #b27306;
+            color: #000;
+        }
+        figcaption.shell-cap {
+          background: #2a2a2a;
+          color: #fff;
+        }
+      }
+</style>
+  <script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+</head>
+
+<body>
+  <header><h1>C - Язык Программирования</h1></header>
+  
+  <div id="main-wrapper">
+    <div id="navigation">        
+      <nav aria-labelledby="table-of-contents">
+        <h2 id="table-of-contents">Содержание</h2>
+        <ul>          
+          <li><a href="#1">Вид сверху на C</a>
+            <ul>
+              <li><a href="#1.1">Введение</a></li>
+              <li><a href="#1.2">Контроль потока</a></li>
+              <li><a href="#1.3">Функции</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div id="contents-wrapper">
+      <main id="contents">
+
+<h2 id="1">Вид сверху на C</h2>
+
+<h3 id="1.1">Введение</h3>
+
+<h3 id="1.1.1">1.1.1</h2>
+<p>Рассмотрим простейшую однофайловую программу на C:</p>
+
+<pre><code class="language-cpp">int main() {
+    return 0;
+}</code></pre>
+
+<p>Здесь определена функция под названием <code>main</code>. <code>int main()</code> — это сигнатура функции. По ней мы видим, что функция не принимает аргументов, так как круглые скобки ничего не содержат, и возвращает тип <code>int</code> — целое число. В фигурных скобках содержится тело функции, которое содержит лишь один <em>statement </em> <code>return 0</code>, который завершает выполнение функции, возвращая значение <code>0</code>. Пока можно сильно не задумываться обо всем вышенаписанном, мы вернемся к функциям с большими подробностями позже.</p><h3 id="1.1.2">1.1.2</h2>
+<p>Сложно анализировать выполнение программы не имея возможности ввода и вывода. Научимся выводить. Первой функцией для вывода будет <code>int puts(const char *str)</code>. Давайте изучим её сигнатуру.</p>
+
+<p>Во первых, функция принимает один аргумент типа <code>const char *str</code>. Пока не будем расшифровывать этот сложный тип, и поверим, что это строка, известная на этапе компиляции (то есть, мы не сможем её сформировать интерактивно). Очевидно эта строка будет напечатана. Позже мы узнаем, что такое потоки <em>streams</em>, пока будем считать, что вывод идет в консоль.</p>
+
+<p>Во вторых, функция возвращает тип <code>int</code>, и, если мы посмотрим в документацию <em>cppreference</em>, мы увидим, что то, что она возвращает, описано с большой свободой.</p>
+
+<blockquote>
+<p>On success, returns a non-negative value.</p>
+
+<p>On failure, returns <a href="https://en.cppreference.com/w/c/io" rel="noopener noreferrer nofollow" title="c/io">EOF</a> and sets the <em>error</em> indicator (see <a href="https://en.cppreference.com/w/c/io/ferror" rel="noopener noreferrer nofollow" title="c/io/ferror">ferror()</a>) on <code>stream</code>.</p>
+</blockquote>
+
+<p>В свою очередь: </p>
+
+<blockquote>
+<table>
+	<tbody>
+		<tr>
+			<td>
+			<p>EOF</p>
+			</td>
+			<td>integer constant expression of type int and negative value</td>
+		</tr>
+	</tbody>
+</table>
+</blockquote>
+
+<p>Такую картину мы будем видеть во многих функциях. Можно посмотреть и <code>ferror()</code>, но нам это пока неинтересно.</p>
+
+<p>Давайте, наконец, напечатаем что-либо.</p>
+
+<pre><code class="language-cpp">int main() {
+    puts("Hello");
+    puts("Test");
+    return 0;
+}</code></pre>
+
+<p>Обратите внимание: в этой программе я не написал <code>#include &lt;stdio.h&gt;</code>, несмотря на то, что так обычно делают. Дело в том, что мы пока не понимаем, что такое <code>#include</code>, но он и не нужен. Вы получите предупреждение о том, что <code>puts</code>не был объявлен, но исполняемый файл вы все равно получите.</p>
+
+<p>При запуске этой программы будет выполнена функция <code>main</code>, в которой будет вызвана функция <code>puts("Hello")</code>, в результате чего будет выполнена печать строки <em>Hello</em> и перевод строки, а затем будет вызвана функция <code>puts("Test")</code>, в результате чего будет выполнена печать строки <em>Test</em> и перевод строки.</p><h3 id="1.1.3">1.1.3</h2>
+<p>Научимся работать с локальными переменными, а заодно и выводить числа. Рассмотрим программу:</p>
+
+<pre><code class="language-cpp">int main() {
+    int a;
+    int b = 2 + 3;
+    b = a + 8;
+    printf("%d %s %d\n", a, "Hello", b + 7);
+    return 0;
+}</code></pre>
+
+<p>В первой строке тела функции <code>main</code>мы объявляем <em>declare</em> переменную типа <code>int</code> с именем <code>a</code>. Мы не присваиваем <em>define</em> её. Её значение на этом моменте будет неопределенно. Какое значение получит переменная <code>a</code> мы узнаем позже.</p>
+
+<p>Во второй строке мы объявляем <em>declare</em> и сразу определяем <em>define</em> переменную типа <code>int</code> с именем <code>b</code>. Мы присваиваем ей значение <code>5</code>.</p>
+
+<p>В третьей строке мы переопределяем значение переменной <code>b</code>. Так как в вычислении её значения используется неопределенная переменная <code>a</code>, теперь значение переменной <code>b</code> тоже не определено.</p>
+
+<p>В четвертой строке вы используем новую, намного более сложную функцию — <code>printf</code>. Это функция с неопределенным количеством аргументов (vararg функция, эллипсис). Первый её аргумент — это строка, задающая формат. Он имеет достаточно богатые возможности, и мы будем ими пользоваться по мере необходимости. Пока остановимся на том, что подстроки <code>%d</code> будут заменены на число в следующем по счету аргументе, подстроки <code>%s</code> будут заменены на строку в следующем по счету аргументе (первый <code>%d</code> заменится на аргумент <code>a</code>, <code>%s</code> заменится на аргумент <code>"Hello"</code>, второй <code>%d</code> заменится на аргумент <code>b + 7</code>), а <code>\n</code> обозначает символ перехода строки line feed (другие подобные символы мы увидим позже).</p>
+
+<p>Определить вывод этой программы наперед не получится, так как значения переменных зависят от компилятора. В будущем мы часто будем с этим сталкиваться.</p><h3 id="1.1.4">1.1.4</h2>
+<p>Рассмотрим базовые типы данных, которые нам в ближайшее время могут пригодиться.</p>
+
+<ul>
+	<li><code>int</code> — целые числа, на хранение котах выделяется <code>4</code> байта</li>
+	<li><code>short</code> — целые числа, на хранение которых выделяется <code>2</code> байта</li>
+	<li><code>char</code> — целые числа, на хранение которых выделяется <code>1</code> байт</li>
+	<li><code>long long</code> — целые числа, на хранение которых выделяется <code>8</code> байт</li>
+	<li><code>long</code> — целые числа, на хранение которых выделяется ?? байт</li>
+</ul>
+
+<p>Помимо этих типов, на понадобится <code>const char*</code>.</p>
+
+<p>Интересная ситуация с логическим типом <code>_Bool</code> — он был введен не сразу, и в многих программах вводили тип с названием <code>bool</code> самостоятельно с помощью препроцессора, поэтому и было выбрано такое странное название. Логический тип имеет лишь два значения: <code>true</code> и <code>false</code>. (На самом деле, размер этого типа <code>1</code> байт, и <code>false</code> соответствует числу <code>0</code>, в то время как <code>true</code> всем остальным.)</p>
+
+<p>Размер типа <code>long</code> в свою очередь зависит от системы. На <em>Windows</em> он равен 4, а на <em>Linux</em> он равен 8. В целом, встроенные типы на описывают нормально свою размерность, как в языках <em>Rust</em> и <em>Zig</em>, и это бывает проблемой.</p>
+
+<p>Про указатели мы поговорим позже.</p>
+
+<p>С помощью оператора <code>sizeof(x)</code> можно узнать размер типа в байтах, причем в качестве аргумента можно использовать как тип, так и переменную или значение.</p>
+
+<pre><code class="language-cpp">int main() {
+    printf("int: %d\n", sizeof(int));
+    printf("short: %d\n", sizeof(short));
+    printf("char: %d\n", sizeof(char));
+    printf("long long: %d\n", sizeof(long long));
+    printf("long: %d\n", sizeof(long));
+    printf("const char*: %d\n", sizeof(const char*));
+    
+    const char *str = "Hello";
+    printf("const char*: %d\n", sizeof(str));
+    return 0;
+}</code></pre><h3 id="1.1.5">1.1.5</h2>
+<p>Изучим несколько базовых операторов.</p>
+
+<ol>
+	<li><code>+</code> — оператор сложения, складывает два числа. <code>2 + 3</code> равно <code>5</code>.</li>
+	<li><code><span style="color: #000000;">-</span></code> — оператор вычитания, вычитает второе число из первого. <code>5 - 3</code> равно <code><span style="color: #000000;">2</span></code>.</li>
+	<li><code><span style="color: #000000;">*</span></code> — оператор умножения, умножает два числа. <code>2 * 3</code> равно <code><span style="color: #000000;">6</span></code>.</li>
+	<li><code><span style="color: #000000;">/</span></code> — оператор деления, делит второе число на первое с округлением вниз. <code><span style="color: #000000;">5 / 2</span></code> равно <code><span style="color: #000000;">2</span></code>. <code><span style="color: #000000;">6 / 2</span></code> равно <code><span style="color: #000000;">3</span></code>.</li>
+	<li><code>%</code> — оператор остатка от деления, делит второе число на первое и даёт остаток от деления. <code><span style="color: #000000;">5 % 2</span></code> равно <code>1</code>. <code><span style="color: #000000;">6 % 2</span></code> равно <code>0</code>.</li>
+</ol>
+
+<p>Если второй аргумент у операторов <code>/</code> и <code>%</code> будет равен <code>0</code>, то программа завершится с ошибкой. Какие при этом механизмы происходят, мы узнаем позже.</p>
+
+<p>Также у этих операторов есть странная особенность: на самом деле они округляют не вниз, а к нулю, что может быть неприятным сюрпризом, если в ваших промежуточных вычислениях будут получаться отрицательные числа. Например <code>-5 / 2</code> равно <code>-1</code> и <code>-5 % 3</code> равно <code>-2</code>.</p>
+
+<p>Имейте ввиду, что числа в C ограничены, и при их переполнении вы не получите никаких предупреждений или ошибок. (Когда такое происходит, процессор ставит флаг переполнения, но компилятор C для скорости даже не смотрит на него.) Например, <code>2000000000 + 2000000000</code> равно <code>-294967296</code>.</p>
+
+<p>Помимо арифметических операторов существуют логические операторы для создания сложных условий.</p>
+
+<ol>
+	<li><code>&amp;&amp;</code> или <code>and</code> — оператор И, который возвращает <code>1</code>, если оба аргумента не равны нулю, и возвращает <code>0</code> в противном случае.</li>
+	<li><code>||</code> или <code>or</code> — оператор ИЛИ, который возвращает <code>1</code>, если хотя бы один аргумент не равен нулю, и возвращает <code>0</code> в противном случае.</li>
+	<li><code>!</code> — унарный оператор НЕ, который возвращает <code>1</code>, если аргумент равен нулю, и возвращает <code>0</code> в противном случае.</li>
+	<li><code>==</code> — оператор равенства, который возвращает <code>1</code>, если аргументы равны, и возвращает <code>0</code> в противном случае.</li>
+</ol>
+
+<pre><code class="language-cpp">int main() {
+    printf("%d ", 3 + 4);
+    printf("%d ", 17 % 7);
+    printf("%d ", 3 &amp;&amp; 0);
+    printf("%d ", 3 || 0);
+    printf("%d ", !4);
+    printf("%d ", 5 == 5);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>7 3 0 1 0 1 </code></p><h3 id="1.1.6">1.1.6</h2>
+<p>Напишите программу, которая выведет следующий текст:</p>
+
+<pre><code>123
+abracadabra
+2 + 5 = 7
+ababba</code></pre><h3 id="1.1.7">1.1.7</h2>
+<p>Напомним, что в C не сразу был введен логический тип данных <code>_Bool</code>. Однако при этом также есть возможность получить "тип" <code>bool</code>, добавив файл <code>#include &lt;stdbool.h&gt;</code>. (На самом деле, это не совсем тип.)</p>
+
+<p>Как думаете, зачем этот файл был добавлен?</p><h3 id="1.1.8">1.1.8</h2>
+<p>Пока эту задачу можно пропустить, и вернуться к ней намного позднее.</p>
+
+<p>Я немного наврал, когда сказал, что размер типа <code>int</code> — 4 байта. Это не так при компиляции в разрядности ниже, чем 32. Однако современные компиляторы не имеют возможности компилировать в такие разрядности, поэтому это не является проблемой. Можно попробовать найти древний компилятор (например, Open Watcom), который может компилировать в разрядность 16, и проверить <code>sizeof(int)</code> в таком режиме.</p>
+<h3 id="1.2">Контроль потока</h3>
+
+<h3 id="1.2.1">1.2.1</h2>
+<p>Начнём с введения нескольких терминов. Рассмотрим программу:</p>
+
+<pre><code class="language-cpp">int main() {
+    int a = 5 + 8;
+    puts("123");
+    int b = puts("456");
+    return 0;
+}</code></pre>
+
+<p>Тело функции <code>main</code> состоит из четырех действий: объявление переменной <code>a</code>, вызов функции <code>puts("123")</code>, объявление переменной <code>b</code>, возвращение значения <code>0</code>. Каждое из этих действий называется <em>statement</em>.</p>
+
+<p>Посмотрим на первый statement: <code>int a = 5 + 8</code>. Часть <code>5 + 8</code> называется <em>expression</em>. Часть этого expression-а <code>5</code> тоже является expression-ом. На третьем statement-е вызов функции <code>puts("456")</code> также является expression-ом (в то время, как другой вызов этой же функции был statement-ом).</p>
+
+<p>Есть проблема в терминологии: оба этих слова не имеют перевода на русский язык, и обычно их обоих называют просто <em>выражение</em>. Позже, когда мы будем более подробно изучать синтаксис, мы увидим смысл такого разделения.</p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px;">
+	<tbody>
+		<tr>
+			<td>statement</td>
+			<td>expression</td>
+		</tr>
+		<tr>
+			<td>Исполняются сверху вниз</td>
+			<td>Порядок исполнения не определен</td>
+		</tr>
+		<tr>
+			<td>Не имеют конечного значения</td>
+			<td>Имеют конечное значение (а потому и тип)</td>
+		</tr>
+		<tr>
+			<td>Имеют side effect</td>
+			<td>По хорошему, не должны иметь side effect</td>
+		</tr>
+	</tbody>
+</table>
+
+<p><em>Side effect</em> означает, что исполнение фрагмента кода приведет к изменению чего либо за его пределами (изменятся внешние переменные; что-то запишется в память, доступную из внешних переменных; выполнится системный вызов и т.д.).</p><h3 id="1.2.2">1.2.2</h2>
+<p>Control Flow (контроль потока) — это набор statement-ов в языке, которые определяют последовательность выполнения statement-ов.</p>
+
+<p>Пока мы видели следующие типы statement-ов:</p>
+
+<ul>
+	<li>Declaration (объявление): <code>int a</code>. Объявление также может быть с определением/присваиванием (по сути, это то же самое, но термин определение в других языках может налагать ограничения):<span style="color: #000000;"> <code>int a = 5</code></span>.</li>
+	<li>Assignment/Definition (присваивание/определение): <code>a = 5 + 2</code>.</li>
+	<li>Function Call (вызов функции): <code>puts("123")</code>.</li>
+	<li>Function Return (возврат из функции): <code>return 2 + puts("456")</code>.</li>
+</ul>
+
+<p>Конечно, хочется иметь вариативность в порядке исполнения statement-ов. Делать это можно с помощью ветвлений и циклов, которые являются control flow statements.</p>
+
+<p>Посмотрим на <code>if</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    int a = 4;
+    if (a - 4) {
+        puts("1");
+    }
+    else if (a) puts("2");
+    else {
+        puts("3");
+    }
+    return 0;
+}</code></pre>
+
+<p>Данный <code>if</code> statement состоит из трех ветвей. Эти ветви надо читать так:</p>
+
+<ol>
+	<li>Если <code>a - 4</code> не <code>0</code>, то выполнить <code>puts("1")</code> и завершить выполнение <code>if</code></li>
+	<li>Если <code>a</code> не <code>0</code>, то выполнить <code>puts("2")</code> и завершить выполнение <code>if</code></li>
+	<li>Выполнить <code>puts("3")</code></li>
+</ol>
+
+<p>Обратите внимание на следующие вещи:</p>
+
+<ul>
+	<li>Можно как обрамлять блок в <code>if</code> в фигурные скобки, так и не делать этого.</li>
+	<li>В качестве условия в <code>if</code> должен быть expression, а его тип неважен. Проверка идет лишь на то, что он не <code>0</code>. А в языке C по сути любой тип данных — число.</li>
+	<li>Веток <code>else if</code> и <code>else</code> может не быть. Количество веток <code>else if</code> не ограниченно.</li>
+</ul>
+
+<p>В результате выполнения этой программы будет напечатано единственное число <code>2</code>.</p><h3 id="1.2.3">1.2.3</h2>
+<p>Вскоре нам потребуется начать решать input/output задачи для проверки знаний. Для этого нужно разобраться, как считывать данные. Для этого используется функция <code>scanf</code>. Посмотрим решение задачи A + B.</p>
+
+<p>Напишите программу, которая считывает два целых числа <span class="math-tex">\(a\)</span> и <span class="math-tex">\(b\)</span> (<span class="math-tex">\(-100 \le a, b \le 100\)</span>), и выводит их сумму.</p>
+
+<pre><code class="language-cpp">int main() {
+    int a, b;
+    scanf("%d%d", &amp;a, &amp;b);
+    printf("%d\n", a + b);
+    return 0;
+}</code></pre>
+
+<p>Функция <code>scanf</code> имеет первым аргументом формат, по которому сопоставляются данные во входном потоке, а следующими аргументами <em>адреса</em>, по которым необходимо эти данные положить. <code>scanf</code> сам считает произвольное количество пробельных символов (пробел, табуляция, следующая строка, возврат каретки и т.д.) между идущими в формате подряд <code>%d</code>. (Принцип, по которому он это делает, мне не очень понятен, но это и не нужно.)</p>
+
+<p>Пока мы не знаем, что такое адреса, но позже мы подробно их изучим. C не имеет возможности передать в функцию локальную переменную так, чтобы функция изменила её. Вместо этого мы передаем адрес локальной переменной, который мы берем оператором <code>&amp;</code> (амперсанд). Интересно, что функция, получая информацию о местоположении локальной переменной, может работать не только с этой переменной, но и с тем что находится рядом с ней. (Она не получает этим <em>права</em> — права у неё от передачи аргументов не меняются. Она получает информацию, где искать данные.) Но об этом мы поговорим подробно потом.</p>
+
+<p>Нетрудно догадаться, как считывать строки, но там есть неочевидные моменты. Мы поговорим о строках отдельно. Пример некорректной программы, которая может, как выполниться успешно, так и завершиться с ошибкой. Ничего страшного, если вы пока не знаете, что такое массивы, и, соответственно, не понимаете программу.</p>
+
+<pre><code class="language-cpp">int main() {
+    char str[10];
+    scanf("%s", str);
+    return 0;
+}</code></pre>
+
+<p>А эта программа гарантированно завершится с ошибкой, так как попытается считать данные в константу. Как функционирует такое ограничение, мы также позже узнаем.</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *str = "Hello";
+    scanf("%s", str);
+    return 0;
+}</code></pre><h3 id="1.2.4">1.2.4</h2>
+<p>Улитка ползет по столбу высотой <span class="math-tex">\(h\)</span> единиц и хочет забраться на самый его верх. Днем улитка поднимается на <span class="math-tex">\(a\)</span> единиц, а ночью соскальзывает вниз на <span class="math-tex">\(b\)</span> единиц. На какой день улитка заберется на столб?</p>
+
+<h4>Формат ввода</h4>
+
+<p>Единственная строка входных данных содержит три целых числа: <span class="math-tex">\(a\)</span>, <span class="math-tex">\(b\)</span> и <span class="math-tex">\(h\)</span> (<span class="math-tex">\(1 \le b &lt; a \le h \le 10^9\)</span>)</p>
+
+<h4>Формат вывода</h4>
+
+<p>Выведите единственное число — номер дня, на который улитка достигнет верха столба.</p><h3 id="1.2.5">1.2.5</h2>
+<p>В C присутствуют циклы <code>while</code>, <code>do while</code> и <code>for</code>. Выходить их циклов можно с помощью операторов <code>break</code> и <code>continue</code>. К сожалению, нет возможности выйти из нескольких циклов, кроме как с помощью оператора перехода к метке <code>goto</code>.</p>
+
+<p>Цикл <code>while</code> выглядит так:</p>
+
+<pre><code class="language-cpp">int main() {
+    int i = 0;
+    while (i &lt; 10) {
+        printf("%d", i);
+        i++;
+    }
+    return 0;
+}</code></pre>
+
+<p>Читать это надо так. Если<code>i &lt; 10</code>, выполнить тело цикла, в котором необходимо вывести значение <code>i</code> и увеличить его на единицу, а затем прыгнуть в начало цикла. В противном случае, прервать выполнение цикла.</p>
+
+<p>Вывод этой программы: <code>0123456789</code></p>
+
+<p>Цикл <code>do while</code> выглядит так:</p>
+
+<pre><code class="language-cpp">int main() {
+    int i = 0;
+    do {
+        printf("%d", i);
+        i++;
+    } while (i &lt; 10);
+    return 0;
+}</code></pre>
+
+<p>Читать это надо так. Выполнить тело цикла, в котором необходимо вывести значение <code>i</code> и увеличить его на единицу. Затем, если<code>i &lt; 10</code>, прыгнуть в начало цикла. В противном случае, прервать выполнение цикла.</p>
+
+<p>Вывод этой программы: <code>0123456789</code></p>
+
+<p>Цикл <code>do while</code> отличается от цикла <code>while</code> тем, что он в любом случае сделает хотя бы одну итерацию.</p><h3 id="1.2.6">1.2.6</h2>
+<p> Цикл <code>for</code> выглядит так:</p>
+
+<pre><code class="language-cpp">int main() {
+    int i;
+    for (i = 0; i &lt; 10; i++) {
+        printf("%d", i);
+    }
+    i = 0;
+    for (; i &lt; 10; printf("%d", i) &amp;&amp; i++);
+    return 0;
+}</code></pre>
+
+<p>Читать первый цикл <code>for</code> надо так. Сначала выполнить <code>i = 0</code>. Затем выполнить тело цикла, в котором необходимо вывести значение <code>i</code>, а затем выполнить <code>i++</code>. Затем, если <code>i &lt; 10</code>, прыгнуть в начало цикл (не выполняя <code>i = 0</code>). В противном случае, прервать выполнение цикла.</p>
+
+<p>Данный цикл на первый взгляд может выглядеть странным и запутанным, но на самом деле он удобен.</p>
+
+<p>Часто вы будете видеть, что в первом "блоке" цикла <code>for </code>(там, где у нас написано <code>i = 0</code>) выполняют объявление переменной (например <code>int i = 0</code>). Однако, это работает не со всеми стандартами языка C. В некоторых стандартах это может считаться ошибкой.</p>
+
+<p>Посмотрим на второй цикл <code>for</code>. Мы видим, что некоторые блоки могут быть пустыми. Все блоки должны являться expressions. Причина этого ясна для второго блока, ведь он проверяет условие, а значит его содержимое должно иметь значение. Но неужели <code>i = 0</code> и <code>i++</code> это тоже expressions, которые имеют какое-то значение? Да. <code>i = 0</code> возвращает значение своего правого аргумента, а <code>i++</code> возвращает значение <code>i</code> до увеличения. (Чуть позже мы изучим все эти операторы подробнее, но вы уже можете почитать про них.)</p>
+
+<p>Оператор <code>&amp;&amp;</code> — это оператор И. Он выполняет левый аргумент, и, если он не <code>0</code>, выполняет правый аргумент и возвращает его, а иначе, возвращает <code>0</code>. Попробуйте теперь самостоятельно понять логику работы второго цикла.</p>
+
+<p>Вывод этой программы: <code>01234567890123456789</code></p><h3 id="1.2.7">1.2.7</h2>
+<p> Немного изменим второй цикл из программы на предыдущем шаге.</p>
+
+<pre><code class="language-cpp">int main() {
+    int i = 0;
+    for (; i &lt; 10; i++ &amp;&amp; printf("%d", i));
+    return 0;
+}</code></pre>
+
+<p>Какой будет вывод у этой программы и почему?</p><h3 id="1.2.8">1.2.8</h2>
+<p>С помощью оператора <code>break</code> мы выходим из одного внутреннего цикла. Выглядит это так:</p>
+
+<pre><code class="language-cpp">int main() {
+    int i, j;
+    for (i = 0; i &lt; 5; i++) {
+        for (j = 0; j &lt; 5; j++) {
+            printf("%d", j);
+            if (j == i) break;
+        }
+    }
+    return 0;
+}</code></pre>
+
+<p>В результате выполнения этой программы будет выведено <code>001012012301234</code></p>
+
+<p>С помощью оператора <code>continue</code> мы переходим к следующей итерации внутреннего цикла, не выполняя оставшуюся часть тела цикла. Выглядит это так:</p>
+
+<pre><code class="language-cpp">int main() {
+    int i, j;
+    for (i = 0; i &lt; 5; i++) {
+        for (j = 0; j &lt; 5; j++) {
+            if (j == i) continue;
+            printf("%d", j);
+        }
+    }
+    return 0;
+}</code></pre>
+
+<p>В результате выполнения этой программы будет выведено <code>12340234013401240123</code></p>
+
+<p>С помощью оператора <code>goto</code> мы переходим к <em>метке</em>. Метка может быть объявлена в любом месте между statement-ов, и выглядит как идентификатор с двоеточием. С помощью оператора <code>goto</code> можно, например, выйти из двойного цикла:</p>
+
+<pre><code class="language-cpp">int main() {
+    int i, j;
+    for (i = 0; i &lt; 5; i++) {
+        for (j = 0; j &lt; 5; j++) {
+            printf("%d", j);
+            if (j == i) goto end;
+        }
+    }
+    end:
+    return 0;
+}</code></pre>
+
+<p>В результате выполнения этой программы будет выведено <code><span style="color: #000000;">0</span></code></p>
+
+<p>Бывает, что необходимо по выполнению условия выйти из блока кода. Увы, сделать это так не получится:</p>
+
+<pre><code class="language-cpp">int main() {
+    {
+        int i;
+        if (i) break;
+    }
+    return 0;
+}</code></pre>
+
+<p>Обычно, для этой цели используют цикл или оператор <em>goto</em>. (В языке программирования Zig это организовано получше.)</p>
+
+<p>Старайтесь не использовать оператор <code>goto</code> там, где он может серьезно усложнить читаемость программы, с чем он отлично справляется. Обычно в языке C он используется для того, чтобы выйти из вложенного цикла, и для того, чтобы перейти к очистке в конце функции, если она что-то динамически создала, но в процессе её работы произошла ошибка, из-за которой она должна прерваться и вернуть ошибку. Выглядит это примерно так:</p>
+
+<pre><code class="language-cpp">FOOSTATUS foo() {
+    void *data = malloc(SIZE);
+    int status = FOO_SUCCESS;
+    if (!init_foo(data)) {
+        status = FOO_ERROR_INIT;
+        goto end
+    }
+    if (!process_foo(data)) {
+        status = FOO_ERROR_PROCESS;
+        goto end
+    }
+    end:
+    free(data);
+    return status;
+}</code></pre><h3 id="1.2.9">1.2.9</h2>
+<p>Для более удобной организации ветвлений используются <code>switch case</code> statement-ы.</p>
+
+<pre><code class="language-cpp">int main() {
+    int x = 2;
+    switch (x) {
+        case 1: printf("1 "); break;
+        case 2: printf("2 "); break;
+    }
+    switch (x) {
+        case 1: printf("1 "); break;
+        case 3: printf("3 "); break;
+    }
+    switch (x) {
+        case 1: printf("1 "); break;
+        case 2: printf("2 ");
+        case 3: printf("3 "); break;
+        case 4: printf("4 ");
+    }
+    switch (x) {
+        case 1: printf("1 "); break;
+        default: printf("- ");
+    }
+    printf("\n");
+}</code></pre>
+
+<p>Здесь написаны четыре <code>switch case</code> statement-а. В своем теле они имеют ветви, каждая из которых состоит из ключевого слова <code>case</code>, выражения, при котором эта ветвь срабатывает, символа двоеточия и блока кода.</p>
+
+<p>При выполнении <code>switch case</code> statement-а выполняется первая ветвь, выражение после слова <code>case</code> у которой равно выражению после слова <code>switch</code>. У первого <code>switch</code> это вторая ветвь, которая содержит блок <code>printf("%d "); break;</code>. (Ключевое слово <code>break</code> тоже часть блока.) У второго <code>switch</code> такой ветви нет, поэтому ничего не будет исполнено.</p>
+
+<p>Как только срабатывает одна из ветвей, выполняются все следующие ветви вплоть до последней (что по моему мнению является довольно странной логикой), либо до встречи ключевого слова <code>break</code>. Так, у третьего <code>switch</code> будет выполнен блок второй ветви <code>printf("2 ");</code>, а затем продолжится выполнение блока третьей ветви, и, так как он завершается словом <code>break</code>, блок четвертой ветви не будет выполнен.</p>
+
+<p>Четвертый <code>switch</code> statement имеет ветвь, которая начинается с ключевого слова <code>default</code>. Блок данной ветви будет выполнен в любом случае, если не было выполнено ни одного блока выше.</p>
+
+<p>Вывод этой программы: <code>2 2 3 - </code></p><h3 id="1.2.10">1.2.10</h2>
+<p>Успешный брокер Василий смотрит курс акций за последние <span class="math-tex">\(n\)</span> дней. Цена акции в день <span class="math-tex">\(i\)</span> равна <span class="math-tex">\(a_i\)</span>. Василий хочет найти два дня <span class="math-tex">\(p &lt; q\)</span>, такие, что <span class="math-tex">\(a_q - a_p\)</span> максимально возможное, ведь именно покупка акций в день <span class="math-tex">\(p\)</span>, а продажа в день <span class="math-tex">\(q\)</span> принесла бы ему максимальную прибыль, будь у него более развитые экстрасенсорные способности.</p>
+
+<h4>Формат ввода</h4>
+
+<p>Первая строка входных данных содержит одно целое число <span class="math-tex">\(n\)</span> (<span class="math-tex">\(1 \le n \le 10^3\)</span>)</p>
+
+<p>Вторая строка входных данных <span class="math-tex">\(n\)</span> целых чисел <span class="math-tex">\(a_1, a_2, \ldots, a_n\)</span> (<span class="math-tex">\(1 \le a_i \le 10^6\)</span>)</p>
+
+<h4>Формат вывода</h4>
+
+<p>Выведите единственное число — наибольшая разность <span class="math-tex">\(a_q - a_p\)</span>.</p>
+<h3 id="1.3">Функции</h3>
+
+<h3 id="1.3.1">1.3.1</h2>
+<p>Мы уже объявляли функции. <code>int main() {}</code> — это объявление функции, которая ничего не принимает. При использовании стандартного <em>linker-скрипта</em> (что это такое, мы узнаем позже) наличие этой функции обязательно.</p>
+
+<p>Cигнатура функции — это список типов аргументов, которые функция принимает, и тип того, что функция возвращает. По умолчанию, функция <code>main</code> возвращает <code>int</code>, и значение <code>0</code> означает успешное выполнение. Это значение называется <em>кодом возврата</em> программы, и в <em>sh</em> можно его посмотреть у запущенной в последний раз программы с помощью переменной <code>$?</code>: <code>echo $?</code>.</p>
+
+<p>Попробуем написать свои функции:</p>
+
+<pre><code class="language-cpp">int foo(int a) {
+    return a + 2;
+}
+
+int main() {
+    int a = 5;
+    int b = foo(a);
+    foo(a);
+    printf("%d %d\n", a, b);
+    return 0;
+}</code></pre>
+
+<p>Функция <code>foo</code> принимает один аргумент типа <code>int</code> и возвращает его значение, увеличенное на <code>2</code>. В результате выполнения этой программы будет выведено <code>5 7</code></p>
+
+<p>Обратите внимание, что вызов функции может быть как expression-ом, как в первом случае, так и statement-ом, как во втором случае.</p>
+
+<p>Функции используются для организации кода и улучшения читаемости.</p>
+
+<p>Функции можно определять в отдельных файлах, но в C (и Assembly) это делается не так просто, как в остальных языках. Мы поговорим об этом отдельно.</p>
+
+<p>В функции <code>foo</code> можно вызвать функцию <code>foo</code>. Это называется <em>рекурсией</em>. Например, функция вычисления наибольшего общего делителя (greatest common divisor) может быть написана так:</p>
+
+<pre><code class="language-cpp">int gcd(int a, int b) {
+    if (a == 0)
+        return 0;
+    else
+        return gcd(b % a, a);
+}</code></pre>
+
+<p>Естественно, можно допустить ошибку, при которой вызов функции будет происходить бесконечно. В таком случае, так как на хранение данных о предыдущих (и все ещё идущих) вызовах функции тратится память на стеке, стек вскоре закончится, и возникнет ошибка исполнения.</p>
+
+<p>Функции могут ничего не возвращать. Для этого вместо типа возврата указывается <code>void</code>. В таком случае, нельзя использовать функцию, как expression.</p><h3 id="1.3.2">1.3.2</h2>
+<p>Принято, что функция <code>main</code> принимает два аргумента, и её полная сигнатура на самом деле выглядит так: <code>int main(int argc, char **argv)</code>. Второй аргумент — список строк, длина которого неизвестна, а первый аргумент — длина этого списка. Рассмотрим программу:</p>
+
+<pre><code class="language-cpp">int main(int argc, char **argv) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>Что за список строк имеется ввиду? Это список аргументов программы. Когда мы запускаем программу в терминале, мы передаем их так: <code>./program ababba babba</code>. При таком запуске вывод программы будет такой:</p>
+
+<pre><code>program
+ababba
+babba</code></pre>
+
+<p>Первый аргумент всегда должен быть названием исполняемого файла. Мы можем нарушить это правило, если сделаем системный вызов <code>exec</code> самостоятельно, и некоторые программы в таком случае могут отказаться работать. (Что такое системные вызовы мы изучим позже.)</p>
+
+<p>Благодаря особенностям <em>ABI</em> (что это такое, мы узнаем позже) мы можем написать в сигнатуру не все аргументы. Однако мы не можем написать большее количество аргументов, иначе они попадут на данные функции, которая нас вызвала, и мы начнем оперировать ими. (<code>main</code> — не первая функция при стандартном linker-скрипте.) Обратите внимание: компилятор никак не помешает нам этого сделать.</p>
+
+<pre><code class="language-cpp">int main(int a, int b, int c, int d) {
+    printf("%d %d %d %d\n", a, b, c, d);
+    d = 5;
+    return 0;
+}
+</code></pre>
+
+<p>Если использовать 64-битный компилятор, то размер адресов (любых) будет 8 байт (то есть два <code>int</code>-а). Тогда переменные <code>b</code> и <code>c</code> лягут на аргумент <code>argv</code>, а переменная <code>d</code> на вызвавшую функцию. (Если бы функция <code>main</code> была первой, а мы могли бы сделать это, написав свой linker-скрипт, то мы могли бы ткнуться за пределы стека и получить ошибку исполнения.)</p><h3 id="1.3.3">1.3.3</h2>
+<p>Функции "видят" другие функции, объявленные выше. Но если мы хотим написать две вызывающие друг друга функции, то с помощью только определений функций сделать этого, возможно, не удастся. Такой код в C++ некорректен, но в C корректен (возможно, не во всех компиляторах):</p>
+
+<pre><code class="language-cpp">void foo(int n) {
+    boo(1);
+}
+
+void boo(int n) {
+    foo(2);
+}</code></pre>
+
+<p>Решить эту проблему можно с помощью объявления функции, или, <em>прототипа</em> функции. Выглядит он так:</p>
+
+<pre><code class="language-cpp">void boo(int n);
+
+void foo(int n) {
+    boo(1);
+}
+
+void boo(int n) {
+    foo(2);
+}</code></pre>
+
+<p>Прототип функции объявляет лишь сигнатуру. Названия аргументов в нем не важны, и, если мы заменим первую строку на <code>void boo(int);</code>, то это будет по прежнему корректно.</p>
+
+<p>Прототип функции должен соответствовать определению функции. Если прототип здесь будет <code>void boo(long long n);</code>, то это вызовет ошибку компиляции.</p>
+
+<p>Очень важно, что если прототип функции, и её определение будут в разных модулях, то компилятор не сможет заметить несоответствия сигнатур функций. В таком случае во время выполнения программы при вызове функции стек "съедет", и произойдет stack corruption. (Более подробно этот механизм мы изучим позже.)</p><h3 id="1.3.4">1.3.4</h2>
+<p>Реализуйте следующие функции:</p>
+
+<ol>
+	<li><code>int min(int, int)</code></li>
+	<li><code>int max(int, int)</code></li>
+	<li><code>int abs(int)</code> — абсолютное значение (модуль)</li>
+	<li><code>int lcm(int, int)</code> — наименьшее общее кратное (least common multiplier)</li>
+	<li><code>int powmod(int a, int n, int m)</code> — возведение числа <code>a</code> в степень <code>n</code> по модулю <code>m</code></li>
+</ol>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    assert(min(5, 8) == 5);
+    assert(min(11, 4) == 4);
+    assert(max(5, 8) == 8);
+    assert(max(11, 4) == 4);
+    assert(abs(43) == 43);
+    assert(abs(-41) == 41);
+    assert(lcm(14, 21) == 42);
+    assert(lcm(1128960, 567000) == 254016000);
+    assert(powmod(3, 4, 7) == 4);
+    assert(powmod(43259, 64234, 784) == 505);
+    return 0;
+}</code></pre>
+
+<p>Функция <code>assert</code> завершает выполнение программы с кодом возврата <code>3</code>, если её аргумент равен нулю (то есть, условие провалено). Возможно, для его использования потребуется добавить <code>#include &lt;assert.h&gt;</code>.</p><h3 id="1.3.5">1.3.5</h2>
+<p>Функции <code>printf</code> и <code>scanf </code>— это функции с переменным количеством аргументов (variadic functions, vararg, ellipsis). Синтаксис C позволяет создавать такие функции, но по понятным (когда придет время) причинам, сам C такие функции поддерживать не может. Проблема в том, что при вызове функции на стек кладутся аргументы и адрес возврата, но ничего более. Поэтому по стеку нельзя понять, сколько аргументов было передано в функцию, и какие их типы или, хотя бы, размерности. Это может вызвать различные corruptions.</p>
+
+<p>Пример функции, вычисляющей сумму аргументов:</p>
+
+<pre><code class="language-cpp">#include &lt;stdarg.h&gt;
+
+int sum(int n, ...) {
+    va_list lst;
+    va_start(lst, n);
+    
+    int sum = 0;
+    int i;
+    for (i = 0; i &lt; n; i++) {
+        sum += va_arg(lst, int);
+    }
+    
+    va_end(lst);
+    return sum;
+}
+
+int main() {
+    printf("%d\n", sum(5, 2, 6, 4, 3, 7));
+    return 0;
+}</code></pre>
+
+<p>Обратим внимание на следующее:</p>
+
+<ul>
+	<li>Нам необходим <code>#include &lt;stdarg.h&gt;</code> для того, чтобы иметь макросы <code>va_list</code>, <code>va_start</code>, <code>va_arg</code>, <code>va_end</code>. (Что такое макросы, мы узнаем позже. Пока считайте, что это функции.)</li>
+	<li>Первый аргумент <code>n</code> — это длина массива. Напомню, что функция никак не может знать форму того, что ей передано. Количество аргументов надо указать. Обратите внимание, что если подать в функцию не <code>n</code> следующих аргументов, то она никак это не проверит — это приведет к corruption.</li>
+	<li>Чтобы пробежать по аргументам, мы пользуемся переменной типа va_list. Это переменную мы передаем всем функциям, связанным с аргументами. По сути, это не более, чем итератор.</li>
+	<li>(Второй аргумент макроса <code>va_start</code> оказался мне неизвестен. Документация утверждает, что это аргумент, после которого начнут перебираться "переменные" аргументы, однако простой тест показал, что это не так.)</li>
+	<li>Второй аргумент макроса <code>va_arg</code> это тип (обратите внимание: если бы это была функция, он не могла бы принимать тип), следующего аргумента (а также, его размер).</li>
+</ul>
+
+<p>В результате выполнения этой программы будет выведено 22.</p>
+
+<p>Функции с переменными аргументами следует использовать ограниченно и с большой осторожностью.</p><h3 id="1.3.6">1.3.6</h2>
+<p>Реализуйте следующие функции:</p>
+
+<ol>
+	<li><code>int min(int n, ...)</code></li>
+	<li><code>int gcd(int n, ...)</code></li>
+	<li><code>int dot_product(int n, ...)</code> — скалярное произведение двух векторов. Например, произведение векторов <code>(1, 4)</code> и <code>(2, -3)</code> должно вычисляться с помощью такого вызова функции: <code>dot_product(2, 1, 4, 2, -3)</code>.</li>
+</ol>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    assert(min(2, 5, 8) == 5);
+    assert(min(3, 11, 4, 8) == 4);
+    assert(gcd(2, 12, 21) == 3);
+    assert(gcd(3, 42, 91, 35) == 7);
+    assert(dot_product(2, 1, 4, 2, -3) == -10);
+    assert(dot_product(3, 1, 2, 3, 6, 5, 4) == 28);
+    return 0;
+}</code></pre><h3 id="1.3.7">1.3.7</h2>
+<p>Рассмотрим такую функцию <code>set_args</code>, которая записывает значение второго аргумента по всем остальным аргументам-адресам.</p>
+
+<p>Пока необязательно понимать манипуляции с адресами, но кое-что проясню:</p>
+
+<ul>
+	<li><code>int*</code> — это адрес типа <code>int</code>. То есть <code>va_arg(lst, int*)</code> достает следующий адрес.</li>
+	<li><code>*a = b</code> выполняет запись значения <code>b</code> в адрес <code>a</code>.</li>
+</ul>
+
+<pre><code class="language-cpp">#include &lt;stdarg.h&gt;
+
+void set_args(int n, int val, ...) {
+    va_list lst;
+    va_start(lst, val);
+    
+    int i;
+    for (i = 0; i &lt; n; i++) {
+        *va_arg(lst, int*) = val;
+    }
+    
+    va_end(lst);
+}
+
+int main() {
+    int a, b, c;
+    set_args(3, 31, &amp;a, &amp;b, &amp;c);
+    printf("%d %d %d\n", a, b, c);
+    return 0;
+}</code></pre>
+
+<p>Представьте, что пользователь может вводить данные и передавать их в <code>set_args</code> без каких либо проверок. Какую атаку можно здесь произвести (потенциально нехорошее действие)?</p>
+      </main>
+    </div>
+  </div>
+</body>
+
+</html>

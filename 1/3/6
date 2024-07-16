@@ -1,0 +1,19 @@
+<p>Реализуйте следующие функции:</p>
+
+<ol>
+	<li><code>int min(int n, ...)</code></li>
+	<li><code>int gcd(int n, ...)</code></li>
+	<li><code>int dot_product(int n, ...)</code> — скалярное произведение двух векторов. Например, произведение векторов <code>(1, 4)</code> и <code>(2, -3)</code> должно вычисляться с помощью такого вызова функции: <code>dot_product(2, 1, 4, 2, -3)</code>.</li>
+</ol>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    assert(min(2, 5, 8) == 5);
+    assert(min(3, 11, 4, 8) == 4);
+    assert(gcd(2, 12, 21) == 3);
+    assert(gcd(3, 42, 91, 35) == 7);
+    assert(dot_product(2, 1, 4, 2, -3) == -10);
+    assert(dot_product(3, 1, 2, 3, 6, 5, 4) == 28);
+    return 0;
+}</code></pre>

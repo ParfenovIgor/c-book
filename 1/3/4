@@ -1,0 +1,27 @@
+<p>Реализуйте следующие функции:</p>
+
+<ol>
+	<li><code>int min(int, int)</code></li>
+	<li><code>int max(int, int)</code></li>
+	<li><code>int abs(int)</code> — абсолютное значение (модуль)</li>
+	<li><code>int lcm(int, int)</code> — наименьшее общее кратное (least common multiplier)</li>
+	<li><code>int powmod(int a, int n, int m)</code> — возведение числа <code>a</code> в степень <code>n</code> по модулю <code>m</code></li>
+</ol>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    assert(min(5, 8) == 5);
+    assert(min(11, 4) == 4);
+    assert(max(5, 8) == 8);
+    assert(max(11, 4) == 4);
+    assert(abs(43) == 43);
+    assert(abs(-41) == 41);
+    assert(lcm(14, 21) == 42);
+    assert(lcm(1128960, 567000) == 254016000);
+    assert(powmod(3, 4, 7) == 4);
+    assert(powmod(43259, 64234, 784) == 505);
+    return 0;
+}</code></pre>
+
+<p>Функция <code>assert</code> завершает выполнение программы с кодом возврата <code>3</code>, если её аргумент равен нулю (то есть, условие провалено). Возможно, для его использования потребуется добавить <code>#include &lt;assert.h&gt;</code>.</p>
