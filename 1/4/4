@@ -1,0 +1,12 @@
+<p>Реализуйте функцию <code>void sort(int n, int *a)</code>, которая сортирует массив <code>a</code> размера <code>n</code>.</p>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    const int n = 10;
+    int a[n] = {6, 1, 8, 2, 10, 7, 4, 5, 9, 3};
+    int b[n] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    sort(n, a);
+    assert(memcmp(a, b, n * sizeof(int)) == 0);
+    return 0;
+}</code></pre>

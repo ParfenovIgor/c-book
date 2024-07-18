@@ -1,0 +1,36 @@
+<p>Найдите все возможные ошибки и утечки памяти в следующем коде:</p>
+
+<pre><code class="language-cpp">int* foo(int x) {
+    int *a = malloc(N * sizeof(int));
+    if (x &lt; 0) return 0;
+    int i;
+    for (i = 0; i &lt; N; i++) {
+        a[i] = x;
+    }
+    return a;
+}
+
+void boo() {
+    int *a = malloc(N * sizeof(int));
+    int *b = a;
+    int *c = malloc(N * sizeof(int));
+    a = c;
+    c = b;
+    b = a;
+    c = b;
+    free(a);
+    free(b);
+}
+
+int flghm_count(int mode, int *result) {
+    int status;
+    int *buffer;
+    status = flghm_init(buffer);
+    if (!status) return -1;
+    status = flghm_fill(buffer, result);
+    if (!status) return -2;
+    status = flghm_free(buffer);
+    if (!status) return -3;
+    return 0;
+}
+</code></pre>
