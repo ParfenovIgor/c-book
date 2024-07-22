@@ -1,0 +1,19 @@
+<p>Реализуется функции <code>strcpy</code>, <code>strncpy</code>, <code>strcmp</code> и <code>strncmp</code> так, как ранее была реализована функция <code>strlen</code>. Добавьте в начало из названия символ <code>_</code>, чтобы не было конфликтов имен.</p>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    char b[10];
+    _strcpy(b, a);
+    assert(strcmp(b, "abacaba") == 0);
+    b[3] = '\0';
+    _strncpy(b, a, 3);
+    assert(strcmp(b, "aba") == 0);
+    assert(_strcmp("aba", "aba") == 0);
+    assert(_strcmp("aba", "abc") &lt; 0);
+    assert(_strcmp("abc", "aba") &gt; 0);
+    assert(_strncmp("aba", "abc", 2) == 0);
+    assert(_strncmp("aba", "abc", 3) &lt; 0);
+    return 0;
+}</code></pre>

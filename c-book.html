@@ -361,6 +361,18 @@
                   <li><a href="#1.4.11">1.4.11</a></li>
                 </ul>
               </li>
+              <li><a href="#1.5">1.5. Строки</a>
+                <ul>
+                  <li><a href="#1.5.1">1.5.1</a></li>
+                  <li><a href="#1.5.2">1.5.2</a></li>
+                  <li><a href="#1.5.3">1.5.3</a></li>
+                  <li><a href="#1.5.4">1.5.4</a></li>
+                  <li><a href="#1.5.5">1.5.5</a></li>
+                  <li><a href="#1.5.6">1.5.6</a></li>
+                  <li><a href="#1.5.7">1.5.7</a></li>
+                  <li><a href="#1.5.8">1.5.8</a></li>
+                </ul>
+              </li>
             </ul>
           </li>
         </ul>
@@ -1352,6 +1364,241 @@ int main() {
 <p>Мы теперь можем понять смысл типа "строки" — <code>const char*</code>. Это указатель на символ (и, соответственно, следующие символы), содержимое которого (то есть, ни первый символ, ни другие) нельзя менять.</p>
 
 <p>Посмотрим на сигнатуру функции <code>int execv(const char *path, char *const argv[]);</code> (подробнее по <a href="https://linux.die.net/man/3/execv" rel="noopener noreferrer nofollow">ссылке</a>). Что вы можете сказать про её второй аргумент, и как это влияет на использование функции? Попробуйте вызвать эту функцию (необязательно делать что-то осмысленное, главное добиться успешной компиляции).</p>
+<h3 id="1.5">1.5. Строки</h3>
+
+<h3 id="1.5.1">1.5.1</h2>
+<p>Представим, что мы печатаем строку, с помощью <code>scanf("%s", str);</code>. <code>str</code> — это не более, чем указатель. Как функция <code>scanf</code> понимает, где кончается строка? Она понимает это с помощью численно равного нулю символа <code>\0</code>, которым строка заканчивается. Когда мы объявляем строку, как <code>const char *str = "aba";</code>, то её длина будет составлять <code>4</code>, и последним символом в ней будет <code>\0</code>.</p>
+
+<p>Что же будет, если мы целенаправленно избавимся от нулевого символа в конце строки? Сделать это мы можем так:</p>
+
+<pre><code class="language-cpp">int main() {
+    char a[3];
+    a[0] = 'a';
+    a[1] = 'b';
+    a[2] = 'c';
+    printf("%s\n", a);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы будет начинаться с символов <code>abc</code>. То, что пойдет далее, зависит от компилятора и его режима. Здесь происходит довольно простая и очевидная вещь: функция <code>scanf</code> печатает символ за символом, пока не наткнется на нулевой символ где-то дальше за строкой в памяти. В зависимости от того, где расположена строка, это также может вызвать ошибку исполнения, если нулевого символа не найдется вплоть до конца доступной программе памяти.</p>
+
+<p>Из-за такой особенности работа со строками в языке C довольно неприятна. Необходимо всегда помнить о лишнем символе.</p>
+
+<p>Рассмотрим первую стандартную функцию для работы со строками: <code>size_t strlen( const char* str );</code>. С помощью этой функции мы определяем длину строки (не включая нулевой символ). Написать эту функцию очень просто, вот её реализация:</p>
+
+<pre><code class="language-cpp">size_t strlen( const char* str ) {
+    const char *x = str;
+    while (*x != '\0') {
+        x++;
+    }
+    return x - str;
+}</code></pre>
+
+<p>Чтобы проверить эту реализацию, функцию необходимо будет переименовать, либо убрать <code>glibc</code>.</p>
+
+<p>Для использования стандартных функций для работы со строками часто необходимо добавить <code>#include &lt;string.h&gt;</code>.</p><h3 id="1.5.2">1.5.2</h2>
+<p>При выполнении данной программы происходит ошибка исполнения, хотя строка не является константой, и компиляция проходит успешно. (Возможно, наблюдается не на всех компиляторах.) Почему? </p>
+
+<pre><code class="language-cpp">int main() {
+    char *a = "abacaba";
+    a[3] = 'b';
+    
+    return 0;
+}</code></pre><h3 id="1.5.3">1.5.3</h2>
+<p>Функция <code>int sprintf( char* buffer, const char* format, ... );<span style=""> </span><span style=""> </span><span style=""> </span><span style=""> </span><span style=""> </span><span style=""> </span></code> работает, как функция <code>printf</code>, но она принимает своим первых аргументом строку <code>buffer</code>, в которую и происходит печать. При этом содержимое строки <code>buffer</code>  никак не проверяется на переполнение.</p>
+
+<pre><code class="language-cpp">int main() {
+    char str[100];
+    sprintf(str, "%d %d", 32, 85);
+    printf("%s\n", str);
+}</code></pre>
+
+<p>Вывод этой программы: <code>32 85</code></p>
+
+<p>Функция <code>char *strcpy( char *dest, const char *src );</code> выполняет копирование строки из второго аргумента в первый (поэтому тип первого аргумента лишен <code>const</code>). Копирование выполняется до обнаружения нулевого символа в <code>src</code>. При этом содержимое строки <code>dest</code> никак не проверяется на переполнение.</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    char b[10];
+    strcpy(b, a);
+    printf("%s\n", b);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>abacaba</code></p>
+
+<p>Обратите внимание, что функция <code>strcpy</code> закладывает нулевой символ в конец строки <code>dest</code>. Не забывайте оставлять под него место.</p>
+
+<p>Часто необходимо ограничить длины копируемой строки. Вместо добавления <code>if</code>-а можно использовать стандартную функцию <code>char *strncpy( char *dest, const char *src, size_t count );</code>, которая копирует не более <code>count</code> символов, <strong>включая нулевой символ</strong> (то есть, может оставить строку без нуля на конце).</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    char b[4];
+    strncpy(b, a, 3);
+    printf("%s\n", b);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>aba</code></p>
+
+<p>Вообще, "n" версии есть у почти каждой строковой функции. Посмотрите функцию <code>strnlen</code>.</p><h3 id="1.5.4">1.5.4</h2>
+<p>Функция <code>int strcmp( const char* lhs, const char* rhs );</code> сравнивает две строки <em>лексикографически</em>.</p>
+
+<blockquote>
+<h3>Return value</h3>
+
+<p>Negative value if lhs appears before rhs in lexicographical order.</p>
+
+<p>Zero if lhs and rhs compare equal.</p>
+
+<p>Positive value if lhs appears after rhs in lexicographical order.</p>
+</blockquote>
+
+<p>Обратите внимание, что упоминается лишь знак возвращаемого значения. Само же значение не задокументировано.</p>
+
+<p>Так мы проверяем две строки на равенство:</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "aba";
+    const char *b = "baba";
+    const char *c = "aba";
+    printf("%d\n", strcmp(a, b));
+    printf("%d\n", strcmp(b, a));
+    printf("%d\n", strcmp(a, c));
+    
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>-1 1 0 </code></p>
+
+<p>Перевести строку в число можно с помощью функции <code>int atoi( const char* str );</code>.(В случае некорректной строки она возвращает <code>0</code>.)</p>
+
+<pre><code class="language-cpp">int main() {
+    printf("%d\n", atoi("5328"));    
+    return 0;
+}</code></pre>
+
+<p>Часто необходимо проводить копирование в динамическую строку (вообще, часто приходится работать и с динамическими строками). Вместо такого:</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    int n = strlen(a);
+    char *b = (char*)malloc((n + 1) * sizeof(char));
+    strcpy(b, a);
+    printf("%s\n", b);
+    return 0;
+}</code></pre>
+
+<p>, можно использовать функцию <code>char * strdup( const char *str1 );</code>, которая делает то же самое: <code>char *b = strdup(a);</code>.</p><h3 id="1.5.5">1.5.5</h2>
+<p>Реализуется функции <code>strcpy</code>, <code>strncpy</code>, <code>strcmp</code> и <code>strncmp</code> так, как ранее была реализована функция <code>strlen</code>. Добавьте в начало из названия символ <code>_</code>, чтобы не было конфликтов имен.</p>
+
+<p>Подставьте следующую функцию <code>main</code>:</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    char b[10];
+    _strcpy(b, a);
+    assert(strcmp(b, "abacaba") == 0);
+    b[3] = '\0';
+    _strncpy(b, a, 3);
+    assert(strcmp(b, "aba") == 0);
+    assert(_strcmp("aba", "aba") == 0);
+    assert(_strcmp("aba", "abc") &lt; 0);
+    assert(_strcmp("abc", "aba") &gt; 0);
+    assert(_strncmp("aba", "abc", 2) == 0);
+    assert(_strncmp("aba", "abc", 3) &lt; 0);
+    return 0;
+}</code></pre><h3 id="1.5.6">1.5.6</h2>
+<p>Следующая функция  <code>char* strtok( char* str, const char* delim );</code> более сложная в использовании. Эта функция используется для разбиения строки <code>str</code> на токены. Аргумент <code>delim</code> хранит символы-разделители токенов. Рассмотрим программу:</p>
+
+<pre><code class="language-cpp">#define NULL 0
+
+int main() {
+    char str[] = "ab;cde,fghi";
+    
+    char *a = strtok(str, ",;");
+    printf("%d ", strlen(str));
+    printf("%d ", strlen(a));
+    
+    char *b = strtok(NULL, ",;");
+    printf("%d ", strlen(b));
+    
+    char *c = strtok(NULL, ",;");
+    printf("%d ", strlen(c));
+    
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>2 2 3 4</code></p>
+
+<p>Пусть разделителями будут символы <code>,</code> и <code>;</code>. Сначала выполним такой вызов функции: <code>strtok(str, ",;");</code>. В результате этого вызова вместо первого разделителя в изначальной строке <code>;</code> будет поставлен нулевой символ, будет возвращен указатель на первый символ, не являющийся разделителем (а наша строка не начинается с разделителей, поэтому будет возвращен <code>str</code>) , а внутри функции <code>strtok</code> будет неким образом создана запись о том, какой последний символ был обработан.</p>
+
+<p>Затем выполним вызов <code>strtok(NULL, ",;");</code>. В результате этого вызова повторятся те же действия, но не с аргумента (который теперь просто <code>0</code>), а с последнего обработанного символа (видимо, с того, который стал нулевым, но это уже нам неизвестно). Сначала пропустятся следующие два разделителя <code>;</code> до первого, не разделительного символа <code>c</code>. Затем будет найден следующий разделительный символ <code>,</code> и заменен на нулевой символ. И наконец, будет возвращён указатель на символ <code>c</code>.</p>
+
+<p>Строка <code>#define NULL 0</code> заменяет все вхождения идентификаторов <code>NULL</code> в нижестоящем коде на <code>0</code> до компиляции программы. Но об этом мы поговорим позже.</p><h3 id="1.5.7">1.5.7</h2>
+<p>Напишите функцию <code>int strsum(const char *str);</code>, которая принимает строку, состоящую из последовательности целых чисел и пробелов, и возвращает сумму чисел в этой строке.</p>
+
+<p>Подставьте следующую функцию&nbsp;<code>main</code>:</p>
+
+<pre>
+<code class="language-cpp">int main() {
+    assert(strsum("123") == 123);
+    assert(strsum("-6") == -6);
+    assert(strsum("  2  2    3 ") == 7);
+    assert(strsum("  -6  24    -7 ") == 11);
+    return 0;
+}</code></pre><h3 id="1.5.8">1.5.8</h2>
+<p>Для выполнения таких же операций с массивами любого типа используются&nbsp;<code>mem***</code>&nbsp;функции. Естественно, функции&nbsp;<code>memlen</code>&nbsp;нет, так как только строки завершаются нулём. Не забывайте о том, что размер массива принимается в байтах, поэтому нужно домножать количество элементов на размер одного элемента.</p>
+
+<p>Функция&nbsp;<code>void *memset(void *buf, int ch, size_t count)</code>&nbsp;устанавливает <code>len</code>&nbsp;байт массива&nbsp;<code>buf</code>&nbsp;равными младшему байту числа&nbsp;<code>ch</code>&nbsp;(старшие байты при этом игнорируются).</p>
+
+<pre>
+<code class="language-cpp">int main() {
+    int a[4];
+    memset(a, 0x1234, 4 * sizeof(int));
+    int i;
+    for (i = 0; i &lt; 4; i++) {
+        printf("%d ", a[i]);
+    }
+    printf("%d", 0x34343434);
+    
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы:&nbsp;<code>875836468 875836468 875836468 875836468 875836468</code></p>
+
+<p>Функция&nbsp;<code>void *memcpy(void *dest, const void *source, size_t count)</code>&nbsp;копирует&nbsp;<code>count</code>&nbsp;байт массива&nbsp;<code>source</code>&nbsp;в массив&nbsp;<code>dest</code>.</p>
+
+<pre>
+<code class="language-cpp">int main() {
+    int a[4] = {1, 2, 3, 4};
+    int b[4];
+    memcpy(b, a, 4 * sizeof(int));
+    int i;
+    for (i = 0; i &lt; 4; i++) {
+        printf("%d ", b[i]);
+    }
+    
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы будет состоять из четырёх чисел, первый три из которых:&nbsp;<code>1 2 3</code></p>
+
+<p>Функция&nbsp;<code>int memcmp(const void *buf1, const void *buf2, size_t count)</code>&nbsp;сравнивает первые&nbsp;<code>count</code>&nbsp;элементов массивов&nbsp;<code>buf1</code>&nbsp;и&nbsp;<code>buf2</code>&nbsp;лексикографически так же, как и функция&nbsp;<code>strcmp</code>.</p>
+
+<pre>
+<code class="language-cpp">int main() {
+    int a[4] = {1, 2, 3, 4};
+    int b[4] = {1, 2, 3, 5};
+    printf("%d ", memcmp(a, b, 3 * sizeof(int)));
+    printf("%d ", memcmp(a, b, 4 * sizeof(int)));
+    
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы:&nbsp;<code>0 -1</code></p>
+
+<p>Следует отдавать предпочтение&nbsp;<code>mem***</code>&nbsp;функциям, так как они используют специальные ассемблерные инструкции (которые мы ещё увидим), и потому более быстрые. (Хотя <code>str***</code>&nbsp;функции в то же время тоже имеют некоторые хитрые оптимизации, связанные с итерированием не по одному символу, а по машинному слову. Но это не так сильно влияет.)</p>
       </main>
     </div>
   </div>

@@ -1,0 +1,48 @@
+<p>Функция <code>int strcmp( const char* lhs, const char* rhs );</code> сравнивает две строки <em>лексикографически</em>.</p>
+
+<blockquote>
+<h3>Return value</h3>
+
+<p>Negative value if lhs appears before rhs in lexicographical order.</p>
+
+<p>Zero if lhs and rhs compare equal.</p>
+
+<p>Positive value if lhs appears after rhs in lexicographical order.</p>
+</blockquote>
+
+<p>Обратите внимание, что упоминается лишь знак возвращаемого значения. Само же значение не задокументировано.</p>
+
+<p>Так мы проверяем две строки на равенство:</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "aba";
+    const char *b = "baba";
+    const char *c = "aba";
+    printf("%d\n", strcmp(a, b));
+    printf("%d\n", strcmp(b, a));
+    printf("%d\n", strcmp(a, c));
+    
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>-1 1 0 </code></p>
+
+<p>Перевести строку в число можно с помощью функции <code>int atoi( const char* str );</code>.(В случае некорректной строки она возвращает <code>0</code>.)</p>
+
+<pre><code class="language-cpp">int main() {
+    printf("%d\n", atoi("5328"));    
+    return 0;
+}</code></pre>
+
+<p>Часто необходимо проводить копирование в динамическую строку (вообще, часто приходится работать и с динамическими строками). Вместо такого:</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    int n = strlen(a);
+    char *b = (char*)malloc((n + 1) * sizeof(char));
+    strcpy(b, a);
+    printf("%s\n", b);
+    return 0;
+}</code></pre>
+
+<p>, можно использовать функцию <code>char * strdup( const char *str1 );</code>, которая делает то же самое: <code>char *b = strdup(a);</code>.</p>
