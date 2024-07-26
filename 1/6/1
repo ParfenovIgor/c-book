@@ -1,0 +1,93 @@
+<p>Один байт состоит из восьми бит. Бит принимает одно из двух значений:&nbsp;<code>0</code>&nbsp;или&nbsp;<code>1</code>. Поэтому один байт может принимать&nbsp;<span class="math-tex">\(2^8 = 256\)</span>&nbsp;различных значений.</p>
+
+<p>Рассмотрим, как переводить числа из двоичной в десятичную систему счисления. Мы будем указывать менее значимые цифры справа. (Хотя это и не важно, и часто для удобства менее значимые цифры размещают слева.)</p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:500px">
+	<tbody>
+		<tr>
+			<td>Двоичная система счисления</td>
+			<td>Десятичная система счисления</td>
+		</tr>
+		<tr>
+			<td><code>0</code></td>
+			<td><code>0</code></td>
+		</tr>
+		<tr>
+			<td><code>1</code></td>
+			<td><code>1</code></td>
+		</tr>
+		<tr>
+			<td><code>10</code></td>
+			<td><code>2</code></td>
+		</tr>
+		<tr>
+			<td><code>11</code></td>
+			<td><code>3</code></td>
+		</tr>
+		<tr>
+			<td><code>100</code></td>
+			<td><code>4</code></td>
+		</tr>
+		<tr>
+			<td><code>101</code></td>
+			<td><code>5</code></td>
+		</tr>
+		<tr>
+			<td><code>110</code></td>
+			<td><code>6</code></td>
+		</tr>
+		<tr>
+			<td><code>111</code></td>
+			<td><code>7</code></td>
+		</tr>
+		<tr>
+			<td><code>1000</code></td>
+			<td><code>8</code></td>
+		</tr>
+	</tbody>
+</table>
+
+<p>В общем случае, если&nbsp;<span class="math-tex">\(i\)</span>-й бит числа в двоичной записи равен&nbsp;<span class="math-tex">\(a_i\)</span>, в десятичной записи оно будет равно&nbsp;<span class="math-tex">\(a_0 \cdot 1 + a_1 \cdot 2 + a_2 \cdot 4 + a_3 \cdot 8 + \ldots = \sum{a_i \cdot 2^i}\)</span></p>
+
+<p>Целочисленные типы данных бывают знаковыми (signed) и беззнаковыми (unsigned). Беззнаковые типы принимают значение от&nbsp;<span class="math-tex">\(0\)</span>&nbsp;(когда все биты нулевые) до&nbsp;<span class="math-tex">\(2^{size} - 1\)</span>&nbsp;(когда все биты единицы), где&nbsp;<span class="math-tex">\(size\)</span>&nbsp;&mdash; это размер типа данных в битах. Так, максимальное значение типа&nbsp;<code>unsigned int</code>&nbsp;равно&nbsp;<span class="math-tex">\(2^{32} - 1 = 4294967295\)</span>.</p>
+
+<p>Знаковые типы принимают значение от&nbsp;<span class="math-tex">\(-2^{size - 1}\)</span>&nbsp;до&nbsp;<span class="math-tex">\(2^{size - 1} - 1\)</span>. Как кодируются отрицательные числа покажем на примере типа&nbsp;<code>char</code>.</p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:500px">
+	<tbody>
+		<tr>
+			<td>Двоичная система счисления</td>
+			<td>Десятичная система счисления</td>
+		</tr>
+		<tr>
+			<td><code>00000000</code></td>
+			<td><code>0</code></td>
+		</tr>
+		<tr>
+			<td><code>11111111</code></td>
+			<td><code>-1</code></td>
+		</tr>
+		<tr>
+			<td><code>11111110</code></td>
+			<td><code>-2</code></td>
+		</tr>
+		<tr>
+			<td><code>11111101</code></td>
+			<td><code>-3</code></td>
+		</tr>
+		<tr>
+			<td><code>11111100</code></td>
+			<td><code>-4</code></td>
+		</tr>
+	</tbody>
+</table>
+
+<p>Переводить число из&nbsp;<code>n</code>-й системы счисления в десятичную можно с помощью формулы&nbsp;<span class="math-tex">\(\sum{a_i \cdot n^i}\)</span>. Чтобы писать в коде числа в двоичном, восмеричном и шестнадцатиричном формате, следует перед ними написать&nbsp;<code>0b</code>,&nbsp;<code>0</code>&nbsp;и&nbsp;<code>0x</code>&nbsp;соответственно. Формат&nbsp;<code>%d</code>выполнит печать в десятичном формате, но&nbsp;<code>printf</code>&nbsp;также имеет форматы и для других систем счисления.</p>
+
+<pre>
+<code class="language-cpp">int main() {
+    printf("%d %d %d\n", 0b1010, 013, 0xC);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы:&nbsp;<code>10 11 12</code></p>

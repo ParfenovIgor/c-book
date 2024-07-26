@@ -1,0 +1,11 @@
+<p>Дана последовательность целых чисел <span class="math-tex">\(a_1, a_2, \ldots, a_n\)</span> длины <span class="math-tex">\(n\)</span>. Найдите минимальный размер такого множества чисел <span class="math-tex">\(b_1, b_2, \ldots, b_m\)</span>, что <span class="math-tex">\(a_{b_1} | a_{b_2} | \ldots | a_{b_m} = a_1 | a_2 | \ldots | a_n\)</span></p>
+
+<h4>Формат ввода</h4>
+
+<p>Первая строка входных данных содержит одно целое число <span class="math-tex">\(n\)</span> (<span class="math-tex">\(1 \le n \le 20\)</span>)</p>
+
+<p>Вторая строка входных данных содержит <span class="math-tex">\(n\)</span> целых чисел <span class="math-tex">\(a_1, a_2, \ldots, a_n\)</span> (<span class="math-tex">\(1 \le a_i \le 2^{30} - 1\)</span>)</p>
+
+<h4>Формат вывода</h4>
+
+<p>Выведите единственное целое число <span class="math-tex">\(m\)</span> — минимальный размер подходящего множества.</p>
