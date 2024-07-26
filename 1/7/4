@@ -1,0 +1,91 @@
+<p>В языке C нет встроенных способов создания функций для обобщенных типов. Мы можем написать макрос, который будет объявлять функцию для заданного типа (ведь в качестве аргументов макроса можно использовать не только значение). Однако до определенного стандарта в языке C не было автоматического определения функции на основе типа. (В языке C++ для этого есть перегрузка функций. Как она работает, и почему она отсутствует в языке C, мы узнаем позже.)</p>
+
+<p>Есть разные способы организации функции для обобщенных типов, и в разных проектах используются разные. Вот один из способов.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define SIZE(X) \
+        sizeof(X) / sizeof(X[0])
+        
+typedef struct {
+    int x;
+} S;
+
+typedef struct {
+    int x;
+} T;
+
+T foo(S s) {
+    T t;
+    t.x = s.x * 2;
+    return t;
+}
+
+int boo(int x) {
+    return x + 1;
+}
+
+#define MAP(F, A, B)                    \
+B* F(B(*f)(A), A* l1, int sz) {         \
+    B* l2 = (B*)malloc(sz * sizeof(B)); \
+    for (int i = 0; i &lt; sz; i++) {      \
+        l2[i] = f(l1[i]);               \
+    }                                   \
+    return l2;                          \
+}
+
+MAP(map_ii, int, int)
+MAP(map_st, S, T)
+
+int main() {
+    int i;
+    int lst1[4] = {1, 4, 6, 11};
+    int *lst1_out = map_ii(boo, lst1, SIZE(lst1));
+    for (i = 0; i &lt; SIZE(lst1); i++) {
+        printf("%d ", lst1_out[i]);
+    }
+    printf("\n");
+    
+    S lst2[4] = {{1}, {3}, {5}, {9}};
+    T *lst2_out = map_st(foo, lst2, SIZE(lst2));
+    for (i = 0; i &lt; SIZE(lst2); i++) {
+        printf("%d ", lst2_out[i].x);
+    }
+    printf("\n");
+    
+    return 0;
+}</code></pre>
+
+<p>Реализуем функцию <code>map</code> из функциональных языков, которая принимает функцию и массив элементов, после чего создает новый массив, полученный поэлементным применением функции к исходному массиву. Посмотрим на сам макрос:</p>
+
+<pre><code class="language-cpp">#define MAP(F, A, B)                    \
+B* F(B(*f)(A), A* l1, int sz) {         \
+    B* l2 = (B*)malloc(sz * sizeof(B)); \
+    for (int i = 0; i &lt; sz; i++) {      \
+        l2[i] = f(l1[i]);               \
+    }                                   \
+    return l2;                          \
+}</code></pre>
+
+<p>Макрос принимает название функции <code>F</code>, которую следует объявить, и входной и выходной типы <code>A</code> и <code>B</code>. Сигнатура функции выглядит так: <code>B* F(B(*f)(A), A* l1, int sz)</code>, то есть она принимает функцию из типа <code>A</code> в тип <code>B</code> и массив типа <code>A</code> с его размером, а возвращает массив типа <code>B</code>. То есть, функция <code>map</code> параметризована двумя типами.</p>
+
+<p>Мы создаем функцию <code>map</code> для типов <code>int</code> и <code>int</code> так: <code>MAP(map_ii, int, int)</code>. После раскрытия макроса вручную мы получим такое:</p>
+
+<pre><code class="language-cpp">int* map_ii(int(*f)(int), int* l1, int sz) {
+    int* l2 = (int*)malloc(sz * sizeof(int));
+    for (int i = 0; i &lt; sz; i++) {
+        l2[i] = f(l1[i]);
+    }
+    return l2;
+}</code></pre>
+
+<p>Обратите внимание на то, что <code>map</code> не освобождает входной массив. Следует ли это делать зависит от вашего стиля создания функций обобщенных типов.</p>
+
+<p>Вызвать функцию <code>map</code> для типов <code>int</code> и <code>int</code> мы можем так: <code>map_ii(boo, lst1, SIZE(lst1));</code>. К сожалению, нам необходимо самостоятельно подбирать правильное название функции на основе типа. В более современном языка C есть ключевое слово <code>_Generic</code>, которое выполняет эту работу за нас.</p>
+
+<p>Вывод этой программы:</p>
+
+<pre><code>2 5 7 12 
+2 6 10 18 
+</code></pre>

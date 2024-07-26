@@ -1,0 +1,48 @@
+<p>Указатели на функции дают возможность сделать подобие наследования. Мы можем написать функции-конструкторы, которые будут подставлять в объекты структур указатели на необходимые функции. Однако, функции через указатели не могут видеть содержимое структур, поэтому придется передавать объект структуры вместе с каждым вызовом её функции вручную. (На самом деле, в языке C++ указатель на объект, функция которого вызывается, всегда передается в функцию и называется <code>this</code>.)</p>
+
+<pre><code class="language-cpp">#include &lt;stdlib.h&gt;
+
+const float pi = 3.14f;
+
+struct Figure;
+
+typedef struct {
+    float x;
+    float (*square)(struct Figure*);
+} Figure;
+
+float circle_square(Figure *f) {
+    return pi * f-&gt;x * f-&gt;x;
+}
+
+float square_square(Figure *f) {
+    return f-&gt;x * f-&gt;x;
+}
+
+Figure *build_circle(float x) {
+    Figure *f = (Figure*)malloc(sizeof(Figure));
+    f-&gt;x = x;
+    f-&gt;square = circle_square;
+    return f;
+}
+
+Figure *build_square(float x) {
+    Figure *f = (Figure*)malloc(sizeof(Figure));
+    f-&gt;x = x;
+    f-&gt;square = square_square;
+    return f;
+}
+
+int main() {
+    Figure *circle = build_circle(3);
+    Figure *square = build_square(3);
+    printf("%f %f\n", circle-&gt;square(circle), square-&gt;square(square));
+    
+    return 0;
+}</code></pre>
+
+<p>Функции <code>circle_square</code> и <code>square_square</code> — это соответствующие реализации функции <code>square</code> (площадь) для структур <code>circle</code> (окружность) и <code>square</code> (квадрат). Функции <code>build_circle</code> и <code>build_square</code> — это конструкторы, которые создают объект структуры и подставляют нужные реализации функций.</p>
+
+<p>В результате этих манипуляций нам не нужно указывать вручную, какую функцию подсчета площади вызывать. На самом деле, в языке C++ выбор нужной функции организован похожим образом: объекты содержат указатели на нужные функции. Это называется виртуальными таблицами (virtual tables), и позже мы узнаем, как они устроены.</p>
+
+<p>Тем не менее, несоответствие локальных переменных у структур в языке C решить нельзя. Если бы мы хотели ввести структуру <code>rectangle</code> (прямоугольник), которая задается двумя числами, сделать это красиво у нас не получится.</p>
