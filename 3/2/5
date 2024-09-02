@@ -1,0 +1,41 @@
+<p>Shared object — это объектные файлы, которые прикомпоновываются к программам при их запуске. Они используются для оптимизации места на диске, так как их могут использовать различные программы, не повторяя реализации тех же функций. Часто shared objects называют динамическими библиотеками.</p>
+
+<p>Оформим пример из предыдущего шага в виде динамической библиотеки. Скомпилируем библиотеку:</p>
+
+<pre><code class="language-no-highlight">gcc foo.c boo.c -c
+gcc -shared -o libfboo.so foo.c boo.c</code></pre>
+
+<p>Во втором вызове <code>gcc</code> мы, с помощью флага <code>-shared</code>, создаём shared object.</p>
+
+<p>Выполним <code>readelf libfboo.so -a</code>.</p>
+
+<pre><code class="language-no-highlight">...
+  Type:                              DYN (Shared object file)
+...</code></pre>
+
+<p>Полученный объектный файл пользователь может положить в директорию со своей программой и попросить <code>gcc</code> искать его там. Но это неправильно. Для того, чтобы библиотека была shared, она должна находиться в месте, где глобально хранятся все shared objects (в директории проекта должны быть только заголовочные файлы). Скопируем файл туда:</p>
+
+<pre><code class="language-no-highlight">cp libfboo.so /usr/lib</code></pre>
+
+<p>Теперь пользователь может скомпилировать свою программу:</p>
+
+<pre><code class="language-no-highlight">gcc main.c -lfboo</code></pre>
+
+<p>Чтобы посмотреть, какие shared objects требует исполняемый файл, введём <code>ldd a.out</code>.</p>
+
+<pre><code class="language-no-highlight">	linux-vdso.so.1 (0x00007ffc58396000)
+	libfboo.so =&gt; /lib/libfboo.so (0x00007171575e0000)
+	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x0000717157200000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000717157606000)</code></pre>
+
+<p>Помимо <code>libfboo.so</code> здесь присутствует, например, <code>libc.so.6</code>.</p>
+
+<p>Когда мы запускаем программу, загрузчик ищет shared objects:</p>
+
+<ul>
+	<li>В директориях <code>/lib*</code> и <code>/usr/lib*</code></li>
+	<li>В директориях в environmental variable <code>LD_LIBRARY_PATH</code></li>
+	<li>В директориях в <code>rpath</code>, который пишется в исполняемый файл в процессе компиляции с помощью флага <code>-rpath</code></li>
+</ul>
+
+<p>В ОС Windows формат динамических библиотек — <code>.dll</code>, и его использование выглядит значительно менее приятно, чем использование <code>.so</code> на Unix, так как требует использование директив компилятора. (Можете изучить пример: <a href="https://github.com/TransmissionZero/MinGW-DLL-Example" rel="noopener noreferrer nofollow">https://github.com/TransmissionZero/MinGW-DLL-Example</a>)</p>

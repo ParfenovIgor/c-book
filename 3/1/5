@@ -1,0 +1,117 @@
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include "foo.h"
+
+int main() {
+    printf("%d\n", foo(2));
+    return 0;
+}</code></pre>
+
+<p> <code>foo.h</code></p>
+
+<pre><code class="language-cpp">int foo(int x) {
+    return x + 1;
+}</code></pre>
+
+<p>Компоновка объединяет несколько объектных файлов, подставляет реализации функций, формирует сегменты (segments) из секций в объектных файлах. В результате мы получаем исполняемый файл (но можно получить и, например, shared object), который на ОС Linux не имеет расширения, а его формат называется <code>elf</code>; на ОС Windows имеет расширение <code>.exe</code>, а его формат называется <code>PE</code> (Portable Executable).</p>
+
+<p>Выполните <code>gcc main.c</code>, чтобы выполнить компоновку. Выходной файл не состоит из читаемого текста. Рассматривать его мы не будем. Вместо этого выполним <code>readelf a.out -a</code>. (По умолчанию, выходной исполняемый файл называется <code>a.out</code>. Вы можете задать название явно с помощью флага <code>-o</code>: <code>gcc main.c -o program</code>.)</p>
+
+<pre><code class="language-no-highlight">...
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x1060
+...
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040
+                 0x00000000000002d8 0x00000000000002d8  R      0x8
+  INTERP         0x0000000000000318 0x0000000000000318 0x0000000000000318
+                 0x000000000000001c 0x000000000000001c  R      0x1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000628 0x0000000000000628  R      0x1000
+...
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .interp 
+   02     .interp .note.gnu.property .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt 
+   03     .init .plt .plt.got .plt.sec .text .fini 
+   04     .rodata .eh_frame_hdr .eh_frame 
+   05     .init_array .fini_array .dynamic .got .data .bss 
+   06     .dynamic 
+   07     .note.gnu.property 
+   08     .note.gnu.build-id .note.ABI-tag 
+   09     .note.gnu.property 
+   10     .eh_frame_hdr 
+   11     
+   12     .init_array .fini_array .dynamic .got</code></pre>
+
+<p>Структура исполняемого файла похожа на структуру объектного файла. Однако здесь помимо секций у нас присутствуют и сегменты (по какой то причине, program headers это section headers). Обратите внимание на таблицу внизу, которая показывает, из каких секций состоит каждый сегмент. Например, сегмент под номером <code>01</code> (в первой таблице мы видим, что это сегмент с названием <code>INTERP</code> (по какой-то причине, они не пронумерованы, нумерация идет с <code>00</code>)) состоит из одной секции <code>.interp</code>. То, как происходит это сопоставление, написано в linker script-е. <code>gcc</code> имеет стандартный linker script, но мы можем написать свой (и мы это сделаем).</p>
+
+<p>Выполним <code>objdump a.out -d</code>.</p>
+
+<pre><code class="language-no-highlight">...
+Disassembly of section .init:
+
+0000000000001000 &lt;_init&gt;:
+    1000:	f3 0f 1e fa          	endbr64 
+    1004:	48 83 ec 08          	sub    $0x8,%rsp
+    1008:	48 8b 05 d9 2f 00 00 	mov    0x2fd9(%rip),%rax        # 3fe8 &lt;__gmon_start__@Base&gt;
+    100f:	48 85 c0             	test   %rax,%rax
+    1012:	74 02                	je     1016 &lt;_init+0x16&gt;
+    1014:	ff d0                	call   *%rax
+    1016:	48 83 c4 08          	add    $0x8,%rsp
+    101a:	c3                   	ret
+...
+Disassembly of section .text:
+
+0000000000001060 &lt;_start&gt;:
+    1060:	f3 0f 1e fa          	endbr64 
+    1064:	31 ed                	xor    %ebp,%ebp
+    1066:	49 89 d1             	mov    %rdx,%r9
+    1069:	5e                   	pop    %rsi
+    106a:	48 89 e2             	mov    %rsp,%rdx
+    106d:	48 83 e4 f0          	and    $0xfffffffffffffff0,%rsp
+    1071:	50                   	push   %rax
+    1072:	54                   	push   %rsp
+    1073:	45 31 c0             	xor    %r8d,%r8d
+    1076:	31 c9                	xor    %ecx,%ecx
+    1078:	48 8d 3d dd 00 00 00 	lea    0xdd(%rip),%rdi        # 115c &lt;main&gt;
+    107f:	ff 15 53 2f 00 00    	call   *0x2f53(%rip)        # 3fd8 &lt;__libc_start_main@GLIBC_2.34&gt;
+    1085:	f4                   	hlt    
+    1086:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+    108d:	00 00 00
+...
+0000000000001149 &lt; foo&gt;:
+    1149:	f3 0f 1e fa          	endbr64 
+    114d:	55                   	push   %rbp
+    114e:	48 89 e5             	mov    %rsp,%rbp
+    1151:	89 7d fc             	mov    %edi,-0x4(%rbp)
+    1154:	8b 45 fc             	mov    -0x4(%rbp),%eax
+    1157:	83 c0 01             	add    $0x1,%eax
+    115a:	5d                   	pop    %rbp
+    115b:	c3                   	ret    
+
+000000000000115c &lt; main&gt;:
+    115c:	f3 0f 1e fa          	endbr64 
+    1160:	55                   	push   %rbp
+    1161:	48 89 e5             	mov    %rsp,%rbp
+    1164:	bf 02 00 00 00       	mov    $0x2,%edi
+    1169:	e8 db ff ff ff       	call   1149 &lt;foo&gt;
+    116e:	89 c6                	mov    %eax,%esi
+    1170:	48 8d 05 8d 0e 00 00 	lea    0xe8d(%rip),%rax        # 2004 &lt;_IO_stdin_used+0x4&gt;
+    1177:	48 89 c7             	mov    %rax,%rdi
+    117a:	b8 00 00 00 00       	mov    $0x0,%eax
+    117f:	e8 cc fe ff ff       	call   1050 &lt;printf@plt&gt;
+    1184:	b8 00 00 00 00       	mov    $0x0,%eax
+    1189:	5d                   	pop    %rbp
+    118a:	c3                   	ret
+...</code></pre>
+
+<p>Количество кода резко увеличилось. Даже в секции <code>.text</code>, в которой раньше находились наши две функции, теперь присутствует множество новых функций. Все они были сгенерированы в результате выполнения linker script-а.</p>
+
+<p>Обратите внимание на значение <code>Entry point address: 0x1060</code> в начале вывода программы <code>readelf</code>. Это адрес инструкции, с которой начнется выполнение программы. Попобуйте найти соответствующий адрес в выводе программы <code>objdump</code>. Это не функция <code>main</code>!</p>

@@ -1,0 +1,70 @@
+<p>Разрешается объявлять функции в программе многократно, а определять их только единожды. По хорошему, реализации функций должны быть только в <code>.c</code> файлах (хотя в C++ есть способы делать это и в <code>.h</code> файлах).</p>
+
+<p>Однако, в заголовочных файлах мы также объявляем структуры (ведь, если они используются другими модулями, они должны знать содержимое структуры). Структуры можно объявлять лишь единожды, что может вызвать проблемы.</p>
+
+<p><code>foo.c</code></p>
+
+<pre><code class="language-cpp">#include "boo.h"
+
+int foo(int x) {
+    if (x == 0)
+        return x + 1;
+    else
+        return x + boo(x - 1);
+}</code></pre>
+
+<p><code>foo.h</code></p>
+
+<pre><code class="language-cpp">struct foo {
+    int x;
+};</code></pre>
+
+<p><code>boo.c</code></p>
+
+<pre><code class="language-cpp">#include "boo.h"
+
+void add(struct boo *b) {
+    b-&gt;f.x++;
+}</code></pre>
+
+<p><code>boo.h</code></p>
+
+<pre><code class="language-cpp">#include "foo.h"
+
+struct boo {
+    struct foo f;
+};
+
+void add(struct boo *b);</code></pre>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include "foo.h"
+#include "boo.h"
+
+int main() {
+    struct foo f;
+    struct boo b;
+    b.f.x = 3;
+    add(&amp;b);
+    return 0;
+}</code></pre>
+
+<p>В этой программе в модуле <code>main.c</code> структура <code>foo</code> объявлена дважды, что приводит к ошибке. Проблема в том, что и модулю <code>main.c</code>, и модулю <code>boo.c</code> необходима эта структура. Мы не можем убрать <code>#include "foo.h"</code> из <code>boo.h</code>, так как тогда в модуле <code>boo.c</code> не будет определена эта структура.</p>
+
+<p>Данную проблему решают с помощью header guard-а (или include guard-а). Это простая конструкция для препроцессора.</p>
+
+<pre><code class="language-cpp">#ifndef FOO
+#define FOO
+
+struct foo {
+    int x;
+};
+
+#endif</code></pre>
+
+<p>Напомню, что препроцессинг происходит независимо для каждого модуля, поэтому содержимое этого <code>if</code>-а будет добавлено лишь по одному разу в каждый из модулей.</p>
+
+<p>Ещё один случай, при котором пригодится header guard: структура <code>foo</code> содержит указатель на <code>boo</code>, а структура <code>boo</code> содержит указатель на <code>foo</code>. В таком случае у нас будет два header файла, которые include друг-друга. Попробуйте проверить, что произойдет в таком случае при отсутствии header guard-а.</p>
+
+<p>Иногда, вместо такой конструкции в самое начало файла вставляют такую строку: <code>#pragma once</code>, однако она есть не во всех компиляторах.</p>

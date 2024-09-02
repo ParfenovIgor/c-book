@@ -1,0 +1,41 @@
+<p>Заменим название рецепта <code>lib</code> на <code>libfboo.a</code>.</p>
+
+<pre><code class="language-makefile">libfboo.a:
+	gcc foo.c -c
+	gcc boo.c -c
+	ar -rc libfboo.a foo.o boo.o
+
+program: libfboo.a
+	gcc main.c -L. -lfboo
+...</code></pre>
+
+<p>На самом деле, <code>lib</code> и <code>libfboo.a</code> в этом месте обозначает не просто название рецепта, а файл, который эти рецепты производят. Конечно, на прошлом шаге рецепт <code>lib</code> не производил файл <code>lib</code>, и так делать разрешено. Теперь же, когда файл в процессе выполнения рецепта производится, логика его выполнения усложняется. Рецепт выполняется только если его целевой файл отсутствует, либо один из файлов, от которых рецепт зависит, стал новее его целевого файла (это мы увидим чуть позже).</p>
+
+<p>Выполните <code>make program</code> несколько раз. Вы увидите, что инструкции в рецепте <code>libfboo.a</code> были выполнены лишь при первой сборке, так как уже после неё файл <code>libfboo.a</code> был создан.</p>
+
+<p>Таким образом мы впервые добились того, что перекомпиляция происходит только для обновленных модулей. Сделаем то же самое и для итогового файла <code>a.out</code>, так как он по прежнему собирается в любом случае.</p>
+
+<pre><code class="language-makefile">libfboo.a:
+	gcc foo.c -c
+	gcc boo.c -c
+	ar -rc libfboo.a foo.o boo.o
+
+a.out: libfboo.a
+	gcc main.c -L. -lfboo
+
+program: a.out
+...</code></pre>
+
+<p>Теперь, при втором вызове <code>make program</code> вы получите сообщение: <code>make: Nothing to be done for 'program'.</code>. Обратите внимание, что инструкции в рецепте <code>program</code> исполняются, ведь файла <code>program</code> нет (можете это проверить, вставив в рецепт любые инструкции). Но рецепт <code>a.out</code> не был выполнен, так как файл <code>a.out</code> моложе всех зависимостей — единственного файла <code>libfboo.a</code>.</p>
+
+<p>Изменим файл <code>libfboo.a</code>. Здесь есть проблема: его пересборка на <code>make libfboo.a</code> будет выполнена только в том случае, если файла <code>libfboo.a</code> нет, ведь мы не написали для этого рецепта никаких зависимостей (сейчас мы это исправим). Поэтому просто удалим <code>libfboo.a</code> и сделаем <code>make libfboo.a</code>. Теперь при вызове <code>make program</code> будет выполнена перекомпиляция <code>a.out</code>.</p>
+
+<p>Добавим зависимости для рецепта <code>libfboo.a</code>.</p>
+
+<pre><code class="language-makefile">libfboo.a: foo.c boo.c
+	gcc foo.c -c
+	gcc boo.c -c
+	ar -rc libfboo.a foo.o boo.o
+...</code></pre>
+
+<p>Теперь при изменения файла <code>foo.c</code> или <code>boo.c</code> будет выполнена пересборка <code>libfboo.a</code> на команду <code>make libfboo.a</code>. Но, более того, будет выполнена пересборка <code>libfboo.a</code> и на команду <code>make program</code>. Это означает, что <code>make</code> проверяет необходимость пересборки не только в текущей точке, но и по всему дереву.</p>

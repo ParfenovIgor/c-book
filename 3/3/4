@@ -1,0 +1,51 @@
+<p>Попробуем добиться распараллеливания. Мы хотим, чтобы компиляция модулей <code>foo</code>  и <code>boo</code> велась параллельно. Сделать это легко.</p>
+
+<pre><code class="language-makefile">foo.o: foo.c
+	gcc foo.c -c
+
+boo.o: boo.c
+	gcc boo.c -c
+
+libfboo.a: foo.o boo.o
+	ar -rc libfboo.a foo.o boo.o
+
+a.out: libfboo.a
+	gcc main.c -L. -lfboo
+
+program: a.out
+...</code></pre>
+
+<p>Сделаем новые рецепты на компиляцию каждого их этих модулей. Пусть сборка библиотеки зависит от объектных файлов этих модулей. Теперь <code>make</code> будет распараллеливать выполнение рецептов <code>foo.o</code> и <code>boo.o</code>, так как для них обоих удовлетворены условия. Чтобы выполнить сборку с помощью двух процессов, введите <code>make program -j 2</code>.</p>
+
+<p>Для того, чтобы удостовериться, что сборка действительно идёт параллельно, напишем такой make-файл.</p>
+
+<pre><code class="language-makefile">foo.o: foo.c
+	sleep 3
+	gcc foo.c -c
+
+boo.o: boo.c
+	sleep 3
+	gcc boo.c -c
+...</code></pre>
+
+<p>Обе паузы при запуске <code>sleep</code> пройдут одновременно.</p>
+
+<p>Предствавьте теперь, что у вас много модулей. Писать для каждого из них такой рецепт долго и усложняет чтение make-файла. <code>make</code> имеет способ решения этого.</p>
+
+<pre><code class="language-makefile">%.o: %.c
+	gcc $&lt; -c
+
+libfboo.a: foo.o boo.o
+	ar -rc libfboo.a $^
+
+a.out: libfboo.a
+	gcc main.c -L. -lfboo
+
+program: a.out
+...</code></pre>
+
+<p>Посмотрите на первый "универсальный" рецепт. Он означает следующее: для того, чтобы собрать файл с названием <code>xxx.o</code> необходим файл <code>xxx.c</code>. Чтобы иметь доступ к необходимому файлу <code>xxx.c</code> в самом скрипте, необходимо использовать оператор <code>$&lt;</code>.</p>
+
+<p>Посмотрите на рецепт <code>libfboo.a</code>. Вместо оператора <code>$^</code>, будут подставлены все требования, то есть, <code>foo.o boo.o</code>. Если бы мы написали оператор <code>$^</code>, то было бы подставлено только первое требование: <code>foo.o</code>.</p>
+
+<p>Существует ещё один оператор: <code>$@</code>, вместо которого подставляется файл-цель. В примере с рецептом <code>xxx.o</code> вместо оператора <code>$@</code> будет подставлено <code>xxx.o</code>.</p>

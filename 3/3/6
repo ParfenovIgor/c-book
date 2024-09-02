@@ -1,0 +1,142 @@
+<p>На предыдущем шаге мы начали изменять организацию нашего проекта в лучшую сторону, когда переместили файлы библиотеки <code>lfboo</code> в отдельную директорию. Выполним теперь правильную организацию проекта полностью. К сожалению, в языке C нет стандарта организации проекта. Я покажу один из способов. Для большей наглядности в некоторых местах я добавлю больше файлов и модулей.</p>
+
+<p>Начнем с основной программы. Её <code>.c</code> файлы будут лежать в директории <code>src</code>, а <code>.h</code> файлы будут лежать в директории <code>include</code>. Мы добавим туда ещё один модуль <code>goo</code>.</p>
+
+<p><code>src/goo.c</code></p>
+
+<pre><code class="language-cpp">int goo(int x) {
+    return x + 4;
+}</code></pre>
+
+<p><code>include/goo.h</code></p>
+
+<pre><code class="language-cpp">int goo(int x);</code></pre>
+
+<p><code>src/main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;fboo/fboo.h&gt;
+#include &lt;doo/doo.h&gt;
+#include &lt;goo.h&gt;
+
+int main() {
+    printf("%d\n", foo(2) + boo(2) + doo(2) + goo(2));
+    return 0;
+}</code></pre>
+
+<p>Создадим директорию <code>build</code>, в которую будем складировать объектные файлы и финальный исполняемый файл. В результате компиляции файла <code>xxx/src/yyy.c</code> будет получаться файл <code>build/xxx/yyy.o</code>. (Например, <code>src/main.c</code> -&gt; <code>build/main.o</code>, <code>lib/fboo/src/foo.c</code> -&gt; <code>build/fboo/foo.o</code>.)</p>
+
+<p>Библиотеки мы будем хранить в директории <code>lib</code>. В директории каждой библиотеки также будут директории <code>src</code> и <code>include</code>. Кроме того, библиотеки будут иметь публичный заголовочный файл (в данном случае <code>lib/fboo/fboo.h</code>) в корне директории библиотеки, на который мы и будем ссылаться из основной программы.</p>
+
+<p><code>lib/fboo/src/foo.c</code></p>
+
+<pre><code class="language-cpp">int foo(int x) {
+    return x + 1;
+}</code></pre>
+
+<p><code>lib/fboo/src/boo.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;box.h&gt;
+
+int boo(int x) {
+    return x + 2;
+}</code></pre>
+
+<p><code>lib/fboo/include/box.h</code></p>
+
+<pre><code class="language-cpp">struct box {
+    int x;
+};</code></pre>
+
+<p><code>lib/fboo/fboo.h</code></p>
+
+<pre><code class="language-cpp">int foo(int x);
+int boo(int x);</code></pre>
+
+<p>Для удобства в директории каждой библиотеки будет свой <code>Makefile</code>.</p>
+
+<p><code>lib/fboo/Makefile</code></p>
+
+<pre><code class="language-makefile">SRCS=$(wildcard src/*.c)
+OBJS=$(patsubst src/%.c, $(BUILD_DIR)/fboo/%.o, $(SRCS))
+CFLAGS+=-Iinclude
+
+$(BUILD_DIR)/fboo/%.o: src/%.c prepare
+	gcc $(CFLAGS) $&lt; -c -o $@
+
+$(BUILD_DIR)/fboo/libfboo.a: $(OBJS)
+	ar -rc $@ $^
+
+prepare:
+	mkdir -p $(BUILD_DIR)/fboo
+
+clean:
+	rm -rf $(BUILD_DIR)/fboo</code></pre>
+
+<p>Здесь переменная <code>$(BUILD_DIR)</code> равна абсолютному пути директории <code>build</code>, и будет нам передана "верхним" make-файлом. Для того, чтобы уже сейчас проверить этот файл, мы можем добавить <code>BUILD_DIR=../../build</code> и вызвать <code>make</code> из директории <code>lib/fboo</code>. В данном случае, если мы вызовем <code>make</code> без названия рецепта, будут выполнены все рецепты. (В общем случае это не так: там упоротые правила, которые я не знаю.) Флаг <code>-Iinclude</code> нам необходим, чтобы файлы в директории <code>lib/fboo/include</code> были видимы. С помощью рецепта <code>prepare</code> мы создаём директорию <code>build/fboo</code>, так как <code>gcc</code> не создает её самостоятельно.</p>
+
+<p>Организуем таким же образом библиотеку <code>doo</code>.</p>
+
+<p><code>lib/doo/src/doo.c</code></p>
+
+<pre><code class="language-cpp">int doo(int x) {
+    return x + 3;
+}</code></pre>
+
+<p><code>lib/doo/doo.h</code></p>
+
+<pre><code class="language-cpp">int doo(int x);</code></pre>
+
+<p><code>lib/doo/Makefile</code></p>
+
+<pre><code class="language-makefile">SRCS=$(wildcard src/*.c)
+OBJS=$(patsubst src/%.c, $(BUILD_DIR)/doo/%.o, $(SRCS))
+CFLAGS+=-Iinclude
+
+$(BUILD_DIR)/doo/%.o: src/%.c prepare
+	gcc $(CFLAGS) $&lt; -c -o $@
+
+$(BUILD_DIR)/doo/libdoo.a: $(OBJS)
+	ar -rc $@ $^
+
+prepare:
+	mkdir -p $(BUILD_DIR)/doo
+
+clean:
+	rm -rf $(BUILD_DIR)/doo</code></pre>
+
+<p>Здесь также можно абстрагировать название модуля <code>doo</code>.</p>
+
+<p>Напишем, наконец, главный <code>Makefile</code></p>
+
+<p><code>Makefile</code></p>
+
+<pre><code class="language-makefile">BUILD_DIR=$(abspath build)
+SRCS=$(wildcard src/*.c)
+OBJS=$(patsubst src/%.c, $(BUILD_DIR)/%.o, $(SRCS))
+LIBS=$(BUILD_DIR)/fboo/libfboo.a $(BUILD_DIR)/doo/libdoo.a
+CFLAGS+=-Iinclude -Ilib
+
+$(BUILD_DIR)/%.o: src/%.c prepare
+	gcc $(CFLAGS) $&lt; -c -o $@
+
+$(BUILD_DIR)/fboo/libfboo.a:
+	$(MAKE) -C lib/fboo BUILD_DIR=$(BUILD_DIR)
+
+$(BUILD_DIR)/doo/libdoo.a:
+	$(MAKE) -C lib/doo BUILD_DIR=$(BUILD_DIR)
+
+$(BUILD_DIR)/program: $(OBJS) $(LIBS)
+	gcc $(OBJS) $(LIBS) -o $@
+
+program: $(BUILD_DIR)/program
+
+prepare:
+	mkdir -p $(BUILD_DIR)
+
+clean:
+	rm -rf $(BUILD_DIR)</code></pre>
+
+<p>Для начала, мы создаём переменную <code>BUILD_DIR</code>, в которую записываем абсолютный путь директории <code>build</code>, который мы добываем с помощью функции <code>abspath</code>. К флагам мы добавляем флаг <code>-Ilib</code>, чтобы мы могли добавлять файлы из библиотек. С помощью <code>$(MAKE) -C dir</code> мы рекурсивно вызываем <code>make</code> в директории <code>dir</code>. Для того, чтобы получить исполняемый файл <code>build/program</code> необходимо ввести <code>make program</code> (либо <code>make dir</code>, где <code>dir</code> это абсолютный путь до исполняемого файла, но так менее удобно).</p>
+
+<p>В этом make-файле есть недостатки. Например, названия библиотек недостаточно абстрагированы. Я намеренно не стал этим усложнять пример.</p>

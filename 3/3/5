@@ -1,0 +1,54 @@
+<p>Мы добились поставленныъ целей с помощью <code>make</code>. Тем не менее продолжим улучшать читаемость и организацию make-скриптов.</p>
+
+<pre><code class="language-makefile">OBJS=foo.o boo.o
+
+%.o: %.c
+	gcc $&lt; -c
+
+libfboo.a: $(OBJS)
+	ar -rc libfboo.a $^
+
+a.out: libfboo.a
+	gcc main.c -L. -lfboo
+
+program: a.out
+...</code></pre>
+
+<p>Мы можем вынести список целевых объектных файлов в отдельную переменную, и писать её, вместо файлов. (Важно: это не environmental variables, хоть и их синтаксис похож. Они не будут проталкиваться в программы, которые вы запускаете.)</p>
+
+<p>Пойдем дальше. Если мы перенесем файлы <code>foo.c</code> и <code>boo.c</code> в отдельную директорию, то мы можем определять целевые файлы автоматически по контенту этой директории. Тогда, когда мы добавим в директорию (и, соответственно, в библиотеку) новый файл, нам не придется изменять make-файл. Перенесем <code>foo.c</code> и <code>boo.c</code> в директорию <code>lib</code>.</p>
+
+<p>Для определения списка файлов мы можем написать что-то вроде <code>SRCS=$(shell ls lib)</code>. (Оператор <code>shell</code> запускает программу и возвращает её вывод. Присутствует не во всех программах <code>make</code>.) Вместо этого воспользуемся оператором <code>wildcard</code>.</p>
+
+<pre><code class="language-makefile">SRCS=$(wildcard lib/*.c)</code></pre>
+
+<p>Смысл этого оператора очевиден. В результате его выполнения, переменная <code>SRCS</code> будет равна <code>lib/foo.c lib/boo.c</code>. Для удобства вывода значений переменных можно воспользоваться оператором <code>info</code>.</p>
+
+<pre><code class="language-makefile">$(info $(SRCS))</code></pre>
+
+<p>Однако, нам необходимы не исходные <code>.c</code> файлы, а объектные файлы. Можно снова пошаминить со строками, а можно воспользоваться оператором <code>patsubst</code>.</p>
+
+<pre><code class="language-makefile">OBJS=$(patsubst lib/%.c, %.o, $(SRCS))</code></pre>
+
+<p>Смысл этого оператора тоже почти очевиден. Вы пробегаемся по каждому слову в третьем аргументе <code>$(SRCS)</code>, и преобразовываем каждое слово из формата <code>lib/xxx.c</code> в  <code>xxx.o</code>.</p>
+
+<p>Обратите внимание, что в результате такого вызова <code>OBJS=$(patsubst %.c, %.o, $(SRCS))</code> значение <code>OBJS</code> будет <code>lib/boo.o  lib/foo.o</code>, что немного не то, что мы хотим.</p>
+
+<p>Обратите внимание на то, что переменная <code>SRCS</code>, кроме формирования переменной <code>OBJS</code>, больше ни на что не влияет, и в рецепте <code>%.o</code> в требованиях теперь находятся несуществующие файлы (например, <code>foo.o</code> требует <code>foo.c</code>, когда его настоящее имя теперь <code>lib/foo.c</code>). Заменим требование на <code>lib/%.c</code>.</p>
+
+<p>Наш итоговый make-файл на текущий момент:</p>
+
+<pre><code class="language-makefile">SRCS=$(wildcard lib/*.c)
+OBJS=$(patsubst lib/%.c, %.o, $(SRCS))
+
+%.o: lib/%.c
+	gcc $&lt; -c
+
+libfboo.a: $(OBJS)
+	ar -rc libfboo.a $^
+
+a.out: libfboo.a
+	gcc main.c -L. -lfboo
+
+program: a.out
+...</code></pre>

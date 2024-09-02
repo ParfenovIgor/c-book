@@ -1,0 +1,54 @@
+<p>Пусть мы хотим написать библиотеку, которая будет состоять из нескольких файлов, а соответственно, будет компилироваться в несколько объектных файлов. Хоть мы и можем написать под них общий заголовочный файл, пользователю всё равно придется добавить множество наших объектных файлов. Эту проблему можно решить, объединив наши объектные файлы в <code>.a</code> архив с помощью программы <code>ar</code>, что часто называют статической библиотекой.</p>
+
+<p>Пусть наша библиотека выглядит так:</p>
+
+<p><code>foo.c</code></p>
+
+<pre><code class="language-cpp">int foo(int x) {
+    return x + 1;
+}</code></pre>
+
+<p><code>foo.h</code></p>
+
+<pre><code class="language-cpp">int foo(int x);</code></pre>
+
+<p><code>boo.c</code></p>
+
+<pre><code class="language-cpp">int boo(int x) {
+    return x + 2;
+}</code></pre>
+
+<p><code>boo.h</code></p>
+
+<pre><code class="language-cpp">int boo(int x);</code></pre>
+
+<p>Скомпилируем файлы нашей библиотеки в объектные файлы, а затем создадим архив с помощью программы <code>ar</code>:</p>
+
+<pre><code class="language-no-highlight">gcc foo.c -c
+gcc boo.c -c
+ar -rc libfboo.a foo.o boo.o</code></pre>
+
+<p>Флаг <code>-r</code> означает добавить указанные файлы в архив, заместив ими файлы с теми же названиями. Флаг <code>-c</code> означает создать архив, если его нет.</p>
+
+<p>Файл библиотеки обязан начинаться с <code>lib</code>.</p>
+
+<p>Пусть теперь пользователь хочет воспользоваться нашей библиотекой.</p>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include "foo.h"
+#include "boo.h"
+
+int main() {
+    printf("%d\n", foo(2) + boo(2));
+    return 0;
+}</code></pre>
+
+<p>Тогда для выполнения компиляции ему необходимо будет упомянуть только архив:</p>
+
+<pre><code class="language-no-highlight">gcc main.c -L. -lfboo</code></pre>
+
+<p><code>-L.</code> означает искать файлы статических библиотек в директории <code>.</code> (то есть, в текущей). <code>-lfboo</code> означает прикомпоновать эту библиотеку. Обратите внимание на странный формат названий: <code>libfboo.a</code> -&gt; <code>lfboo</code>.</p>
+
+<p>IDE Visual Studio имеет свой формат для статических библиотек — <code>.lib</code>, в то время как MinGW имеет формат <code>.a</code>.</p>
