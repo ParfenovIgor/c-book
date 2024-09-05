@@ -1,9 +1,8 @@
 <p>Напишите функцию <code>int strsum(const char *str);</code>, которая принимает строку, состоящую из последовательности целых чисел и пробелов, и возвращает сумму чисел в этой строке.</p>
 
-<p>Подставьте следующую функцию&nbsp;<code>main</code>:</p>
+<p>Подставьте следующую функцию <code>main</code>:</p>
 
-<pre>
-<code class="language-cpp">int main() {
+<pre><code class="language-cpp">int main() {
     assert(strsum("123") == 123);
     assert(strsum("-6") == -6);
     assert(strsum("  2  2    3 ") == 7);

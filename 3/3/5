@@ -26,7 +26,7 @@ program: a.out
 
 <pre><code class="language-makefile">$(info $(SRCS))</code></pre>
 
-<p>Однако, нам необходимы не исходные <code>.c</code> файлы, а объектные файлы. Можно снова пошаминить со строками, а можно воспользоваться оператором <code>patsubst</code>.</p>
+<p>Однако, нам необходимы не исходные <code>.c</code> файлы, а объектные файлы. Можно снова пошаманить со строками, а можно воспользоваться оператором <code>patsubst</code>.</p>
 
 <pre><code class="language-makefile">OBJS=$(patsubst lib/%.c, %.o, $(SRCS))</code></pre>
 

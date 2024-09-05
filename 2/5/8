@@ -1,9 +1,8 @@
-<p>Для выполнения таких же операций с массивами любого типа используются&nbsp;<code>mem***</code>&nbsp;функции. Естественно, функции&nbsp;<code>memlen</code>&nbsp;нет, так как только строки завершаются нулём. Не забывайте о том, что размер массива принимается в байтах, поэтому нужно домножать количество элементов на размер одного элемента.</p>
+<p>Для выполнения таких же операций с массивами любого типа используются <code>mem***</code> функции. Естественно, функции <code>memlen</code> нет, так как только строки завершаются нулём. Не забывайте о том, что размер массива принимается в байтах, поэтому нужно домножать количество элементов на размер одного элемента.</p>
 
-<p>Функция&nbsp;<code>void *memset(void *buf, int ch, size_t count)</code>&nbsp;устанавливает <code>len</code>&nbsp;байт массива&nbsp;<code>buf</code>&nbsp;равными младшему байту числа&nbsp;<code>ch</code>&nbsp;(старшие байты при этом игнорируются).</p>
+<p>Функция <code>void *memset(void *buf, int ch, size_t count)</code> устанавливает <code>len</code> байт массива <code>buf</code> равными младшему байту числа <code>ch</code> (старшие байты при этом игнорируются).</p>
 
-<pre>
-<code class="language-cpp">int main() {
+<pre><code class="language-cpp">int main() {
     int a[4];
     memset(a, 0x1234, 4 * sizeof(int));
     int i;
@@ -15,12 +14,11 @@
     return 0;
 }</code></pre>
 
-<p>Вывод этой программы:&nbsp;<code>875836468 875836468 875836468 875836468 875836468</code></p>
+<p>Вывод этой программы: <code>875836468 875836468 875836468 875836468 875836468</code></p>
 
-<p>Функция&nbsp;<code>void *memcpy(void *dest, const void *source, size_t count)</code>&nbsp;копирует&nbsp;<code>count</code>&nbsp;байт массива&nbsp;<code>source</code>&nbsp;в массив&nbsp;<code>dest</code>.</p>
+<p>Функция <code>void *memcpy(void *dest, const void *source, size_t count)</code> копирует <code>count</code> байт массива <code>source</code> в массив <code>dest</code>.</p>
 
-<pre>
-<code class="language-cpp">int main() {
+<pre><code class="language-cpp">int main() {
     int a[4] = {1, 2, 3, 4};
     int b[4];
     memcpy(b, a, 4 * sizeof(int));
@@ -32,12 +30,11 @@
     return 0;
 }</code></pre>
 
-<p>Вывод этой программы будет состоять из четырёх чисел, первый три из которых:&nbsp;<code>1 2 3</code></p>
+<p>Вывод этой программы будет состоять из четырёх чисел, первый три из которых: <code>1 2 3</code></p>
 
-<p>Функция&nbsp;<code>int memcmp(const void *buf1, const void *buf2, size_t count)</code>&nbsp;сравнивает первые&nbsp;<code>count</code>&nbsp;элементов массивов&nbsp;<code>buf1</code>&nbsp;и&nbsp;<code>buf2</code>&nbsp;лексикографически так же, как и функция&nbsp;<code>strcmp</code>.</p>
+<p>Функция <code>int memcmp(const void *buf1, const void *buf2, size_t count)</code> сравнивает первые <code>count</code> элементов массивов <code>buf1</code> и <code>buf2</code> лексикографически так же, как и функция <code>strcmp</code>.</p>
 
-<pre>
-<code class="language-cpp">int main() {
+<pre><code class="language-cpp">int main() {
     int a[4] = {1, 2, 3, 4};
     int b[4] = {1, 2, 3, 5};
     printf("%d ", memcmp(a, b, 3 * sizeof(int)));
@@ -46,6 +43,6 @@
     return 0;
 }</code></pre>
 
-<p>Вывод этой программы:&nbsp;<code>0 -1</code></p>
+<p>Вывод этой программы: <code>0 -1</code></p>
 
-<p>Следует отдавать предпочтение&nbsp;<code>mem***</code>&nbsp;функциям, так как они используют специальные ассемблерные инструкции (которые мы ещё увидим), и потому более быстрые. (Хотя <code>str***</code>&nbsp;функции в то же время тоже имеют некоторые хитрые оптимизации, связанные с итерированием не по одному символу, а по машинному слову. Но это не так сильно влияет.)</p>
+<p>Следует отдавать предпочтение <code>mem***</code> функциям, так как они используют специальные ассемблерные инструкции (которые мы ещё увидим), и потому более быстрые. (Хотя <code>str***</code> функции в то же время тоже имеют некоторые хитрые оптимизации, связанные с итерированием не по одному символу, а по машинному слову. Но это не так сильно влияет.)</p>
