@@ -1,0 +1,45 @@
+<p>Создадим диск с несколькими partition-ами с помощью fdisk. Прочитайте самостоятельно help в утилите и добейтесь похожей картины:</p>
+
+<pre><code class="language-no-highlight">Command (m for help): p
+Disk dsk: 512 KiB, 524288 bytes, 1024 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 4A705392-B1C6-E34B-B7B9-39BFA385DB58
+
+Device Start   End Sectors  Size Type
+dsk1      34   200     167 83,5K Linux filesystem
+dsk2     201   990     790  395K Linux filesystem</code></pre>
+
+<p>Формат диска не важен, так как мы планируем использовать loop devices, и они поддерживают большинство форматов.</p>
+
+<p>Выполните <code>losetup</code> с флагом <code>-P</code>: <code>sudo losetup -P /dev/loop100 dsk</code> . Вывод <code>losetup -l</code> ничего нового не покажет, но если вы выполните <code>ls /dev</code>, то увидете интересную картину.</p>
+
+<pre><code class="language-no-highlight">...
+loop100
+loop100p1
+loop100p2
+...</code></pre>
+
+<p>У нас появилось по одному дополнительному loop device на каждый partition. Мы можем в каждом из них выполнить форматирование. Для интереса выполним форматирование в разные файловые системы.</p>
+
+<pre><code class="language-no-highlight">$ sudo mkfs.fat /dev/loop100p1
+$ sudo mkfs.ext4 /dev/loop100p2</code></pre>
+
+<p>Теперь мы можем примонтировать их.</p>
+
+<pre><code class="language-no-highlight">$ mkdir mnt1 mnt2
+$ sudo mount /dev/loop100p1 mnt1
+$ sudo mount /dev/loop100p2 mnt2
+$ ls mnt1
+$ ls mnt2
+lost+found</code></pre>
+
+<p>Расскажу ещё немного о файловых системах. Есть три основных часто используемых файловых систем:</p>
+
+<ul>
+	<li>ext4 — сложная файловая система, часто используемая на Linux</li>
+	<li>NTFS — сложная файловая система, используемая на Windows</li>
+	<li>fat — простая файловая система, драйвер к которой можно написать самостоятельно</li>
+</ul>

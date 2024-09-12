@@ -1,0 +1,139 @@
+<p>Посмотрим на такую программу:</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+int *x;
+
+void *thread_main() {
+    if (*x &gt; 0) {
+        sleep(1);
+        (*x)--;
+    }
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 1;
+    pthread_t thr1, thr2;
+    pthread_create(&amp;thr1, NULL, thread_main, NULL);
+    pthread_create(&amp;thr2, NULL, thread_main, NULL);
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<p>Программа немного искусственная, но она покажет нам проблему. Мы создаём два потока. Каждый из них уменьшает счётчик на единицу, если он больше нуля. Однако вывод прогаммы:</p>
+
+<pre><code class="language-no-highlight">-1</code></pre>
+
+<p>Чтобы лучше понять, что произошло, я покажу порядок, в котором исполнялись statement-ы потоков.</p>
+
+<pre><code>Thread 1: if (*x &gt; 0)
+Thread 1: sleep(1);
+Thread 2: if (*x &gt; 0)
+Thread 2: sleep(1);
+Thread x: (*x)--;
+Thread x: return NULL;
+Thread y: (*x)--;
+Thread y: return NULL;</code></pre>
+
+<p>Здесь из-за блокировки функции sleep, после которой процессор переходит к другому потоку, сначала выполнились две проверки, а только потом два уменьшения. Это называется состоянием гонки (race condition), и исправить проблему можно с помощью использования семафора (semaphore).</p>
+
+<p>Мы воспользуемся posix semaphore-ами, функции которых имеют вид <code>sem_xxx</code>. Существует много других реализаций, но я не вижу в них смысла. Как и в случае с thread-ами, эта реализация семафоров основана на не очень дружелюбных системных вызовах <code>semxxx</code> (можете найти их в таблице СВ). Я так же покажу лишь пример использования этого.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+
+int *x;
+sem_t sem;
+
+void *thread_main() {
+    sem_wait(&amp;sem);
+    if (*x &gt; 0) {
+        sleep(1);
+        (*x)--;
+    }
+    sem_post(&amp;sem);
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 1;
+    sem_init(&amp;sem, 0, 1);
+    pthread_t thr1, thr2;
+    pthread_create(&amp;thr1, NULL, thread_main, NULL);
+    pthread_create(&amp;thr2, NULL, thread_main, NULL);
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<p>Функция <code>sem_init</code> записывает дескриптор семафора в первый аргумент, а третий аргумент — это начальное значение семафора. Пусть сначала оно будет равно единице.</p>
+
+<p>Функция <code>sem_wait</code> уменьшает значение семафора на один, но если оно сейчас равно нулю, блокирует поток до момента, когда оно станет больше нуля.</p>
+
+<p>Функция <code>sem_post</code> увеличивает значение семафора на один.</p>
+
+<p>Нам необходимо обрамить блок, использующий общую переменную в sem_wait и sem_post. Теперь порядок выполнения statement-ов такой:</p>
+
+<pre><code class="language-no-highlight">Thread 1: sem_wait(&amp;sem);
+Thread 1: if (*x &gt; 0)
+Thread 1: sleep(1);
+Thread 2: sem_wait(&amp;sem);
+Thread 1: (*x)--;
+Thread 1: sem_post(&amp;sem);
+Thread 1: return NULL;
+Thread 2: if (*x &gt; 0)
+Thread 2: sem_post(&amp;sem);
+Thread 2: return NULL;</code></pre>
+
+<p>Если мы заменим третий аргумент функции sem_init на <code>2</code>, то это можно понимать, как редактирование переменной одновременно не более чем двумя потоками.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+
+int *x;
+sem_t sem;
+
+void *thread_main() {
+    sem_wait(&amp;sem);
+    if (*x &gt; 0) {
+        sleep(1);
+        (*x)--;
+    }
+    sem_post(&amp;sem);
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 1;
+    sem_init(&amp;sem, 0, 2);
+    pthread_t thr1, thr2, thr3;
+    pthread_create(&amp;thr1, NULL, thread_main, NULL);
+    pthread_create(&amp;thr2, NULL, thread_main, NULL);
+    pthread_create(&amp;thr3, NULL, thread_main, NULL);
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    pthread_join(thr3, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">-1</code></pre>

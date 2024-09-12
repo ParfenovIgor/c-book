@@ -1,0 +1,103 @@
+<p>Когда вы вводите команду <code>cat file</code>, вы запускаете программу <code>cat</code> и передаёте ей аргумент <code>file</code>. Посмотрим, как эти аргументы можно читать из программы на C.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>На самом деле, в функцию <code>main</code> передаётся два аргумента — количество аргументов программы <code>argc</code>, и массив этих аргументов <code>argv</code>, которые являются строками. (На ещё более самом деле, в функцию main может передаваться аргумент <code>envp</code>, но он есть не на всех системах.) Благодаря том, как устроен application binary interface, мы можем просто не писать суффикс аргументов, и это не вызовет никаких проблем. Подробнее об этом мы узнаем позже.</p>
+
+<p>Данная программа просто выводит аргументы. Потестируем её.</p>
+
+<pre><code class="language-cpp">$ ./main
+./main
+$ /home/igor/test/main	
+/home/igor/test/main
+$ ./main a -b c
+./main
+a
+-b
+c</code></pre>
+
+<p>Аргументы вида <code>--help</code> и <code>-h</code> называются флагами. Используются также аргументы вида <code>--output=file</code>. Сам shell никак не задаёт формат аргументов: вам необходимо обработать его самостоятельно.</p>
+
+<p>Обратите внимание, что первым аргументом программы получают путь к своему исполняемому файлу. Когда мы будем запускать программы с помощью системного вызова <code>exec</code>, мы сможем нарушить это правило. В таком случае, некоторые программы могут отказаться работать.</p>
+
+<p>Чтобы считать переменные среды (environmental variables), можно воспользоваться третьим аргументом <code>envp</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv, char **envp) {
+    int i;
+    for (i = 0; envp[i] != NULL; i++) {
+        printf("%s\n", envp[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>Массив <code>envp</code>, в отличии от <code>argv</code>, является ноль-терминированным. (Напомню, что это по сути два способа хранения массивов: либо хранить отдельно длину массива, либо завершать его нулем.)</p>
+
+<pre><code class="language-no-highlight">$ ./main
+LESSOPEN=| /usr/bin/lesspipe %s
+no_proxy=localhost,127.0.0.0/8,::1
+USER=igor
+LC_TIME=ru_RU.UTF-8
+all_proxy=socks://127.0.0.1:1080/
+XDG_SESSION_TYPE=x11
+SHLVL=1
+HOME=/home/igor
+...</code></pre>
+
+<p>Мы можем установить значение переменной в sh с помощью оператора <code>export</code>. Чтобы получить значение переменной, нужно перед её названием написать символ <code>$</code>.</p>
+
+<pre><code class="language-no-highlight">$ export DOG=Shepherd
+$ echo $DOG</code></pre>
+
+<p>Переменные среды видны всем процессам-потомкам, то есть, в том числе тем, которые запущены в данном sh.</p>
+
+<pre><code class="language-no-highlight">$ ./main | grep DOG
+DOG=Shepherd</code></pre>
+
+<p>Один из других способов вывести переменные среды — это воспользоваться глобальной переменной <code>environ</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+extern char **environ;
+
+int main(int argc, char **argv) {
+    int i;
+    for (i = 0; environ[i] != NULL; i++) {
+        printf("%s\n", environ[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>Ключевое слово <code>extern</code> достаёт на этапе компоновки переменную <code>environ</code> из другого модуля, так как эта переменная не определена в заголовочных файлах. Переменна environ определена где-то в файлах <code>libc</code>. Конечно, использование extern-а считается плохой практикой.</p>
+
+<p>Чтобы установить значение переменной, можно воспользоваться функцией <code>int setenv(const char *name, const char *value, int overwrite);</code>. Если overwrite равен нулю, то она записывает value в name, только если name не определено. В противном случае, записывает всегда.</p>
+
+<p>Чтобы прочитать значение переменной, можно воспользоваться функцией <code>char *getenv(const char *name);</code>. В случае, если переменная name отсутствует, функция возвратит <code>NULL</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(int argc, char **argv) {
+    printf("%s\n", getenv("HOME"));
+    setenv("HOME", "/bin", 0);
+    printf("%s\n", getenv("HOME"));
+    setenv("HOME", "/bin", 1);
+    printf("%s\n", getenv("HOME"));
+    printf("%d\n", getenv("HOM"));
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ ./main
+/home/igor
+/home/igor
+/bin
+0</code></pre>

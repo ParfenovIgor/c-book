@@ -1,0 +1,60 @@
+<p>Посмотрите на системные вызовы read и write: <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md </a>. В качестве первого аргумента они принимают некий файловый дескриптор <code>fd</code>, который является числом. В Linux работа с stream-ами реализована весьма красиво, любой stream, будь он stdin, файлом, pipe-ом, определяется единственным числом — файловым дескриптором. Посмотрим на номера файловых дескрипторов для stdin, stdout и stderr.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    printf("%d %d %d\n", STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>0 1 2</code></p>
+
+<p>Попробуем вывести текст с помощью функции write в файловый дескриптор <code>1</code>, то есть, stdout.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    write(1, "Abacaba\n", 8);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>Abacaba</code></p>
+
+<p>Мы можем также считать данные с помощью функции read.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char buffer[1024];
+    int cnt = read(0, buffer, 1024);
+    printf("%.*s", cnt, buffer);
+    return 0;
+}</code></pre>
+
+<p>Обратите внимание, что функция read не добавляет нулевой символ после считанной строки. Поэтому нам необходимо считать длину считанной строки и попросить функции printf вывести ровно столько символов, а не до первого нуля.</p>
+
+<p>Вспомним, что ранее вы выводили текст в stderr с помощью функции fprintf, в которую мы передавали первым аргументом переменную <code>FILE *stderr</code>. Структура <code>FILE</code> является высокоуровневой абстракцией над файловыми дескрипторами, которая предоставляет дополнительную информацию. <code>FILE</code> можно получить по дескриптору с помощью функции <code>fdopen</code>. Я не буду здесь рассказывать про эти функции, так как после изучения дескрипторов читатель без проблем сможет изучить это самостоятельно. (Думаю, на этом этапе вы уже согласитесь, что C является высокоуровневым языком.)</p>
+
+<p>Как вывести текст в файл с помощью системных вызовов? Очень просто. Нам понадобится (внезапно) системный вызов <code>open</code>. Я особо не буду рассказывать о его аргументов. Отмечу лишь, что нам необходимо наличие флага <code>O_WRONLY</code> или <code>O_RDWR</code> во втором аргументе.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+int main() {
+    int fd = open("file", O_WRONLY, 0);
+    printf("%d\n", fd);
+    write(fd, "Abacaba\n", 8);
+    return 0;
+}</code></pre>
+
+<p>Чтобы вызов функции open завершился успешно, файл "file" должен существовать. Вы можете также сами посмотреть в документации, что нужно передать в функцию, чтобы она создала файл сама.</p>
+
+<p>В моём случае вывод этой программы: <code>3</code></p>
+
+<p>Можно перечислить несколько флагов с помощью оператора <code>|</code>. Например, <code>O_WRONLY | O_APPEND</code>. Часто передачу флагов делают так. Чтобы такое работало, необходимо, чтобы у всех флагов множество битов не пересекалось.</p>
+
+<p>Обратите внимание на номер дескриптора: <code>3</code>. Это означает, что, в отличии от, например, pid, номера дескрипторов не являются глобальными.</p>

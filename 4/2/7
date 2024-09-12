@@ -1,0 +1,85 @@
+<p>Вы, наверное, слышали про thread (поток), который является альтернативой создания нового процесса. Чем thread отличается от процесса? Тем, насколько дочерний процесс/поток отделён от родительского. Мы видели, что новый процесс имеет свой стек (что логично, ведь блуждание по функциям меняет стек) и свою кучу. Новый поток же своей кучи не имеет. После создания нового потока, основную программу мы будем называть основным потоком.</p>
+
+<p>Посмотрите на список СВ: <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md </a>— в нём нет СВ, имеющих какое-то отношение к потоку. Функции создания потоков в libc используют СВ <code>clone</code>, который выполняет то же самое, что и fork, но имеет возможность настройки нового процесса.</p>
+
+<p>Я не буду объяснять большинство функций здесь. Информация о потоках здесь лишь для ознакомления.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+void *thread_main() {
+    printf("Thread begin\n");
+    sleep(2);
+    printf("Thread end\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thr;
+    pthread_create(&amp;thr, NULL, thread_main, NULL);
+    sleep(1);
+    printf("Main end\n");
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">Thread begin
+Main end</code></pre>
+
+<p>Мы создаём поток с помощью функции <code>pthread_create</code>. В первый аргумент функция записывает дескриптор потока, по которому мы будем этот поток упоминать. Третий аргумент — это функция, которая будет вызвана при старте потока (это сделано для удобства, так как обычно в потоках мы не запускаем другие программы с помощью execve).</p>
+
+<p>Обратите внимание, что завершение основного потока прервало дочерний поток, и он не вывел строку <code>Thread end</code>. (Дочерние процессы продолжают выполнение и вывод.)</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+void *thread_main() {
+    printf("Thread begin\n");
+    sleep(2);
+    printf("Thread end\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thr;
+    pthread_create(&amp;thr, NULL, thread_main, NULL);
+    sleep(1);
+    pthread_join(thr, NULL);
+    printf("Main end\n");
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">Thread begin
+Thread end
+Main end</code></pre>
+
+<p>Функция <code>pthread_join</code> останавливает текущий поток до завершения потока, дескриптор которого мы передали в первый аргумент. Это аналог функции wait4 для процессов.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+
+int *x;
+
+void *thread_main() {
+    (*x)++;
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 2;
+    pthread_t thr;
+    pthread_create(&amp;thr, NULL, thread_main, NULL);
+    pthread_join(thr, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">3</code></pre>
+
+<p>В данном примере мы видим, что куча у обоих потоков общая.</p>

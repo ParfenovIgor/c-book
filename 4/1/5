@@ -1,0 +1,67 @@
+<p>Когда мы запускаем программу, запускается процесс, выполняющий эту программу. После завершения каждый процесс возвращает число. По хорошему, при успешном завершении процесс должен возвращать ноль, а при неуспешном — не ноль. Узнать, какое число вернул последний процесс, мы можем, напечатав значение переменной <code>$?</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd	
+/home/igor/test
+$ echo $?
+0
+$ gcc
+gcc: fatal error: no input files
+compilation terminated.
+$ echo $?
+1
+$ gcc main.c -o main
+$ echo $?
+0</code></pre>
+
+<p>Когда мы пишем shell-скрипты, мы так проверяем, был ли запуск программы успешен.</p>
+
+<p>Чтобы выполнить несколько программ друг за другом, мы можем написать их на одной строке, разделив символом <code>;</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd ; ls
+/home/igor/test
+main  main.c</code></pre>
+
+<p>Чтобы выполнять программы из списка, пока одна из них не завершится успешно (вернёт 0), мы можем написать их на одной строке, разделив оператором <code>||</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd || ls
+/home/igor/test
+$ gcc || ls
+gcc: fatal error: no input files
+compilation terminated.
+main  main.c</code></pre>
+
+<p>В первом случае программа pwd завершилась успешно, поэтому программа ls не запускалась.</p>
+
+<p>Во втором случае программа gcc завершилась неуспешно, поэтому программа ls запустилась.</p>
+
+<p>Чтобы выполнять программы из списка, пока они выполняются успешно, мы можем написать их на одной строке, разделив оператором <code>&amp;&amp;</code>. (Звучит, как оператор, который часто будет пригождаться.)</p>
+
+<pre><code class="language-no-highlight">$ pwd &amp;&amp; ls
+/home/igor/test
+main  main.c
+$ gcc &amp;&amp; ls
+gcc: fatal error: no input files
+compilation terminated.</code></pre>
+
+<p>В первом случае программа pwd завершилась успешно, поэтому программа ls запускалась.</p>
+
+<p>Во втором случае программа gcc завершилась неуспешно, поэтому программа ls не запустилась.</p>
+
+<p>Каждый процесс при запуске получает уникальный PID (process identifier). Когда мы запускаем процесс на фоне, в некоторых shell-ах нам выводится его PID (но не в sh). Его же мы можем прочитать из переменной <code>$!</code>. Пока мы мало что умеем делать с процессами. Мы можем завершить процесс с помощью программы <code>kill</code>.</p>
+
+<pre><code class="language-no-highlight">$ sleep 100 &amp;
+$ echo $!
+18865
+$ kill $!
+$ 
+[1] + Terminated                 sleep 100</code></pre>
+
+<p>Нетрудно догадаться, что код возврата — это то, что мы возвращаем из функции <code>main</code>.</p>
+
+<pre><code class="language-cpp">int main() {
+    return 123;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ ./main
+$ echo $?
+123</code></pre>

@@ -1,0 +1,40 @@
+<p>Мы можем посмотреть список процессов-потомков с помощью программы <code>ps</code>.</p>
+
+<pre><code class="language-no-highlight">$ sleep 5 &amp;
+$ ps              
+    PID TTY          TIME CMD
+  30872 pts/1    00:00:00 bash
+  71987 pts/1    00:00:00 sh
+  72063 pts/1    00:00:00 sleep
+  72070 pts/1    00:00:00 ps</code></pre>
+
+<p>Здесь мы видем <code>bash</code>, который был запущен у меня изначально; <code>sh</code>, который я запустил в нём; <code>ps</code>, который вывел этот текст; и <code>sleep</code>, запущенный ранее на фоне.</p>
+
+<p>Мы можем проверить время работы процесса с помощью программы <code>time</code>.</p>
+
+<p>Напишем вспомогательную программу.</p>
+
+<pre><code class="language-cpp">int main() {
+    int i;
+    for (i = 0; i &lt; 1000000000; i++);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ time sleep 2
+0.00user 0.00system 0:02.00elapsed 0%CPU (0avgtext+0avgdata 2048maxresident)k
+0inputs+0outputs (0major+87minor)pagefaults 0swaps
+$ time ./main
+1.80user 0.00system 0:01.80elapsed 99%CPU (0avgtext+0avgdata 1152maxresident)k
+0inputs+0outputs (0major+63minor)pagefaults 0swaps</code></pre>
+
+<p>По какой-то причине, вывод в sh не отформатирован. Обратите внимание, что всё время работы программы sleep приходится на system, в то время как всё время работы программы main приходится на user. Это связано с тем, что программа sleep просит процессор не выполнять её некоторое время, в то время как main всё это время полностью использует процессор.</p>
+
+<p>Мы можем посмотреть информацию обо всех процессах с помощью программы <code>top</code>. Данная программа является интерактивной, то есть, она меняет текст в терминале. Чтобы выйти из программы, нажмите <code>q</code>. Мы можем получить мгновенный статус с помощью флага <code>-n</code> со значением <code>1</code>. Проверим статус процесса sh. Нам понадобится флаг <code>-b</code>, чтобы top не выводил символы форматирования.</p>
+
+<pre><code class="language-no-highlight">$ top -n 1 -b | grep sh
+...
+  30872 igor      20   0   11556   4776   3788 S   0,0   0,1   0:00.45 bash
+...
+  71987 igor      20   0    2892   1664   1664 S   0,0   0,0   0:00.00 sh
+...</code></pre>

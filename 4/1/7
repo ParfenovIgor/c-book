@@ -1,0 +1,77 @@
+<p>В sh есть более сложные синтаксические конструкции. Например, так мы можем написать if-statement.</p>
+
+<pre><code class="language-no-highlight">$ if gcc
+&gt; then
+&gt; echo 1
+&gt; else 
+&gt; echo 2
+&gt; fi
+gcc: fatal error: no input files
+compilation terminated.
+2</code></pre>
+
+<p>Заметьте, что пока мы не завершили if-statement ключевым словом <code>fi</code>, sh выводит особый prompt, который подсказывает нам, что мы вводим сейчас вводим сложную синтаксическую конструкцию. Так как gcc вернул не ноль, выполнилась ветка else.</p>
+
+<p>Очевидно, что можно сохранить такой скрипт в отдельном файле, и просто подать этот файл на stdin к sh.</p>
+
+<p><code>script</code></p>
+
+<pre><code class="language-bash">if gcc
+then
+    echo 1
+else
+    echo 2
+fi</code></pre>
+
+<pre><code class="language-no-highlight">$ sh &lt; script
+gcc: fatal error: no input files
+compilation terminated.
+2</code></pre>
+
+<p>Но такой способ требует, чтобы мы сами указали обработчик скрипта. В Unix есть возможность указать обработчик скрипта прямо в файле. В таком случае, мы можем просто запустить скрипт, как исполняемый файл, и загрузчик программ запустит указанный в файле обработчик скрипта и передаст ему путь к скрипту.</p>
+
+<p><code>script</code></p>
+
+<pre><code class="language-bash">#!/bin/sh
+if gcc
+then
+    echo 1
+else
+    echo 2
+fi</code></pre>
+
+<p>На первой строке написан Shebang. Если файл начинается с текстовых символов <code>#!</code> то загрузчик программ (не shell) запустит программу, путь к которой указан следом (в данном случае, <code>/bin/sh</code>), и передаст ей вторым аргументом путь к скрипту.</p>
+
+<pre><code class="language-no-highlight">$ chmod +x script
+$ ./script
+gcc: fatal error: no input files
+compilation terminated.
+2</code></pre>
+
+<p>Нам необходимо разрешить запускать скрипт. Сделать это можно с помощью программы <code>chmod</code>.</p>
+
+<p>Давайте напишем свой обработчик скриптов.</p>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p><code>script</code></p>
+
+<pre><code class="language-no-highlight">#!./main</code></pre>
+
+<p> Укажем путь к исполняемому файлу нашего обработчика: <code>./main</code>.</p>
+
+<pre><code class="language-no-highlight">$ ./script	
+./main
+./script</code></pre>
+
+<p>Видим, что вторым аргументом указан путь к скрипту.  Теперь мы можем в нашем обработчике открыть этот файл и что-то сделать.</p>

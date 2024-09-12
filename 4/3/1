@@ -1,0 +1,45 @@
+<p><strong>Внимание! В данной главе мы будем работать с потенциально разрушительными командами. Внимательно читайте команды перед тем, как выполнять их.</strong></p>
+
+<p>Создадим для удобства папку <code>mnt</code> (это не более, чем обычная папка).</p>
+
+<pre><code class="language-no-highlight">mkdir mnt</code></pre>
+
+<p>Посмотрите содержимое директории <code>/dev</code>. Среди файлов вы увидете файлы с названиями <code>sda</code>, <code>sda1</code>, <code>sda2</code>, и т. д. <code>sda</code> — это ваш загрузочный диск, на котором располагается ОС. Диск разбит на несколько partitions (разделов), которые являются обычными, но независимыми друг от друга, директориями. Каждый из файлов <code>sdaX</code> — это соответствующий partition.</p>
+
+<p>В Unix есть возможность "подвесить" partition к любой пустой директории. В результате этого действия вы сможете видеть директорию partition-а при в входе в эту пустую директорию. Это дествие называется mount (монтирование) и выполняется программой <code>mount</code>.</p>
+
+<p>Монтрирование производится централизованно, и список всех можно увидеть, выполнив <code>mount -l</code>.</p>
+
+<pre><code class="language-no-highlight">...
+/dev/sda1 on /boot type ext4 (rw,relatime)
+...</code></pre>
+
+<p>Посмотрите на мой вывод. Здесь указано, что первый partition моего системного диска уже подвешен к директории /boot. Этот partition отвечает за первичную загрузку нашей ОС.</p>
+
+<p>Давайте примонтируем этот partition к нашей директории <code>mnt</code> с помощью команды <code>sudo mount /dev/sda1 mnt</code>.</p>
+
+<p>Теперь в выводе программы <code>mount -l</code> я получаю такую строку в конце:</p>
+
+<pre><code class="language-no-highlight">...
+/dev/sda1 on /home/igor/test/mnt type ext4 (rw,relatime)
+</code></pre>
+
+<p>Мы можем зайти в директорию и увидеть её содержимое.</p>
+
+<pre><code class="language-no-highlight">$ ls mnt
+config-6.5.0-44-generic      initrd.img-6.8.0-40-generic  System.map-6.5.0-44-generic
+config-6.8.0-40-generic      initrd.img.old               System.map-6.8.0-40-generic
+efi                          lost+found                   vmlinuz
+grub                         memtest86+.bin               vmlinuz-6.5.0-44-generic
+initrd.img                   memtest86+.elf               vmlinuz-6.8.0-40-generic
+initrd.img-6.5.0-44-generic  memtest86+_multiboot.bin     vmlinuz.old</code></pre>
+
+<p>Директорию можно редактировать, что является отличным способом сломать свою ОС.</p>
+
+<p>Чтобы размонтировать директорию, необходимо воспользоваться программой <code>umount</code>: <code>sudo umount mnt</code></p>
+
+<p>Давайте теперь примонтируем <code>/dev/sda3</code>. В моём случае в этом partition-е хранится основная файловая система вместе с директорией <code>/home</code>. В вашем случае, это может быть другой partition, или даже директория /home может находится в отдельном от основной файловой системы partition-е. Найдите partition с /home самостоятельно и работайте с ним.</p>
+
+<p>При такой файловой системе вы можете вновь прийти к директории mnt, однако на этот раз она будет пуста.</p>
+
+<pre><code class="language-no-highlight">$ ls mnt/home/igor/test/mnt</code></pre>

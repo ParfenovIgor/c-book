@@ -1,0 +1,5 @@
+<p>Изучите, с помощью каких системных вызовов можно манипулировать файлами (open может только создавать файлы).</p>
+
+<p><a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md</a></p>
+
+<p>Реализуйте любую программу, использующую эти системные вызовы.</p>

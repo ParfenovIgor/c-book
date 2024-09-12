@@ -449,6 +449,50 @@
                 </ul>
               </li>
             </ul>
+            <li><a href="#4">4. Unix</a>
+            <ul>
+              <li><a href="#4.1">4.1. Shell</a>
+                <ul>
+                  <li><a href="#4.1.1">4.1.1</a></li>
+                  <li><a href="#4.1.2">4.1.2</a></li>
+                  <li><a href="#4.1.3">4.1.3</a></li>
+                  <li><a href="#4.1.4">4.1.4</a></li>
+                  <li><a href="#4.1.5">4.1.5</a></li>
+                  <li><a href="#4.1.6">4.1.6</a></li>
+                  <li><a href="#4.1.7">4.1.7</a></li>
+                  <li><a href="#4.1.8">4.1.8</a></li>
+                  <li><a href="#4.1.9">4.1.9</a></li>
+                  <li><a href="#4.1.10">4.1.10</a></li>
+                </ul>
+              </li>
+              <li><a href="#4.2">4.2. Системные вызовы</a>
+                <ul>
+                  <li><a href="#4.2.1">4.2.1</a></li>
+                  <li><a href="#4.2.2">4.2.2</a></li>
+                  <li><a href="#4.2.3">4.2.3</a></li>
+                  <li><a href="#4.2.4">4.2.4</a></li>
+                  <li><a href="#4.2.5">4.2.5</a></li>
+                  <li><a href="#4.2.6">4.2.6</a></li>
+                  <li><a href="#4.2.7">4.2.7</a></li>
+                  <li><a href="#4.2.8">4.2.8</a></li>
+                  <li><a href="#4.2.9">4.2.9</a></li>
+                  <li><a href="#4.2.10">4.2.10</a></li>
+                  <li><a href="#4.2.11">4.2.11</a></li>
+                </ul>
+              </li>
+              <li><a href="#4.3">4.3. Файловая система</a>
+                <ul>
+                  <li><a href="#4.3.1">4.3.1</a></li>
+                  <li><a href="#4.3.2">4.3.2</a></li>
+                  <li><a href="#4.3.3">4.3.3</a></li>
+                  <li><a href="#4.3.4">4.3.4</a></li>
+                  <li><a href="#4.3.5">4.3.5</a></li>
+                  <li><a href="#4.3.6">4.3.6</a></li>
+                  <li><a href="#4.3.7">4.3.7</a></li>
+                  <li><a href="#4.3.8">4.3.8</a></li>
+                </ul>
+              </li>
+            </ul>
           </li>
         </ul>
       </nav>
@@ -3206,6 +3250,1477 @@ clean:
 <p>В этом make-файле есть недостатки. Например, названия библиотек недостаточно абстрагированы. Я намеренно не стал этим усложнять пример.</p><h3 id="3.3.7">3.3.7</h2><p>Попробуйте найти недостатки в организации проекта, который показан на предыдущем шаге, и исправить их.</p><h3 id="3.3.8">3.3.8</h2><p>До сих пор мы рассматривали только зависимости от <code>.c</code> файлов. Пусть теперь мы изменили <code>.h</code> файл. В тако случае, необходима перекомпиляция всех модулей, которые его добавляют. К сожалению, нет адекватных общих способов определить это множество модулей. Исследуйте способы, как эта проблема может быть решена.</p><h3 id="3.3.9">3.3.9</h2><h3>Проект: Программа со структурой</h3>
 
 <p>Напишите любую программу (полная свобода мысли) вместе с несколькими её библиотеками и систему сборки для неё. Используйте контент шестого шага в качестве образца.</p>
+<h2 id="4">4. Unix</h2>
+
+<h3 id="4.1">4.1. Shell</h3>
+<h3 id="4.1.1">4.1.1</h2><p>Разберемся подробнее в том, что такое "терминал". Запустите терминал. У вас начнется сессия с командной оболочкой (shell). В зависимости от вашего дистрибутива, запускаемая оболочка может быть различной. Однако, скорее всего, в вашем дистрибутиве по умолчанию будет запущен <code>bash</code>. Существуют другие оболочки: например, древняя и более примитивная <code>sh</code>, или более продвинутая <code>zsh</code>. Начнем с <code>sh</code>. Введите <code>sh</code> в терминале, чтобы запустить его. Какие при этом происходят действия, мы узнаем немного позже.</p>
+
+<p>Prompt (приглашение) в <code>sh</code> очень простое — <code>$</code>. Чтобы запустить локальную программу в любом shell, необходимо ввести <code>./program</code>, где program — название исполняемого файла. Чтобы запустить глобальную программу, необходимо просто ввести название её исполняемого файла. Shell будет искать этот исполняемый файл во всех директориях, которые записаны в переменной <code>PATH</code> (об этом позже).</p>
+
+<p>Чтобы узнать текущую директорию, в которой мы находимся, можно воспользоваться программой <code>pwd</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd
+/home/igor/test</code></pre>
+
+<p>Чтобы создать папку, можно воспользоваться программой <code>mkdir</code>.</p>
+
+<pre><code class="language-no-highlight">$ mkdir dir</code></pre>
+
+<p>Чтобы посмотреть все файлы в текущей директории, можно воспользоваться программой <code>ls</code>.</p>
+
+<pre><code class="language-no-highlight">$ ls
+dir</code></pre>
+
+<p>Чтобы сменить директорию, воспользуйтесь <strong>командой</strong> <code>cd</code>.</p>
+
+<pre><code class="language-no-highlight">$ cd dir
+$ pwd
+/home/igor/test/dir</code></pre>
+
+<p>Чтобы создать файл, можно воспользоваться программой <code>touch</code>.</p>
+
+<pre><code class="language-no-highlight">$ touch file
+$ ls
+file</code></pre>
+
+<p>Чтобы редактировать файл в терминале, можно воспользоваться одним из текстовых редакторов: <code>nano</code>, <code>vim</code>, etc. (Их необходимо осваивать отдельно.)</p>
+
+<p>Чтобы вывести содержимое файла в текстовом, можно воспользоваться программой <code>cat</code>.</p>
+
+<pre><code class="language-no-highlight">$ cat file
+A dog</code></pre>
+
+<p>Чтобы вывести содержимое файла в hex, можно воспользоваться программой <code>hd</code>.</p>
+
+<pre><code class="language-no-highlight">00000000  41 20 64 6f 67 0a                                 |A dog.|
+00000006</code></pre>
+
+<p>Чтобы узнать расположение исполняемого файла программы, можно воспользоваться программой <code>which</code>.</p>
+
+<pre><code class="language-no-highlight">$ which ls
+/usr/bin/ls
+$ which which
+/usr/bin/which
+$ which cd</code></pre>
+
+<p>Чтобы удалить файл, можно воспользоваться программой <code>rm</code>.</p>
+
+<pre><code class="language-no-highlight">$ rm file
+$ ls</code></pre>
+
+<p>Чтобы перейти не папку наверх, необходимо аргументом к команде <code>cd</code> написать <code>..</code>.</p>
+
+<pre><code class="language-no-highlight">$ cd ..</code></pre>
+
+<p>Чтобы удалить папку, можно воспользоваться программой <code>rmdir</code>.</p>
+
+<pre><code class="language-no-highlight">$ rmdir dir
+$ ls</code></pre><h3 id="4.1.2">4.1.2</h2><p>Чтобы "зависнуть" на некоторое время, можно воспользоваться программой <code>sleep</code>.</p>
+
+<pre><code class="language-no-highlight">$ sleep 5</code></pre>
+
+<p>Можно выполнить процесс "на фоне" (background), то есть, shell не будет ждать завершения процесса, а продолжит выполнять команды. Для этого в конце команды следует написать <code>&amp;</code>.</p>
+
+<pre><code class="language-no-highlight">$ sleep 5 &amp;
+$ pwd
+/home/igor/test
+$ 
+[1] + Done                       sleep 5</code></pre>
+
+<p>Здесь, после ввода первой команды я сразу же ввёл вторую команду. После ввода очередной команды shell уведомляет о завершенных фоновых командах.</p>
+
+<p>Когда у вас выполняется программа не на фоне, вы можете нажать комбинацию <code>Ctrl + Z</code>. Данная комбинация ставит процесс на паузу и помещает его наверх специального буфера. Чтобы возобновить процесс с вершины буфера, введите <strong>команду</strong> <code>fg</code> (foreground).</p>
+
+<pre><code class="language-no-highlight">$ sleep 5
+^Z[1] + Stopped                    sleep 5
+$ fg
+sleep 5</code></pre>
+
+<p>Обратите внимание (при личном тесте), что между нажатием комбинации Ctrl + Z и введением команды fg, таймер продолжает идти (то есть, программа <code>sleep</code> игнорирует просьбу о паузе). Пока таймер не истёк, вы не можете вводить команды, так как команда выполняется не на фоне.</p>
+
+<p>Чтобы возобновить программу из буфера на фоне, вместо команды <code>fg</code> введите команду <code>bg</code> (background).</p>
+
+<pre><code class="language-no-highlight">$ sleep 5
+^Z[1] + Stopped                    sleep 5
+$ bg
+[1] sleep 5
+$ 
+[1] + Done                       sleep 5</code></pre>
+
+<p>Обратите внимание (хотя это и не так важно), что буфер имеет форму стека (то есть берётся последний пришедший).</p>
+
+<pre><code class="language-no-highlight">$ sleep 5
+^Z[1] + Stopped                    sleep 5
+$ sleep 6
+^Z[2] + Stopped                    sleep 6
+$ bg
+[2] sleep 6
+$ bg
+[1] sleep 5</code></pre><h3 id="4.1.3">4.1.3</h2><p>Запустим программу <code>grep</code> которая принимает как аргумент слово и ищет его в своём стандартном вводе (stdin). Как только она на очередной строке, ограниченной символом <code>\n</code> находит слово, как подстроку, она выводит всю строку.</p>
+
+<p>Как только вы запустим программу, которая ожидает данные в стандартном вводе, мы увидем в терминале не prompt, а пустую строку. Каждая наша строка, которую мы завершаем нажатием enter-а, передаётся программе в её стандартный ввод. В свою очередь, программа может что-то выводить в свой стандартный вывод (stdout), и мы также его будем видеть.</p>
+
+<pre><code class="language-no-highlight">$ grep a  
+aaa
+aaa
+bbb
+aba
+aba</code></pre>
+
+<p>Первую, третью и четвёртую строку ввёл я. Вторую и пятую строку вывода вывела программа grep. Всё, что мы ввели будет передаваться программе grep, пока она не закроет свой stdin, однако она его никогда не закроет. Чтобы нам закрыть его, мы должны нажать комбинацию <code>Ctrl + D</code>.</p>
+
+<p>Мы пожем связать стандартый вывод программы с файлом. Тогда всё, что она выводит, окажется в файле. Для этого, следует к команде добавить <code>&gt; file</code>.</p>
+
+<pre><code class="language-no-highlight">$ grep a &gt; file
+aaa
+bbb
+aba
+$ cat file
+aaa
+aba</code></pre>
+
+<p>При такой команде всё, что было до этого в файле, удаляется. Чтобы вместо этого выполнить дозапись в файл, следует вместо <code>&gt;</code> написать <code>&gt;&gt;</code>.</p>
+
+<p>Можно также связать стандартный ввод программы с файлом с помощью оператора <code>&lt;</code>. Программа <code>echo</code> выводит в стандартный вывод единственный свой аргумент.</p>
+
+<pre><code class="language-no-highlight">$ echo aaa &gt; file
+$ echo bbb &gt;&gt; file
+$ echo aba &gt;&gt; file
+$ grep a &lt; file
+aaa
+aba</code></pre>
+
+<p>Можно запустить две программы и связать стандартный вывод одной со стандартным вводом в другой. Для этого необходимо воспользоваться оператором <code>|</code> (pipe).</p>
+
+<pre><code class="language-no-highlight">$ cat file | grep a
+aaa
+aba</code></pre>
+
+<p>Stdin и stdout — это streams. (Данное слово, как и слова thread и flow переведены на русский язык, как поток. Причём, по смыслу эти три слова совсем не близки.) Есть ещё один частоиспользуемый stream — стандартный вывод ошибок (stderr). В него обычно пишут программы при нарушении правил общения с ними.</p>
+
+<p>В терминале мы видим и stdout и stderr от выполняемой программы, и отличить их нельзя. Попробуем перенаправить stdout у этой команды.</p>
+
+<pre><code class="language-no-highlight">$ ls dirrr &gt; out
+ls: cannot access 'dirrr': No such file or directory
+$ cat out</code></pre>
+
+<p>Не перенаправилось. Значит, эту строку ls вывел в stderr. Чтобы перенаправить его, следует воспользоваться оператором <code>2&gt;</code>.</p>
+
+<pre><code class="language-no-highlight">$ ls dirrr 2&gt; out
+$ cat out
+ls: cannot access 'dirrr': No such file or directory</code></pre>
+
+<p>Чтобы перенаправить оба потока в один файл, следует написать так.</p>
+
+<pre><code class="language-no-highlight">$ ls &gt; out 2&gt;&amp;1</code></pre>
+
+<p>Чтобы в программе на C выполнить вывод в stderr, можно воспользоваться функцией <code>fprintf</code>, которая первым аргументом принимет дескриптор stream-а. Дескриптор stderr-а храниться в глобальной переменной <code>stderr</code>.</p>
+
+<pre><code class="language-cpp">fprintf(stderr, "%d\n", 42);</code></pre>
+
+<p>Теперь мы можем понять, что когда мы в самом начале запустили <code>sh</code>, то мы начали с ним интерактивную сессию, такую же, как и с <code>grep</code> здесь. Мы можем её прервать комбинацией <code>Ctrl + D</code>.</p><h3 id="4.1.4">4.1.4</h2><p>Когда вы вводите команду <code>cat file</code>, вы запускаете программу <code>cat</code> и передаёте ей аргумент <code>file</code>. Посмотрим, как эти аргументы можно читать из программы на C.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>На самом деле, в функцию <code>main</code> передаётся два аргумента — количество аргументов программы <code>argc</code>, и массив этих аргументов <code>argv</code>, которые являются строками. (На ещё более самом деле, в функцию main может передаваться аргумент <code>envp</code>, но он есть не на всех системах.) Благодаря том, как устроен application binary interface, мы можем просто не писать суффикс аргументов, и это не вызовет никаких проблем. Подробнее об этом мы узнаем позже.</p>
+
+<p>Данная программа просто выводит аргументы. Потестируем её.</p>
+
+<pre><code class="language-cpp">$ ./main
+./main
+$ /home/igor/test/main	
+/home/igor/test/main
+$ ./main a -b c
+./main
+a
+-b
+c</code></pre>
+
+<p>Аргументы вида <code>--help</code> и <code>-h</code> называются флагами. Используются также аргументы вида <code>--output=file</code>. Сам shell никак не задаёт формат аргументов: вам необходимо обработать его самостоятельно.</p>
+
+<p>Обратите внимание, что первым аргументом программы получают путь к своему исполняемому файлу. Когда мы будем запускать программы с помощью системного вызова <code>exec</code>, мы сможем нарушить это правило. В таком случае, некоторые программы могут отказаться работать.</p>
+
+<p>Чтобы считать переменные среды (environmental variables), можно воспользоваться третьим аргументом <code>envp</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv, char **envp) {
+    int i;
+    for (i = 0; envp[i] != NULL; i++) {
+        printf("%s\n", envp[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>Массив <code>envp</code>, в отличии от <code>argv</code>, является ноль-терминированным. (Напомню, что это по сути два способа хранения массивов: либо хранить отдельно длину массива, либо завершать его нулем.)</p>
+
+<pre><code class="language-no-highlight">$ ./main
+LESSOPEN=| /usr/bin/lesspipe %s
+no_proxy=localhost,127.0.0.0/8,::1
+USER=igor
+LC_TIME=ru_RU.UTF-8
+all_proxy=socks://127.0.0.1:1080/
+XDG_SESSION_TYPE=x11
+SHLVL=1
+HOME=/home/igor
+...</code></pre>
+
+<p>Мы можем установить значение переменной в sh с помощью оператора <code>export</code>. Чтобы получить значение переменной, нужно перед её названием написать символ <code>$</code>.</p>
+
+<pre><code class="language-no-highlight">$ export DOG=Shepherd
+$ echo $DOG</code></pre>
+
+<p>Переменные среды видны всем процессам-потомкам, то есть, в том числе тем, которые запущены в данном sh.</p>
+
+<pre><code class="language-no-highlight">$ ./main | grep DOG
+DOG=Shepherd</code></pre>
+
+<p>Один из других способов вывести переменные среды — это воспользоваться глобальной переменной <code>environ</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+extern char **environ;
+
+int main(int argc, char **argv) {
+    int i;
+    for (i = 0; environ[i] != NULL; i++) {
+        printf("%s\n", environ[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p>Ключевое слово <code>extern</code> достаёт на этапе компоновки переменную <code>environ</code> из другого модуля, так как эта переменная не определена в заголовочных файлах. Переменна environ определена где-то в файлах <code>libc</code>. Конечно, использование extern-а считается плохой практикой.</p>
+
+<p>Чтобы установить значение переменной, можно воспользоваться функцией <code>int setenv(const char *name, const char *value, int overwrite);</code>. Если overwrite равен нулю, то она записывает value в name, только если name не определено. В противном случае, записывает всегда.</p>
+
+<p>Чтобы прочитать значение переменной, можно воспользоваться функцией <code>char *getenv(const char *name);</code>. В случае, если переменная name отсутствует, функция возвратит <code>NULL</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(int argc, char **argv) {
+    printf("%s\n", getenv("HOME"));
+    setenv("HOME", "/bin", 0);
+    printf("%s\n", getenv("HOME"));
+    setenv("HOME", "/bin", 1);
+    printf("%s\n", getenv("HOME"));
+    printf("%d\n", getenv("HOM"));
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ ./main
+/home/igor
+/home/igor
+/bin
+0</code></pre><h3 id="4.1.5">4.1.5</h2><p>Когда мы запускаем программу, запускается процесс, выполняющий эту программу. После завершения каждый процесс возвращает число. По хорошему, при успешном завершении процесс должен возвращать ноль, а при неуспешном — не ноль. Узнать, какое число вернул последний процесс, мы можем, напечатав значение переменной <code>$?</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd	
+/home/igor/test
+$ echo $?
+0
+$ gcc
+gcc: fatal error: no input files
+compilation terminated.
+$ echo $?
+1
+$ gcc main.c -o main
+$ echo $?
+0</code></pre>
+
+<p>Когда мы пишем shell-скрипты, мы так проверяем, был ли запуск программы успешен.</p>
+
+<p>Чтобы выполнить несколько программ друг за другом, мы можем написать их на одной строке, разделив символом <code>;</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd ; ls
+/home/igor/test
+main  main.c</code></pre>
+
+<p>Чтобы выполнять программы из списка, пока одна из них не завершится успешно (вернёт 0), мы можем написать их на одной строке, разделив оператором <code>||</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd || ls
+/home/igor/test
+$ gcc || ls
+gcc: fatal error: no input files
+compilation terminated.
+main  main.c</code></pre>
+
+<p>В первом случае программа pwd завершилась успешно, поэтому программа ls не запускалась.</p>
+
+<p>Во втором случае программа gcc завершилась неуспешно, поэтому программа ls запустилась.</p>
+
+<p>Чтобы выполнять программы из списка, пока они выполняются успешно, мы можем написать их на одной строке, разделив оператором <code>&amp;&amp;</code>. (Звучит, как оператор, который часто будет пригождаться.)</p>
+
+<pre><code class="language-no-highlight">$ pwd &amp;&amp; ls
+/home/igor/test
+main  main.c
+$ gcc &amp;&amp; ls
+gcc: fatal error: no input files
+compilation terminated.</code></pre>
+
+<p>В первом случае программа pwd завершилась успешно, поэтому программа ls запускалась.</p>
+
+<p>Во втором случае программа gcc завершилась неуспешно, поэтому программа ls не запустилась.</p>
+
+<p>Каждый процесс при запуске получает уникальный PID (process identifier). Когда мы запускаем процесс на фоне, в некоторых shell-ах нам выводится его PID (но не в sh). Его же мы можем прочитать из переменной <code>$!</code>. Пока мы мало что умеем делать с процессами. Мы можем завершить процесс с помощью программы <code>kill</code>.</p>
+
+<pre><code class="language-no-highlight">$ sleep 100 &amp;
+$ echo $!
+18865
+$ kill $!
+$ 
+[1] + Terminated                 sleep 100</code></pre>
+
+<p>Нетрудно догадаться, что код возврата — это то, что мы возвращаем из функции <code>main</code>.</p>
+
+<pre><code class="language-cpp">int main() {
+    return 123;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ ./main
+$ echo $?
+123</code></pre><h3 id="4.1.6">4.1.6</h2><p>Напишите простую программу, работающую аналогично программе <code>grep</code>. Выберите и реализуйте 1-3 её флага. Не следует реализовывать весь её функционал, так как он очень большой. Чтобы узнать флаги, которые принимает программа, введите флаг <code>--help</code>.</p>
+
+<pre><code class="language-no-highlight">grep --help</code></pre><h3 id="4.1.7">4.1.7</h2><p>В sh есть более сложные синтаксические конструкции. Например, так мы можем написать if-statement.</p>
+
+<pre><code class="language-no-highlight">$ if gcc
+&gt; then
+&gt; echo 1
+&gt; else 
+&gt; echo 2
+&gt; fi
+gcc: fatal error: no input files
+compilation terminated.
+2</code></pre>
+
+<p>Заметьте, что пока мы не завершили if-statement ключевым словом <code>fi</code>, sh выводит особый prompt, который подсказывает нам, что мы вводим сейчас вводим сложную синтаксическую конструкцию. Так как gcc вернул не ноль, выполнилась ветка else.</p>
+
+<p>Очевидно, что можно сохранить такой скрипт в отдельном файле, и просто подать этот файл на stdin к sh.</p>
+
+<p><code>script</code></p>
+
+<pre><code class="language-bash">if gcc
+then
+    echo 1
+else
+    echo 2
+fi</code></pre>
+
+<pre><code class="language-no-highlight">$ sh &lt; script
+gcc: fatal error: no input files
+compilation terminated.
+2</code></pre>
+
+<p>Но такой способ требует, чтобы мы сами указали обработчик скрипта. В Unix есть возможность указать обработчик скрипта прямо в файле. В таком случае, мы можем просто запустить скрипт, как исполняемый файл, и загрузчик программ запустит указанный в файле обработчик скрипта и передаст ему путь к скрипту.</p>
+
+<p><code>script</code></p>
+
+<pre><code class="language-bash">#!/bin/sh
+if gcc
+then
+    echo 1
+else
+    echo 2
+fi</code></pre>
+
+<p>На первой строке написан Shebang. Если файл начинается с текстовых символов <code>#!</code> то загрузчик программ (не shell) запустит программу, путь к которой указан следом (в данном случае, <code>/bin/sh</code>), и передаст ей вторым аргументом путь к скрипту.</p>
+
+<pre><code class="language-no-highlight">$ chmod +x script
+$ ./script
+gcc: fatal error: no input files
+compilation terminated.
+2</code></pre>
+
+<p>Нам необходимо разрешить запускать скрипт. Сделать это можно с помощью программы <code>chmod</code>.</p>
+
+<p>Давайте напишем свой обработчик скриптов.</p>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p><code>script</code></p>
+
+<pre><code class="language-no-highlight">#!./main</code></pre>
+
+<p> Укажем путь к исполняемому файлу нашего обработчика: <code>./main</code>.</p>
+
+<pre><code class="language-no-highlight">$ ./script	
+./main
+./script</code></pre>
+
+<p>Видим, что вторым аргументом указан путь к скрипту.  Теперь мы можем в нашем обработчике открыть этот файл и что-то сделать.</p><h3 id="4.1.8">4.1.8</h2><p>Мы можем посмотреть список процессов-потомков с помощью программы <code>ps</code>.</p>
+
+<pre><code class="language-no-highlight">$ sleep 5 &amp;
+$ ps              
+    PID TTY          TIME CMD
+  30872 pts/1    00:00:00 bash
+  71987 pts/1    00:00:00 sh
+  72063 pts/1    00:00:00 sleep
+  72070 pts/1    00:00:00 ps</code></pre>
+
+<p>Здесь мы видем <code>bash</code>, который был запущен у меня изначально; <code>sh</code>, который я запустил в нём; <code>ps</code>, который вывел этот текст; и <code>sleep</code>, запущенный ранее на фоне.</p>
+
+<p>Мы можем проверить время работы процесса с помощью программы <code>time</code>.</p>
+
+<p>Напишем вспомогательную программу.</p>
+
+<pre><code class="language-cpp">int main() {
+    int i;
+    for (i = 0; i &lt; 1000000000; i++);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ time sleep 2
+0.00user 0.00system 0:02.00elapsed 0%CPU (0avgtext+0avgdata 2048maxresident)k
+0inputs+0outputs (0major+87minor)pagefaults 0swaps
+$ time ./main
+1.80user 0.00system 0:01.80elapsed 99%CPU (0avgtext+0avgdata 1152maxresident)k
+0inputs+0outputs (0major+63minor)pagefaults 0swaps</code></pre>
+
+<p>По какой-то причине, вывод в sh не отформатирован. Обратите внимание, что всё время работы программы sleep приходится на system, в то время как всё время работы программы main приходится на user. Это связано с тем, что программа sleep просит процессор не выполнять её некоторое время, в то время как main всё это время полностью использует процессор.</p>
+
+<p>Мы можем посмотреть информацию обо всех процессах с помощью программы <code>top</code>. Данная программа является интерактивной, то есть, она меняет текст в терминале. Чтобы выйти из программы, нажмите <code>q</code>. Мы можем получить мгновенный статус с помощью флага <code>-n</code> со значением <code>1</code>. Проверим статус процесса sh. Нам понадобится флаг <code>-b</code>, чтобы top не выводил символы форматирования.</p>
+
+<pre><code class="language-no-highlight">$ top -n 1 -b | grep sh
+...
+  30872 igor      20   0   11556   4776   3788 S   0,0   0,1   0:00.45 bash
+...
+  71987 igor      20   0    2892   1664   1664 S   0,0   0,0   0:00.00 sh
+...</code></pre><h3 id="4.1.9">4.1.9</h2><p>На sh-скриптах можно решать задачи. Так мы можем решить задачу <code>A + B</code>.</p>
+
+<pre><code class="language-bash">read a
+read b
+c=$(($a + $b))
+echo $c</code></pre>
+
+<p>Изучите синтаксические конструкции в sh (они простые, хоть и очень странные). В sh есть только один тип данных — строка.</p>
+
+<p>Напишите решение любой более сложной задачи. Например, задачи про брокера Василия из главы "Контроль потока".</p><h3 id="4.1.10">4.1.10</h2><h3>Проект: Judge System</h3>
+
+<p>Напишите локальную тестирующую систему, работающую по аналогии с <a href="https://codeforces.com/" rel="noopener noreferrer nofollow">https://codeforces.com/</a> и подобными сайтами.</p>
+
+<ul>
+	<li>В директории, отведенной под задачу должны быть:
+	<ul>
+		<li>Директория с тестами</li>
+		<li>Директория с ответами на тесты</li>
+	</ul>
+	</li>
+	<li>Пользователь запускает bash-скрипт, передавая ему исходный код своей программы-решения (выбор поддерживаемых языков неважен) и путь к директории задачи. bash-скрипт проходит по всем парам &lt;тест, ответ на тест&gt; и запускает решение (предварительно скомпилированное), подавая ему в stdin тест и сравнивая вывод в stdout с ответом на тест.
+	<ul>
+		<li>Если программа не скомпилировалась, пользователь должен получить вердикт "Compilation error"</li>
+		<li>Если программа использует больше X памяти, она должна прерваться, и пользователь должен получить вердикт "Memory limit exceeded".</li>
+		<li>Если программа использует больше Y времени, она должна быть прерванное, и пользователь должен получить вердикт "Time limit exceeded"</li>
+		<li>Если программа вернула не <code>0</code>, пользователь должен получить вердикт "Runtime error"</li>
+		<li>Если вывод программы не совпал с ответом на тест, пользователь должен получить вердикт "Wrong answer"</li>
+		<li>В противном случае, пользовать должен получить вердикт "Accepted"</li>
+	</ul>
+	</li>
+</ul>
+
+<p>По желанию, можете изучить, что такое checkers (чекеры) и добавить их поддержку. Но это почти не усложнит логику.</p>
+<h3 id="4.2">4.2. Системные вызовы</h3>
+<h3 id="4.2.1">4.2.1</h2><p>Возможности наших программ сильно ограничены. Многие вещи, которые наши программы в прошлом делали, например, считывали ввод или создавали файлы, на самом деле они выполняли не самостоятельно. Программы могут лишь делать что-либо в своих сегментах (если у них есть на это права) и выполнять <em>системные вызовы</em>.</p>
+
+<p>Во время существования программы её оперативная память сильно изолирована. Программа не может получить доступ к памяти других программ. Эта изоляция достигается за счет механизма <em>paging</em>-а. Каждый процесс имеет свою <em>page directory</em>, и, когда ОС переключает процесс, она также переключает и page directory. Подробнее об этом мы узнаем позже.</p>
+
+<p>Системные вызовы — это примерно то же самое, что и функции. Их реализует ОС. Именно с помощью них мы и делаем такие действия, как взаимодействие с stream-ами, файлами, процессами. Самостоятельно вызвать системные вызовы из кода на C мы не можем — на нём просто нет соответствующих конструкций. Мы сможем самостоятельно вызывать их из кода на Assembly, но позже. Пока мы будем пользоваться функциями-обёртками.</p>
+
+<p>Здесь указан список системных вызовов в ОС Linux на разных архитектурах. Набор системных вызовов во всех случаях почти одинаковый, меняется лишь порядок. <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md</a></p>
+
+<p>Обратите внимание, что все ссылки в этой таблице ведут на документацию функций-обёрток в Linux-е. Многие из них вы скорее всего уже видели.</p>
+
+<p>Важно понять, что механизм системных вызовов предоставляет архитектура (причём, все распространённые на данный момент архитектуры), но то, какие будут системные вызовы и как они будут реализованы, определяет ОС. Сравните системные вызовы в Linux с системными вызовами в Windows: <a href="https://j00ru.vexillium.org/syscalls/nt/64/" rel="noopener noreferrer nofollow">https://j00ru.vexillium.org/syscalls/nt/64/</a></p>
+
+<p>Начнём с простого системного вызова (СВ) <code>fork</code>. Данный СВ:</p>
+
+<ul>
+	<li>не принимает никаких аргументов,</li>
+	<li>создаёт новый процесс, полностью идентичный  родительскому,</li>
+	<li>возвращает родителю pid ребёнка, а ребёнку <code>0</code>.</li>
+</ul>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int x = fork();
+    printf("%d\n", x);
+}</code></pre>
+
+<p>В моём случае вывод:</p>
+
+<pre><code class="language-no-highlight">19025
+0</code></pre>
+
+<p>Ребёнок наследует stream-ы, и поэтому выводит в тот же терминал, что и родитель. Порядок вывода случайный. Попробуйте позапускать эту программу многократно.</p>
+
+<p>Рассмотрим пример сложнее.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int t = 2, *v = (int*)malloc(sizeof(int));
+    *v = 2;
+    int x = fork();
+    t++;
+    (*v)++;
+    printf("%d %d %d\n", x, t, *v);
+}</code></pre>
+
+<p>В моём случае вывод:</p>
+
+<pre><code class="language-no-highlight">20561 3 3
+0 3 3</code></pre>
+
+<p>Обратите внимание, что и переменная на стеке, и переменная на куче, в обоих процессах независимы. (Если бы это было не так, процесс, выполнивший вывод вторым, вывел бы <code>4</code>.) Это показывает, что и стек, и куча, копируются в новый процесс. Также это показывает, что кучи не являются общими для всех процессов. (О том, как работают кучи, и что делает <code>malloc</code>, мы узнаем позже. Обратите внимание, что системного вызова <code>malloc</code> или подобного нет.)</p><h3 id="4.2.2">4.2.2</h2><p>Данная программа принимает вторым аргументом целое число и выводит некоторое количество чисел. Выведете количество выведенных чисел, как функцию от значения аргумента.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(int argc, char **argv) {
+    int n = atoi(argv[1]);
+    int i;
+    while (n &gt; 0) {
+        printf("%d\n", n);
+        fflush(stdout);
+        if (fork() == 0) {
+            n -= 1;
+        }
+        else if(fork() == 0) {
+            n -= 2;
+        }
+        else {
+            break;
+        }
+    }
+
+    return 0;
+}</code></pre>
+
+<p>Функция <code>fflush</code> необходима, если вы будете выводить в файл. Функция <code>printf</code> выполняет буферизацию (то есть, копит текст, и только затем выполняет вывод), поэтому необходимо потребовать её выполнить вывод сейчас с помощью функции <code>fflush</code>.</p><h3 id="4.2.3">4.2.3</h2><p>СВ fork создаёт полностью идентичный процесс. Однако гараздо чаще мы хотим запускать новый процесс другой программы. С помощью системного вызова <code>execve</code> мы можем "загрузить" в процесс другую программу. Изучите аргументы этой функции в документации: <a href="https://man7.org/linux/man-pages/man2/execve.2.html" rel="noopener noreferrer nofollow">https://man7.org/linux/man-pages/man2/execve.2.html</a> . Нам необходимо передать путь к исполняемому файлу, переменные запуска и переменные среды. Пока не будем сильно задумываться об этом и рассмотрим такой пример.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char *argv[] = {"/usr/bin/pwd", NULL};
+    char *envp[] = {NULL};
+    execve("/usr/bin/pwd", argv, envp);
+    printf("Check\n");
+    return 0;
+}</code></pre>
+
+<p>В моём случае вывод:</p>
+
+<pre><code class="language-no-highlight">/home/igor/test</code></pre>
+
+<p>В результате выполнения функции <code>execve</code> выполнение нашей программы прервалось, и вместо этого начала выполняться программа <code>pwd</code>. Проверьте, что если в первый аргумент ввести <code>pwd</code>, то функция не найдет программу и вернёт ошибку.</p>
+
+<p>Обратите внимание, что мы передаём функции в качестве первого аргумента путь к ней. Мы здесь можем нарушить правило о том, что первым аргументом должен быть пусть к программе. На pwd это не влияет, но, например, программа <code>rustc</code> выводит такое:</p>
+
+<pre><code class="language-no-highlight">error: unknown proxy name: 'xxx'; valid proxy names are 'rustc', 'rustdoc', 'cargo', 'rust-lldb', 'rust-gdb', 'rust-gdbgui', 'rls', 'cargo-clippy', 'clippy-driver', 'cargo-miri', 'rust-analyzer', 'rustfmt', 'cargo-fmt'</code></pre>
+
+<p>Напишем вспомогательную программу, которая просто будет выводить аргументы и переменные среды.</p>
+
+<p><code>test.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv, char **envp) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    printf("________________\n");
+    for (i = 0; envp[i] != NULL; i++) {
+        printf("%s\n", envp[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char *argv[] = {"xxx", "yyy", NULL};
+    char *envp[] = {"A=a", "B=b", "C=c", NULL};
+    execve("./test", argv, envp);
+    printf("Check\n");
+    return 0;
+}</code></pre>
+
+<p>Вывод:</p>
+
+<pre><code class="language-no-highlight">xxx
+yyy
+________________
+A=a
+B=b
+C=c</code></pre>
+
+<p>Запущенная программа не получила переменные среды своего родителя. Нам необходимо передавать их самостоятельно. Для удобства существуют дополнительные функции-обёртки для execve. Здесь можно посмотреть их: <a href="https://www.opennet.ru/docs/RUS/linux_parallel/node8.html" rel="noopener noreferrer nofollow">https://www.opennet.ru/docs/RUS/linux_parallel/node8.html .</a> Например, чтобы передать переменные среды, можно воспользоваться <code>execvp</code>.</p>
+
+<p>Наконец, если мы хотим начать новый процесс, но при этом продолжить выполнение старого, нам необходимо скомбинировать execve с fork-ом. Напомню, что ребёнку fork возвращает ноль, а родителю pid ребёнка, который больше нуля.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int pid = fork();
+    if (pid == 0) {
+        char *argv[] = {"/usr/bin/pwd", NULL};
+        char *envp[] = {NULL};
+        execve("/usr/bin/pwd", argv, envp);
+    }
+    else {
+        printf("Check\n");
+    }
+    return 0;
+}</code></pre>
+
+<p>В таком случае будет присутствовать и вывод программы pwd, и строка <code>Check</code>.</p>
+
+<p>При завершении родительского процесса, дочерний продолжит выполняться. (При этом, в иерархии процессов будут интересные действия, но мы их обсуждать не будем.) Однако, вы можете остановить родительский процесс до завершения дочернего с помощью системного вызова <code>wait4</code>. Это довольно сложный СВ, так как он позволяет также прочитать состояние интересующего нас процесса в специальной структуре. Я же просто здесь покажу, как подождать завершения процесса по его pid.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main() {
+    int pid = fork();
+    if (pid == 0) {
+        char *argv[] = {"/usr/bin/sleep", "5", NULL};
+        char *envp[] = {NULL};
+        execve("/usr/bin/sleep", argv, envp);
+    }
+    else {
+        wait4(pid, NULL, 0, NULL);
+        printf("Check\n");
+    }
+    return 0;
+}</code></pre>
+
+<p>Строка <code>Check</code> будет выведена после завершения программы <code>sleep</code>.</p><h3 id="4.2.4">4.2.4</h2><p>Посмотрите на системные вызовы read и write: <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md </a>. В качестве первого аргумента они принимают некий файловый дескриптор <code>fd</code>, который является числом. В Linux работа с stream-ами реализована весьма красиво, любой stream, будь он stdin, файлом, pipe-ом, определяется единственным числом — файловым дескриптором. Посмотрим на номера файловых дескрипторов для stdin, stdout и stderr.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    printf("%d %d %d\n", STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>0 1 2</code></p>
+
+<p>Попробуем вывести текст с помощью функции write в файловый дескриптор <code>1</code>, то есть, stdout.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    write(1, "Abacaba\n", 8);
+    return 0;
+}</code></pre>
+
+<p>Вывод этой программы: <code>Abacaba</code></p>
+
+<p>Мы можем также считать данные с помощью функции read.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char buffer[1024];
+    int cnt = read(0, buffer, 1024);
+    printf("%.*s", cnt, buffer);
+    return 0;
+}</code></pre>
+
+<p>Обратите внимание, что функция read не добавляет нулевой символ после считанной строки. Поэтому нам необходимо считать длину считанной строки и попросить функции printf вывести ровно столько символов, а не до первого нуля.</p>
+
+<p>Вспомним, что ранее вы выводили текст в stderr с помощью функции fprintf, в которую мы передавали первым аргументом переменную <code>FILE *stderr</code>. Структура <code>FILE</code> является высокоуровневой абстракцией над файловыми дескрипторами, которая предоставляет дополнительную информацию. <code>FILE</code> можно получить по дескриптору с помощью функции <code>fdopen</code>. Я не буду здесь рассказывать про эти функции, так как после изучения дескрипторов читатель без проблем сможет изучить это самостоятельно. (Думаю, на этом этапе вы уже согласитесь, что C является высокоуровневым языком.)</p>
+
+<p>Как вывести текст в файл с помощью системных вызовов? Очень просто. Нам понадобится (внезапно) системный вызов <code>open</code>. Я особо не буду рассказывать о его аргументов. Отмечу лишь, что нам необходимо наличие флага <code>O_WRONLY</code> или <code>O_RDWR</code> во втором аргументе.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+int main() {
+    int fd = open("file", O_WRONLY, 0);
+    printf("%d\n", fd);
+    write(fd, "Abacaba\n", 8);
+    return 0;
+}</code></pre>
+
+<p>Чтобы вызов функции open завершился успешно, файл "file" должен существовать. Вы можете также сами посмотреть в документации, что нужно передать в функцию, чтобы она создала файл сама.</p>
+
+<p>В моём случае вывод этой программы: <code>3</code></p>
+
+<p>Можно перечислить несколько флагов с помощью оператора <code>|</code>. Например, <code>O_WRONLY | O_APPEND</code>. Часто передачу флагов делают так. Чтобы такое работало, необходимо, чтобы у всех флагов множество битов не пересекалось.</p>
+
+<p>Обратите внимание на номер дескриптора: <code>3</code>. Это означает, что, в отличии от, например, pid, номера дескрипторов не являются глобальными.</p><h3 id="4.2.5">4.2.5</h2><p>Изучите, с помощью каких системных вызовов можно манипулировать файлами (open может только создавать файлы).</p>
+
+<p><a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md</a></p>
+
+<p>Реализуйте любую программу, использующую эти системные вызовы.</p><h3 id="4.2.6">4.2.6</h2><p>С помощью системного вызова <code>pipe</code> мы можем получить сразу два таких дескриптора, что при записи данных в один из них, мы сможем считать эти данные из другого. Эта связка дескрипторов называется pipe (канал). Функция pipe принимает указатель на массив двух чисел и записывает в первый элемент принимающего, а во второй отправителя.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int fds[2];
+    pipe(fds);
+    
+    write(fds[1], "Hello\n", 6);
+
+    char buffer[1024];
+    read(fds[0], buffer, 1024);
+    printf("%s", buffer);
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">3 4
+Hello</code></pre>
+
+<p>Использование двух полученных дескрипторов никак не отличается от использования stdin/stdout. Нам просто необходимо подставлять нужный дескриптор. Обратите внимание, что если мы поменяем местами write и read, то на вызове write наша программа зависнет в ожидании ввода, который никогда не получит.</p>
+
+<p>Напомню, что все стандартные функции вывода выполняют вывод в stdout, то есть конкретный файловый дескриптор. Пусть мы хотим, чтобы эти функции выполняли вывод в наш pipe, а не в терминал. (Который, кстати, скорее всего тоже связан с нашей программой с помощью своего pipe-а.) С помощью системного вызова <code>dup2</code> мы можем закрыть stdout stream (не путайте с stdout-дескриптором, то есть, с числом <code>1</code>) и связать его дескриптор с отправляющей стороной pipe-а. В результате и при выводе в stdout, и при выводе в <code>fds[1]</code> будет выполнен вывод в pipe.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+int main() {
+    int fds[2];
+    pipe(fds);
+
+    dup2(fds[1], STDOUT_FILENO);
+    write(STDOUT_FILENO, "Hello\n", 6);
+    // write(fds[1], "Hello\n", 6);
+    // printf("Hello\n");
+    // fflush(stdout);
+
+    char buffer[1024];
+    int cnt = read(fds[0], buffer, 1024);
+    int fd = open("file", O_WRONLY, 0);
+    write(fd, buffer, cnt);
+
+    return 0;
+}</code></pre>
+
+<p>После вызова функции <code>dup2</code> и при выводе в <code>1</code>, и при выводе в <code>fds[1]</code>, будет выполнен вывод в pipe, который мы позже сможем считать через <code>fds[0]</code>. По желанию можно закрыть дескриптор <code>fds[1]</code> с помощью функции <code>close</code>: <code>close(fds[1])</code>. В таком случае вывод в <code>fds[1]</code> станет вызывать ошибку.</p>
+
+<p>Так как теперь дескриптор <code>1</code> связан с pipe-ом, функция printf будет выводить в него. Только так как она выполняет буферизацию (то есть, копит текст, и только затем выполняет СВ write), вам необходимо будет потребовать её выполнить write сейчас с помощью функции <code>fflush</code>.</p>
+
+<p>Так как stdout больше не связан с терминалом (и снова его связать простым способом невозможно), мы посмотрим на результат, выполним вывод в файл.</p>
+
+<p>До сих пор мы с помощью pipe-а отправляли данные из процесса в него же. Но такое применение довольно бессмысленное. Обычно мы хотим с помощью pipe-ов передавать данные между процессами. Когда мы выполняем fork, оба процесса наследуют общий pipe, у которого теперь два дескриптора отправителя и два принимающих дескриптора. Имейте ввиду, что когда у вас два процесса считывают данные из одного pipe, то сложность системы сильно увеличивается. Это называется состоянием гонки (race condition).</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+int main() {
+    int fds[2];
+    pipe(fds);
+
+    if (fork() != 0) {
+        char buffer[1024];
+        write(fds[1], "Cat\n", 4);
+        read(fds[0], buffer, 1024);
+    }
+    else {
+        char buffer[1024];
+        read(fds[0], buffer, 1024);
+        write(fds[1], "Dog\n", 4);
+    }
+
+    return 0;
+}</code></pre>
+
+<p>Если бы отправители и/или принимающие были связаны с разными pipe-ами, какой-то из процессов бы завис в ожидании ввода. Однако, этого не происходит.</p>
+
+<p>При некоторых конфигурациях кода мне необходимо "потыркать" stream-ы, чтобы они немедленно передали данные. Иногда они могут это не сделать сразу, из-за чего программа зависнет. Например, у меня это происходит, если заменить <code>fork() != 0</code> на <code>fork() == 0</code>.</p>
+
+<p>В процессах детях также можно переоткрыть pipe-ы в дескрипторы стандартных потоков с помощью dup2. Вам может это понадобиться, если вы хотите запустить в дочернем процессе другую программу с помощью execve и общаться с ней через её стандартные потоки.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+int main() {
+    int fds[2];
+    pipe(fds);
+
+    if (fork() != 0) {
+        char buffer[1024];
+        write(fds[1], "Cat\n", 4);
+        write(fds[1], "Dog\n", 4);
+        write(fds[1], "Crab\n", 5);
+    }
+    else {
+        dup2(fds[0], STDIN_FILENO);
+        char *argv[] = {"/usr/bin/grep", "a", NULL};
+        char *envp[] = {NULL};
+        execve("/usr/bin/grep", argv, envp);
+    }
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">Cat
+Crab</code></pre>
+
+<p>Здесь мы передаём дочернему процессу, выполняющему программу grep, данные в стандартный ввод через наш pipe.</p>
+
+<p>Когда вы будете сами пробовать работать с pipe-ами, у вас часто будут проблемы с недосброшенными буферами, из-за чего ваши программы будут зависать. Я не знаю, как нормально решать эту проблему. Здесь я не использовал СВ <code>close</code>, который закрывает дескриптор, но иногда он может быть необходим.</p><h3 id="4.2.7">4.2.7</h2><p>Вы, наверное, слышали про thread (поток), который является альтернативой создания нового процесса. Чем thread отличается от процесса? Тем, насколько дочерний процесс/поток отделён от родительского. Мы видели, что новый процесс имеет свой стек (что логично, ведь блуждание по функциям меняет стек) и свою кучу. Новый поток же своей кучи не имеет. После создания нового потока, основную программу мы будем называть основным потоком.</p>
+
+<p>Посмотрите на список СВ: <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md </a>— в нём нет СВ, имеющих какое-то отношение к потоку. Функции создания потоков в libc используют СВ <code>clone</code>, который выполняет то же самое, что и fork, но имеет возможность настройки нового процесса.</p>
+
+<p>Я не буду объяснять большинство функций здесь. Информация о потоках здесь лишь для ознакомления.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+void *thread_main() {
+    printf("Thread begin\n");
+    sleep(2);
+    printf("Thread end\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thr;
+    pthread_create(&amp;thr, NULL, thread_main, NULL);
+    sleep(1);
+    printf("Main end\n");
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">Thread begin
+Main end</code></pre>
+
+<p>Мы создаём поток с помощью функции <code>pthread_create</code>. В первый аргумент функция записывает дескриптор потока, по которому мы будем этот поток упоминать. Третий аргумент — это функция, которая будет вызвана при старте потока (это сделано для удобства, так как обычно в потоках мы не запускаем другие программы с помощью execve).</p>
+
+<p>Обратите внимание, что завершение основного потока прервало дочерний поток, и он не вывел строку <code>Thread end</code>. (Дочерние процессы продолжают выполнение и вывод.)</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+void *thread_main() {
+    printf("Thread begin\n");
+    sleep(2);
+    printf("Thread end\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t thr;
+    pthread_create(&amp;thr, NULL, thread_main, NULL);
+    sleep(1);
+    pthread_join(thr, NULL);
+    printf("Main end\n");
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">Thread begin
+Thread end
+Main end</code></pre>
+
+<p>Функция <code>pthread_join</code> останавливает текущий поток до завершения потока, дескриптор которого мы передали в первый аргумент. Это аналог функции wait4 для процессов.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;pthread.h&gt;
+
+int *x;
+
+void *thread_main() {
+    (*x)++;
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 2;
+    pthread_t thr;
+    pthread_create(&amp;thr, NULL, thread_main, NULL);
+    pthread_join(thr, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">3</code></pre>
+
+<p>В данном примере мы видим, что куча у обоих потоков общая.</p><h3 id="4.2.8">4.2.8</h2><p>Напишите любую программу, в которой несколько потоков объединены в цикл из pipe-ов и по кругу передают друг-другу сообщение.</p><h3 id="4.2.9">4.2.9</h2><p>Посмотрим на такую программу:</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+int *x;
+
+void *thread_main() {
+    if (*x &gt; 0) {
+        sleep(1);
+        (*x)--;
+    }
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 1;
+    pthread_t thr1, thr2;
+    pthread_create(&amp;thr1, NULL, thread_main, NULL);
+    pthread_create(&amp;thr2, NULL, thread_main, NULL);
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<p>Программа немного искусственная, но она покажет нам проблему. Мы создаём два потока. Каждый из них уменьшает счётчик на единицу, если он больше нуля. Однако вывод прогаммы:</p>
+
+<pre><code class="language-no-highlight">-1</code></pre>
+
+<p>Чтобы лучше понять, что произошло, я покажу порядок, в котором исполнялись statement-ы потоков.</p>
+
+<pre><code>Thread 1: if (*x &gt; 0)
+Thread 1: sleep(1);
+Thread 2: if (*x &gt; 0)
+Thread 2: sleep(1);
+Thread x: (*x)--;
+Thread x: return NULL;
+Thread y: (*x)--;
+Thread y: return NULL;</code></pre>
+
+<p>Здесь из-за блокировки функции sleep, после которой процессор переходит к другому потоку, сначала выполнились две проверки, а только потом два уменьшения. Это называется состоянием гонки (race condition), и исправить проблему можно с помощью использования семафора (semaphore).</p>
+
+<p>Мы воспользуемся posix semaphore-ами, функции которых имеют вид <code>sem_xxx</code>. Существует много других реализаций, но я не вижу в них смысла. Как и в случае с thread-ами, эта реализация семафоров основана на не очень дружелюбных системных вызовах <code>semxxx</code> (можете найти их в таблице СВ). Я так же покажу лишь пример использования этого.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+
+int *x;
+sem_t sem;
+
+void *thread_main() {
+    sem_wait(&amp;sem);
+    if (*x &gt; 0) {
+        sleep(1);
+        (*x)--;
+    }
+    sem_post(&amp;sem);
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 1;
+    sem_init(&amp;sem, 0, 1);
+    pthread_t thr1, thr2;
+    pthread_create(&amp;thr1, NULL, thread_main, NULL);
+    pthread_create(&amp;thr2, NULL, thread_main, NULL);
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<p>Функция <code>sem_init</code> записывает дескриптор семафора в первый аргумент, а третий аргумент — это начальное значение семафора. Пусть сначала оно будет равно единице.</p>
+
+<p>Функция <code>sem_wait</code> уменьшает значение семафора на один, но если оно сейчас равно нулю, блокирует поток до момента, когда оно станет больше нуля.</p>
+
+<p>Функция <code>sem_post</code> увеличивает значение семафора на один.</p>
+
+<p>Нам необходимо обрамить блок, использующий общую переменную в sem_wait и sem_post. Теперь порядок выполнения statement-ов такой:</p>
+
+<pre><code class="language-no-highlight">Thread 1: sem_wait(&amp;sem);
+Thread 1: if (*x &gt; 0)
+Thread 1: sleep(1);
+Thread 2: sem_wait(&amp;sem);
+Thread 1: (*x)--;
+Thread 1: sem_post(&amp;sem);
+Thread 1: return NULL;
+Thread 2: if (*x &gt; 0)
+Thread 2: sem_post(&amp;sem);
+Thread 2: return NULL;</code></pre>
+
+<p>Если мы заменим третий аргумент функции sem_init на <code>2</code>, то это можно понимать, как редактирование переменной одновременно не более чем двумя потоками.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+
+int *x;
+sem_t sem;
+
+void *thread_main() {
+    sem_wait(&amp;sem);
+    if (*x &gt; 0) {
+        sleep(1);
+        (*x)--;
+    }
+    sem_post(&amp;sem);
+    return NULL;
+}
+
+int main() {
+    x = (int*)malloc(sizeof(int));
+    *x = 1;
+    sem_init(&amp;sem, 0, 2);
+    pthread_t thr1, thr2, thr3;
+    pthread_create(&amp;thr1, NULL, thread_main, NULL);
+    pthread_create(&amp;thr2, NULL, thread_main, NULL);
+    pthread_create(&amp;thr3, NULL, thread_main, NULL);
+    pthread_join(thr1, NULL);
+    pthread_join(thr2, NULL);
+    pthread_join(thr3, NULL);
+    printf("%d\n", *x);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">-1</code></pre><h3 id="4.2.10">4.2.10</h2><p>Рассмотрим программу.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main() {
+    int *a = 0;
+    printf("%d\n", *a);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">Segmentation fault (core dumped)</code></pre>
+
+<p>Когда наша программа нарушает правила доступа, ей поступает сигнал <code>SIGSEGV</code>. По умолчанию при получении этого сигнала программа завершается. Мы можем сами указать, что следует сделать при получении этого сигнала. Функция <code>signal</code> принимает номер сигнала и функцию, которая будет вызвана при получении этого сигнала. Попробуем перехватит SIGSEGV.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+
+void handler(int s) {
+    printf("%d\n", s);
+}
+
+int main() {
+    signal(SIGSEGV, handler);
+    int *a = 0;
+    printf("%d\n", *a);
+
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">11
+11
+11
+...</code></pre>
+
+<p>Число <code>11</code> — это номер SIGSEGV-а. Мы не завершаем программу в нашем обработчике. После возвращения из функции handler процессор снова выполняет инструкцию, которая привела к SIGSEGV. На уровне ОС есть способы "передумать" и не выполнять инструкцию, которая приводит к ошибке. Однако у нас, как у прикладной программы, таких способов нет. Поэтому обработчик SIGSEGV-а должен завершать программу.</p>
+
+<p>А вот и квест: программа в таком состоянии не будет слушать сигналов. Как её завершить?</p>
+
+<p>Попробуем поиграться с разными сигналами.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+
+void handler(int s) {
+    printf("%d\n", s);
+}
+
+int main() {
+    signal(SIGSEGV, handler);
+    signal(SIGINT,  handler);
+    signal(SIGQUIT, handler);
+    signal(SIGSTOP, handler);
+    signal(SIGCONT, handler);
+    signal(SIGTERM, handler);
+    signal(SIGKILL, handler);
+    signal(SIGPIPE, handler);
+    signal(SIGCHLD, handler);
+    
+    while(1);
+
+    return 0;
+}</code></pre>
+
+<p>Пойдем по порядку.</p>
+
+<p>Сигнал SIGINT вызывается при нажатии комбинации <code>Ctrl + C</code> в терминале и по умолчанию прерывает процесс. Нажмите эту комбинацию, и увидете число <code>2</code>.</p>
+
+<p>Сигнал SIGQUIT вызывается при нажатии комбинации <code>Ctrl + \</code> в терминале и по умолчанию прерывает процесс. Нажмите эту комбинацию, и увидете число <code>3</code>.</p>
+
+<p>Сигнал SIGSTOP вызывается при нажатии комбинации <code>Ctrl + Z</code> в терминале, то есть, при переводе процесса на фон. Нажмите эту комбинацию, однако число <code>19</code>(номер этого сигнала) вы не увидете. Дело в том, что этот сигнал особенный — его нельзя перехватить.</p>
+
+<p>Сигнал SIGCONT вызывается при возвращении фонового процесса командой <code>fg</code>. Введите эту команду, и увидете число <code>18</code>.</p>
+
+<p>Сигнал SIGTERM вызывается при вызове программы kill с pid нашей программы. Выполните это и увидете число <code>15</code>.</p>
+
+<p>Сигнал SIGKILL вызывается при вызове программы kill с дополнительным аргументом <code>-9</code>. При выполнении этого программа завершится и не выведет число, так как этот сигнал нельзя перехватить.</p>
+
+<p>Для генерации следующих сигналов потребуется внести изменения в программу.</p>
+
+<p>Сигнал SIGPIPE вызывается при записи в закрытый stream.</p>
+
+<pre><code class="language-cpp">...
+    int fds[2];
+    pipe(fds);
+    close(fds[0]);
+    write(fds[1], "Hello\n", 6);
+...</code></pre>
+
+<p> Сигнал SIGCHLD вызывается при завершении дочернего процесса.</p>
+
+<pre><code class="language-cpp">...
+    if (fork() == 0) {
+        return 0;
+    }
+...</code></pre>
+
+<p>Здесь возникнет интересная ситуация. Посмотрите на таблицу процессов любым способом (например, через <code>ps</code> или <code>top</code>). Вы увидете, что дочерний процесс ещё есть, и, более того, он не будет пропадать при сигнале SIGKILL. Дочерний процесс находиться в состоянии зомби. В этом состоянии процесс уже завершен, но ОС хранит некоторую метаинформацию, которая может быть полезна родительскому процессу. ОС уничтожит эти данные после того, как родительский процесс вызовет СВ wait. Обработчик по умолчанию делает этот вызов, но наш — нет.</p>
+
+<pre><code class="language-cpp">...
+void handler(int s) {
+    printf("%d\n", s);
+    wait(NULL);
+}
+...</code></pre><h3 id="4.2.11">4.2.11</h2><h3>Проект: Shell</h3>
+
+<p>Напишите программу, аналогичную <code>sh</code>, но без скриптов (так как их написание довольно сложно). Список, на который можно опираться:</p>
+
+<ul>
+	<li>Принимать команды, которые состоят из нескольких слов и отделены друг от друга переводами строк.</li>
+	<li>Первое слово в команде определяет путь к исполняемому файлу. Остальные слова — аргументы.</li>
+	<li>Может быть команда <code>cd</code>, которая меняет текущую директорию. Для её реализации необходимо воспользоваться системным вызовом <code>chdir</code>.</li>
+	<li>В команде могут быть операторы <code>&lt;</code>, <code>&gt;</code> после которых идут пути к файлам. Для реализации этих операторов необходимы pipe-ы.</li>
+	<li>Команды могут быть разделены символов <code>|</code>. Тогда нужно запускать программы сразу во всех таких командах и связывать их pipe-ами.</li>
+	<li>В команде может быть оператор <code>&amp;</code>. Также могут быть команды <code>fd</code> и <code>bg</code>. Это также реализуется манипуляциями с pipe-ами.</li>
+	<li>При получении сигналов, которые могут быть предназначены текущему дочернему процессу, передавать эти сигналы ему. Для реализации этого необходимо воспользоваться системным вызовом <code>kill</code>.</li>
+</ul>
+<h3 id="4.3">4.3. Файловая система</h3>
+<h3 id="4.3.1">4.3.1</h2><p><strong>Внимание! В данной главе мы будем работать с потенциально разрушительными командами. Внимательно читайте команды перед тем, как выполнять их.</strong></p>
+
+<p>Создадим для удобства папку <code>mnt</code> (это не более, чем обычная папка).</p>
+
+<pre><code class="language-no-highlight">mkdir mnt</code></pre>
+
+<p>Посмотрите содержимое директории <code>/dev</code>. Среди файлов вы увидете файлы с названиями <code>sda</code>, <code>sda1</code>, <code>sda2</code>, и т. д. <code>sda</code> — это ваш загрузочный диск, на котором располагается ОС. Диск разбит на несколько partitions (разделов), которые являются обычными, но независимыми друг от друга, директориями. Каждый из файлов <code>sdaX</code> — это соответствующий partition.</p>
+
+<p>В Unix есть возможность "подвесить" partition к любой пустой директории. В результате этого действия вы сможете видеть директорию partition-а при в входе в эту пустую директорию. Это дествие называется mount (монтирование) и выполняется программой <code>mount</code>.</p>
+
+<p>Монтрирование производится централизованно, и список всех можно увидеть, выполнив <code>mount -l</code>.</p>
+
+<pre><code class="language-no-highlight">...
+/dev/sda1 on /boot type ext4 (rw,relatime)
+...</code></pre>
+
+<p>Посмотрите на мой вывод. Здесь указано, что первый partition моего системного диска уже подвешен к директории /boot. Этот partition отвечает за первичную загрузку нашей ОС.</p>
+
+<p>Давайте примонтируем этот partition к нашей директории <code>mnt</code> с помощью команды <code>sudo mount /dev/sda1 mnt</code>.</p>
+
+<p>Теперь в выводе программы <code>mount -l</code> я получаю такую строку в конце:</p>
+
+<pre><code class="language-no-highlight">...
+/dev/sda1 on /home/igor/test/mnt type ext4 (rw,relatime)
+</code></pre>
+
+<p>Мы можем зайти в директорию и увидеть её содержимое.</p>
+
+<pre><code class="language-no-highlight">$ ls mnt
+config-6.5.0-44-generic      initrd.img-6.8.0-40-generic  System.map-6.5.0-44-generic
+config-6.8.0-40-generic      initrd.img.old               System.map-6.8.0-40-generic
+efi                          lost+found                   vmlinuz
+grub                         memtest86+.bin               vmlinuz-6.5.0-44-generic
+initrd.img                   memtest86+.elf               vmlinuz-6.8.0-40-generic
+initrd.img-6.5.0-44-generic  memtest86+_multiboot.bin     vmlinuz.old</code></pre>
+
+<p>Директорию можно редактировать, что является отличным способом сломать свою ОС.</p>
+
+<p>Чтобы размонтировать директорию, необходимо воспользоваться программой <code>umount</code>: <code>sudo umount mnt</code></p>
+
+<p>Давайте теперь примонтируем <code>/dev/sda3</code>. В моём случае в этом partition-е хранится основная файловая система вместе с директорией <code>/home</code>. В вашем случае, это может быть другой partition, или даже директория /home может находится в отдельном от основной файловой системы partition-е. Найдите partition с /home самостоятельно и работайте с ним.</p>
+
+<p>При такой файловой системе вы можете вновь прийти к директории mnt, однако на этот раз она будет пуста.</p>
+
+<pre><code class="language-no-highlight">$ ls mnt/home/igor/test/mnt</code></pre><h3 id="4.3.2">4.3.2</h2><p>В Linux есть возможность создать файловую систему прямо на обычном файле, а затем этот файл примонтировать и пользоваться им. Для этого используются loop devices.</p>
+
+<p>Посмотрите содержимое директории <code>/dev</code>: во многих дистрибутивах у вас там будут использоваться loop devices (на Ubuntu их особенно много).</p>
+
+<p>Создадим файл, состоящий только из нулей.</p>
+
+<pre><code class="language-no-highlight">dd if=/dev/zero of=dsk count=1024</code></pre>
+
+<p>Программа <code>dd</code> берет префикс файла <code>if</code> размера <code>bs * count</code> и пишет его в файл <code>of</code>. Файл <code>/dev/zero</code> это особенный файл, который состоит только из нулей, а его размер бесконечен.</p>
+
+<p>Примонтировать сам файл нельзя, зато можно примонтировать loop device. Введите <code>losetup -l</code>, чтобы увидеть список loop devices, которые сейчас у вас присутствуют. В зависимости от дистрибутива, их может быть разное количество. Все их названия имеют форму <code>/dev/loopX</code>. Введите <code>losetup -f</code>, чтобы определить свободное название.</p>
+
+<p>Я предположу, что название <code>/dev/loop100</code> у вас свободно. Создадим loop device:</p>
+
+<pre><code class="language-no-highlight">sudo losetup /dev/loop100 dsk</code></pre>
+
+<p>Введите теперь <code>losetup -l</code>: вы увидете ваш loop device в списке.</p>
+
+<pre><code class="language-no-highlight">/dev/loop100         0      0         0  0 /home/igor/test/dsk                                       0     512</code></pre>
+
+<p>Попробуем его примонтировать.</p>
+
+<pre><code class="language-no-highlight">$ sudo mount /dev/loop100 mnt
+mount: /home/igor/test/mnt: wrong fs type, bad option, bad superblock on /dev/loop100, missing codepage or helper program, or other error.</code></pre>
+
+<p>Монтировать можно только корректные файловые системы, а у нас просто последовательность нулей. Создадим файловую систему <code>ext4</code> (об этом чуть позже).</p>
+
+<pre><code class="language-no-highlight">$ mkfs.ext4 dsk
+mke2fs 1.46.5 (30-Dec-2021)
+
+Filesystem too small for a journal
+Discarding device blocks: done                            
+Creating filesystem with 128 4k blocks and 64 inodes
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Writing superblocks and filesystem accounting information: done
+
+$ sudo mkfs.ext4 /dev/loop100
+mke2fs 1.46.5 (30-Dec-2021)
+/dev/loop100 contains a ext4 file system
+	created on Wed Sep 11 13:38:27 2024
+Proceed anyway? (y,N)  
+</code></pre>
+
+<p>Обратите внимание: вы можете упомянуть как сам файл, так и loop device.</p>
+
+<p>Теперь мы можем выполнить монтирование.</p>
+
+<pre><code class="language-no-highlight">$ sudo mount /dev/loop100 mnt
+$ ls mnt
+lost+found
+</code></pre>
+
+<p>В этой файловой системе у вас изначально есть директория <code>lost+found</code>.</p>
+
+<p>Чтобы удалить loop device, необходимо выполнить <code>sudo losetup -d /dev/loop100</code> .</p><h3 id="4.3.3">4.3.3</h2><p>Разберемся, как установить на диске несколько partition-ов и примонтировать их.</p>
+
+<p>Есть несколько утилит для редактирования partition-ов диска. Мы воспользуемся утилитой <code>fdisk</code>. Введите <code>fdisk dsk</code>, чтобы начать редактирование.</p>
+
+<p>Ранее я говорил о том, что мы создали диск с единственным partition-ом. Это не совсем так, так как диск с partition-ами должен содержать специальную метаинформацию, которой у нас не было. Когда мы запустим fdisk, он нас предупредит о том, что наш диск является чистой ext4 файловой системой, которую он просто перезапишет.</p>
+
+<p>Интерфейс этой программы не совсем тривиальный. Внимательно читайте, что она выводит.</p>
+
+<p>Для начала, познакомимся с форматами таблиц partition-ов. Выведите help с помощью <code>m</code> и посмотрите на последний блок, в котором написаны форматы <code>GPT</code>, <code>SGI</code>, <code>DOS</code> и <code>Sun</code>. Мы поговорим о первом и третьем.</p>
+
+<pre><code class="language-no-highlight">...
+  Create a new label
+   g   create a new empty GPT partition table
+   G   create a new empty SGI (IRIX) partition table
+   o   create a new empty DOS partition table
+   s   create a new empty Sun partition table</code></pre>
+
+<p>Когда вы запускаете компьютер, на нём выполняется "некий" код, который делает некоторую подготовку, а затем начинает выполнять код, написанный где-то на диске. Этот "некий" код, который ответственнен за первичную подготовку, бывает двух типов: <code>BIOS</code> и <code>EFI</code>.</p>
+
+<p>BIOS действует очень просто: он загружает первый сектор диска и начинает его выполнять. Поэтому в первом секторе мы обязательно должны написать код, который поймет, где находится нужный нам partition, и загрузит его. (Один сектор — это, кстати, 512 байт. А вы сможете вместить такую логику в этот объем?)</p>
+
+<p>BIOS сейчас является устаревшим, и маловероятно, что на вашем компьютере используется он. Однако, вы можете запустить виртуальную машину с BIOS (почему-то, это фукнция по умолчанию в VirtualBox).</p>
+
+<p>EFI значительно умнее и его "некий" код изучает таблицу partition-ов и загружает нужный самостоятельно.</p>
+
+<p>Обратите внимание, что термин "таблица partition-ов" не имеет отношения к термину "файловая система". Вы можете иметь на диске partition-ы с разными файловыми системами.</p>
+
+<p>Итак, EFI использует формат GPT, а BIOS использует формат DOS (на самом деле, формат <code>MBR</code>, к которому относится DOS).</p>
+
+<p>Посмотрим на используемый сейчас формат с помощью <code>p</code>.</p>
+
+<pre><code class="language-no-highlight">Command (m for help): p
+Disk dsk: 512 KiB, 524288 bytes, 1024 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xaf3f4246</code></pre>
+
+<p>По умолчанию fdisk выбрал формат DOS. Давайте проверим, как он отформатирует наш диск. Введите <code>n</code> для создания нового partition-а и, пока что, прокликайте всё без изменения. Теперь введите <code>w</code>, чтобы выполнить форматирование.</p>
+
+<p>Посмотрим на первый сектор, то есть, первые 512 байт получившегося файла <code>dsk</code>.</p>
+
+<p>Посмотрите на таблицу из <a href="http://wiki.osdev.org/Partition_Table" rel="noopener noreferrer nofollow">http://wiki.osdev.org/Partition_Table</a> . Согласно таблице, информация о нашем первом partition-е должна находиться на байте <code>0x01BE</code>.</p>
+
+<table border="1" cellpadding="4" cellspacing="0" style="background: #f9f9f9; border: 1px #aaaaaa solid;">
+	<tbody>
+		<tr>
+			<th>Partition number</th>
+			<th>Offset</th>
+		</tr>
+		<tr>
+			<td>Partition 1</td>
+			<td>0x01BE (446)</td>
+		</tr>
+		<tr>
+			<td>Partition 2</td>
+			<td>0x01CE (462)</td>
+		</tr>
+		<tr>
+			<td>Partition 3</td>
+			<td>0x01DE (478)</td>
+		</tr>
+		<tr>
+			<td>Partition 4</td>
+			<td>0x01EE (494)</td>
+		</tr>
+	</tbody>
+</table>
+
+<p> Проверим это с помощью <code>hd</code>: <code>hd dsk</code>.</p>
+
+<pre><code class="language-no-highlight">00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+000001b0  00 00 00 00 00 00 00 00  e2 79 d9 ef 00 00 00 00  |.........y......|
+000001c0  02 00 83 01 04 15 01 00  00 00 ff 03 00 00 00 00  |................|
+000001d0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 55 aa  |..............U.|
+...</code></pre>
+
+<p>Мы действительно видим ненулевые биты на отрезке <code>0x1be - 0x1cd</code>. (Что написано на отрезке <code>0x1b8 - 0x1ba</code> можете изучить самостоятельно по той же ссылке.) Кроме того, мы здесь видим в конце первого сектора байты <code>0x55</code> и <code>0xaa</code>, которые обязательно должны быть в MBR.</p><h3 id="4.3.4">4.3.4</h2><p>Когда вы создаёте первый partition в DOS-диске, вы можете разместить его только начиная с 1-го сектора (везде нумерация идёт с нуля), так как первый сектор является хратит код и таблицу разделов MBR. Однако, когда вы создаёте первый partition в GPT-диске, вы можете разместить его только начиная с 34-сектора.</p>
+
+<ul>
+	<li>Что находится в первых 34-х секторах?</li>
+	<li>Зачем нужет первый сектор?</li>
+</ul>
+
+<p> Можете прочитать о GPT на OSDev Wiki.</p><h3 id="4.3.5">4.3.5</h2><p>Создадим диск с несколькими partition-ами с помощью fdisk. Прочитайте самостоятельно help в утилите и добейтесь похожей картины:</p>
+
+<pre><code class="language-no-highlight">Command (m for help): p
+Disk dsk: 512 KiB, 524288 bytes, 1024 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 4A705392-B1C6-E34B-B7B9-39BFA385DB58
+
+Device Start   End Sectors  Size Type
+dsk1      34   200     167 83,5K Linux filesystem
+dsk2     201   990     790  395K Linux filesystem</code></pre>
+
+<p>Формат диска не важен, так как мы планируем использовать loop devices, и они поддерживают большинство форматов.</p>
+
+<p>Выполните <code>losetup</code> с флагом <code>-P</code>: <code>sudo losetup -P /dev/loop100 dsk</code> . Вывод <code>losetup -l</code> ничего нового не покажет, но если вы выполните <code>ls /dev</code>, то увидете интересную картину.</p>
+
+<pre><code class="language-no-highlight">...
+loop100
+loop100p1
+loop100p2
+...</code></pre>
+
+<p>У нас появилось по одному дополнительному loop device на каждый partition. Мы можем в каждом из них выполнить форматирование. Для интереса выполним форматирование в разные файловые системы.</p>
+
+<pre><code class="language-no-highlight">$ sudo mkfs.fat /dev/loop100p1
+$ sudo mkfs.ext4 /dev/loop100p2</code></pre>
+
+<p>Теперь мы можем примонтировать их.</p>
+
+<pre><code class="language-no-highlight">$ mkdir mnt1 mnt2
+$ sudo mount /dev/loop100p1 mnt1
+$ sudo mount /dev/loop100p2 mnt2
+$ ls mnt1
+$ ls mnt2
+lost+found</code></pre>
+
+<p>Расскажу ещё немного о файловых системах. Есть три основных часто используемых файловых систем:</p>
+
+<ul>
+	<li>ext4 — сложная файловая система, часто используемая на Linux</li>
+	<li>NTFS — сложная файловая система, используемая на Windows</li>
+	<li>fat — простая файловая система, драйвер к которой можно написать самостоятельно</li>
+</ul><h3 id="4.3.6">4.3.6</h2><p>Выполните установку любого дистрибутива с ручной установкой (я рекомендую Arch) на виртуальную машину в VirtualBox. Нас интересует часть, связанная с разметкой диска. Попробуйте выполнить установку и на машину с BIOS, и на машину с EFI (меняется в настройках машины).</p><h3 id="4.3.7">4.3.7</h2><p>Предположим, что мы хотим запустить процесс так, чтобы он видел лишь некое поддерево файловой системы. Есть два способа достичь этого: <code>chroot</code> и системный вызов <code>clone</code> с флагом <code>CLONE_NEWNS</code>. Второй способ использует namespaces, которые были введены в Linux не очень давно для контейнеризации (изоляции процессов), и именно его сейчас используют утилиты <code>LXC</code> и <code>Docker</code>. Namespaces способны изолировать не только файловую систему и значительно сложнее chroot-а, поэтому будем здесь работать с ним.</p>
+
+<p>При использовании любого способа, так как программа не будет видеть ничего вне выбранного поддерева, необходимо будет иметь как минимум, необходимые shared objects, а, желательно, почти всю ОС в этом поддереве.</p>
+
+<p>Попробуем запустить pwd в изолированной директории. Создайте директорию <code>dir</code> и скопируйте туда pwd.</p>
+
+<pre><code class="language-no-highlight">$ mkdir dir
+$ cp /usr/bin/pwd dir</code></pre>
+
+<p>Попробуем запустить его с помощью программы chroot.</p>
+
+<pre><code class="language-no-highlight">$ sudo chroot dir /pwd
+chroot: failed to run command ‘/pwd’: No such file or directory</code></pre>
+
+<p>Первым аргументом мы вводим поддерево, которое будет видеть процесс, а вторым — путь к исполняемому файлу относительно корня этого поддерева.</p>
+
+<p>Ошибка очень неочевидная и она говорит о том, что загрузчик процесса не смог найти необходимые shared objects. (Как это понять, история умалчивает.) Мы можем посмотреть необходимые shared objects с помощью программы <code>ldd</code>, а затем скопировать их в dir.</p>
+
+<pre><code class="language-no-highlight">$ cd dir
+$ ldd pwd
+	linux-vdso.so.1 (0x00007ffd1aed3000)
+	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007d59e6000000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007d59e637a000)
+$ mkdir -p lib/x86_64-linux-gnu lib64
+$ cp /lib/x86_64-linux-gnu/libc.so.6 lib/x86_64-linux-gnu/
+$ cp /lib64/ld-linux-x86-64.so.2 lib64
+$ cd ..
+$ sudo chroot dir /pwd
+/</code></pre>
+
+<p><code>linux-vdso.so.1</code> — особый shared object, который импортируется в из ядра в любую программу. Обратите внимание, что pwd вывел свою позицию относительно поддерева.</p>
+
+<p>Для запуска sh скопируем в dsk образ ОС. (Ведь, чтобы запускать другие программы в sh, необходимо будет их всех также скопировать вместе с их зависимостями.) Наверное, легче всего скачивать образы с помощью утилиты Docker. Очистите директорию dsk и выполните <code>docker export $(docker create ubuntu) | tar -C dsk -xvf -</code> , чтобы скачать и образ ОС Ubuntu и разархивировать его в dsk.</p>
+
+<p>Выполните <code>sudo chroot dsk /bin/sh</code> , чтобы запустить sh. Попробуйте походить по папкам, чтобы удостовериться, что вы не имеете доступа к основной файловой системе.</p>
+
+<p>chroot имеет некоторые уязвимости, которые устраняют namespaces. Можете изучить самостоятельно, что нехорошего может сделать программа, запущенная из chroot-а.</p><h3 id="4.3.8">4.3.8</h2><h3>Проект: Containerization</h3>
+
+<p>Напишите программу для контейнеризации, которая позволяет:</p>
+
+<ul>
+	<li>Создавать файлы-диски и монтировать их (создавать контейнеры)</li>
+	<li>Автоматически устанавливать на контейнер ОС (можно загружать их с помощью docker-а)</li>
+	<li>Монтировать несколько дисков</li>
+	<li>Запускать программы в контейнерах в chroot</li>
+</ul>
+
+<p>По желанию, можете использовать namespaces, но это намного сложнее.</p>
       </main>
     </div>
   </div>

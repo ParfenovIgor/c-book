@@ -1,0 +1,63 @@
+<p>Разберемся подробнее в том, что такое "терминал". Запустите терминал. У вас начнется сессия с командной оболочкой (shell). В зависимости от вашего дистрибутива, запускаемая оболочка может быть различной. Однако, скорее всего, в вашем дистрибутиве по умолчанию будет запущен <code>bash</code>. Существуют другие оболочки: например, древняя и более примитивная <code>sh</code>, или более продвинутая <code>zsh</code>. Начнем с <code>sh</code>. Введите <code>sh</code> в терминале, чтобы запустить его. Какие при этом происходят действия, мы узнаем немного позже.</p>
+
+<p>Prompt (приглашение) в <code>sh</code> очень простое — <code>$</code>. Чтобы запустить локальную программу в любом shell, необходимо ввести <code>./program</code>, где program — название исполняемого файла. Чтобы запустить глобальную программу, необходимо просто ввести название её исполняемого файла. Shell будет искать этот исполняемый файл во всех директориях, которые записаны в переменной <code>PATH</code> (об этом позже).</p>
+
+<p>Чтобы узнать текущую директорию, в которой мы находимся, можно воспользоваться программой <code>pwd</code>.</p>
+
+<pre><code class="language-no-highlight">$ pwd
+/home/igor/test</code></pre>
+
+<p>Чтобы создать папку, можно воспользоваться программой <code>mkdir</code>.</p>
+
+<pre><code class="language-no-highlight">$ mkdir dir</code></pre>
+
+<p>Чтобы посмотреть все файлы в текущей директории, можно воспользоваться программой <code>ls</code>.</p>
+
+<pre><code class="language-no-highlight">$ ls
+dir</code></pre>
+
+<p>Чтобы сменить директорию, воспользуйтесь <strong>командой</strong> <code>cd</code>.</p>
+
+<pre><code class="language-no-highlight">$ cd dir
+$ pwd
+/home/igor/test/dir</code></pre>
+
+<p>Чтобы создать файл, можно воспользоваться программой <code>touch</code>.</p>
+
+<pre><code class="language-no-highlight">$ touch file
+$ ls
+file</code></pre>
+
+<p>Чтобы редактировать файл в терминале, можно воспользоваться одним из текстовых редакторов: <code>nano</code>, <code>vim</code>, etc. (Их необходимо осваивать отдельно.)</p>
+
+<p>Чтобы вывести содержимое файла в текстовом, можно воспользоваться программой <code>cat</code>.</p>
+
+<pre><code class="language-no-highlight">$ cat file
+A dog</code></pre>
+
+<p>Чтобы вывести содержимое файла в hex, можно воспользоваться программой <code>hd</code>.</p>
+
+<pre><code class="language-no-highlight">00000000  41 20 64 6f 67 0a                                 |A dog.|
+00000006</code></pre>
+
+<p>Чтобы узнать расположение исполняемого файла программы, можно воспользоваться программой <code>which</code>.</p>
+
+<pre><code class="language-no-highlight">$ which ls
+/usr/bin/ls
+$ which which
+/usr/bin/which
+$ which cd</code></pre>
+
+<p>Чтобы удалить файл, можно воспользоваться программой <code>rm</code>.</p>
+
+<pre><code class="language-no-highlight">$ rm file
+$ ls</code></pre>
+
+<p>Чтобы перейти не папку наверх, необходимо аргументом к команде <code>cd</code> написать <code>..</code>.</p>
+
+<pre><code class="language-no-highlight">$ cd ..</code></pre>
+
+<p>Чтобы удалить папку, можно воспользоваться программой <code>rmdir</code>.</p>
+
+<pre><code class="language-no-highlight">$ rmdir dir
+$ ls</code></pre>

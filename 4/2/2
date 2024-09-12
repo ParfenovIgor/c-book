@@ -1,0 +1,27 @@
+<p>Данная программа принимает вторым аргументом целое число и выводит некоторое количество чисел. Выведете количество выведенных чисел, как функцию от значения аргумента.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(int argc, char **argv) {
+    int n = atoi(argv[1]);
+    int i;
+    while (n &gt; 0) {
+        printf("%d\n", n);
+        fflush(stdout);
+        if (fork() == 0) {
+            n -= 1;
+        }
+        else if(fork() == 0) {
+            n -= 2;
+        }
+        else {
+            break;
+        }
+    }
+
+    return 0;
+}</code></pre>
+
+<p>Функция <code>fflush</code> необходима, если вы будете выводить в файл. Функция <code>printf</code> выполняет буферизацию (то есть, копит текст, и только затем выполняет вывод), поэтому необходимо потребовать её выполнить вывод сейчас с помощью функции <code>fflush</code>.</p>

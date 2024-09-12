@@ -1,0 +1,57 @@
+<p>В Linux есть возможность создать файловую систему прямо на обычном файле, а затем этот файл примонтировать и пользоваться им. Для этого используются loop devices.</p>
+
+<p>Посмотрите содержимое директории <code>/dev</code>: во многих дистрибутивах у вас там будут использоваться loop devices (на Ubuntu их особенно много).</p>
+
+<p>Создадим файл, состоящий только из нулей.</p>
+
+<pre><code class="language-no-highlight">dd if=/dev/zero of=dsk count=1024</code></pre>
+
+<p>Программа <code>dd</code> берет префикс файла <code>if</code> размера <code>bs * count</code> и пишет его в файл <code>of</code>. Файл <code>/dev/zero</code> это особенный файл, который состоит только из нулей, а его размер бесконечен.</p>
+
+<p>Примонтировать сам файл нельзя, зато можно примонтировать loop device. Введите <code>losetup -l</code>, чтобы увидеть список loop devices, которые сейчас у вас присутствуют. В зависимости от дистрибутива, их может быть разное количество. Все их названия имеют форму <code>/dev/loopX</code>. Введите <code>losetup -f</code>, чтобы определить свободное название.</p>
+
+<p>Я предположу, что название <code>/dev/loop100</code> у вас свободно. Создадим loop device:</p>
+
+<pre><code class="language-no-highlight">sudo losetup /dev/loop100 dsk</code></pre>
+
+<p>Введите теперь <code>losetup -l</code>: вы увидете ваш loop device в списке.</p>
+
+<pre><code class="language-no-highlight">/dev/loop100         0      0         0  0 /home/igor/test/dsk                                       0     512</code></pre>
+
+<p>Попробуем его примонтировать.</p>
+
+<pre><code class="language-no-highlight">$ sudo mount /dev/loop100 mnt
+mount: /home/igor/test/mnt: wrong fs type, bad option, bad superblock on /dev/loop100, missing codepage or helper program, or other error.</code></pre>
+
+<p>Монтировать можно только корректные файловые системы, а у нас просто последовательность нулей. Создадим файловую систему <code>ext4</code> (об этом чуть позже).</p>
+
+<pre><code class="language-no-highlight">$ mkfs.ext4 dsk
+mke2fs 1.46.5 (30-Dec-2021)
+
+Filesystem too small for a journal
+Discarding device blocks: done                            
+Creating filesystem with 128 4k blocks and 64 inodes
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Writing superblocks and filesystem accounting information: done
+
+$ sudo mkfs.ext4 /dev/loop100
+mke2fs 1.46.5 (30-Dec-2021)
+/dev/loop100 contains a ext4 file system
+	created on Wed Sep 11 13:38:27 2024
+Proceed anyway? (y,N)  
+</code></pre>
+
+<p>Обратите внимание: вы можете упомянуть как сам файл, так и loop device.</p>
+
+<p>Теперь мы можем выполнить монтирование.</p>
+
+<pre><code class="language-no-highlight">$ sudo mount /dev/loop100 mnt
+$ ls mnt
+lost+found
+</code></pre>
+
+<p>В этой файловой системе у вас изначально есть директория <code>lost+found</code>.</p>
+
+<p>Чтобы удалить loop device, необходимо выполнить <code>sudo losetup -d /dev/loop100</code> .</p>

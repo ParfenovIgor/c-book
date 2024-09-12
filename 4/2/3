@@ -1,0 +1,110 @@
+<p>СВ fork создаёт полностью идентичный процесс. Однако гараздо чаще мы хотим запускать новый процесс другой программы. С помощью системного вызова <code>execve</code> мы можем "загрузить" в процесс другую программу. Изучите аргументы этой функции в документации: <a href="https://man7.org/linux/man-pages/man2/execve.2.html" rel="noopener noreferrer nofollow">https://man7.org/linux/man-pages/man2/execve.2.html</a> . Нам необходимо передать путь к исполняемому файлу, переменные запуска и переменные среды. Пока не будем сильно задумываться об этом и рассмотрим такой пример.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char *argv[] = {"/usr/bin/pwd", NULL};
+    char *envp[] = {NULL};
+    execve("/usr/bin/pwd", argv, envp);
+    printf("Check\n");
+    return 0;
+}</code></pre>
+
+<p>В моём случае вывод:</p>
+
+<pre><code class="language-no-highlight">/home/igor/test</code></pre>
+
+<p>В результате выполнения функции <code>execve</code> выполнение нашей программы прервалось, и вместо этого начала выполняться программа <code>pwd</code>. Проверьте, что если в первый аргумент ввести <code>pwd</code>, то функция не найдет программу и вернёт ошибку.</p>
+
+<p>Обратите внимание, что мы передаём функции в качестве первого аргумента путь к ней. Мы здесь можем нарушить правило о том, что первым аргументом должен быть пусть к программе. На pwd это не влияет, но, например, программа <code>rustc</code> выводит такое:</p>
+
+<pre><code class="language-no-highlight">error: unknown proxy name: 'xxx'; valid proxy names are 'rustc', 'rustdoc', 'cargo', 'rust-lldb', 'rust-gdb', 'rust-gdbgui', 'rls', 'cargo-clippy', 'clippy-driver', 'cargo-miri', 'rust-analyzer', 'rustfmt', 'cargo-fmt'</code></pre>
+
+<p>Напишем вспомогательную программу, которая просто будет выводить аргументы и переменные среды.</p>
+
+<p><code>test.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv, char **envp) {
+    int i;
+    for (i = 0; i &lt; argc; i++) {
+        printf("%s\n", argv[i]);
+    }
+    printf("________________\n");
+    for (i = 0; envp[i] != NULL; i++) {
+        printf("%s\n", envp[i]);
+    }
+    return 0;
+}</code></pre>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    char *argv[] = {"xxx", "yyy", NULL};
+    char *envp[] = {"A=a", "B=b", "C=c", NULL};
+    execve("./test", argv, envp);
+    printf("Check\n");
+    return 0;
+}</code></pre>
+
+<p>Вывод:</p>
+
+<pre><code class="language-no-highlight">xxx
+yyy
+________________
+A=a
+B=b
+C=c</code></pre>
+
+<p>Запущенная программа не получила переменные среды своего родителя. Нам необходимо передавать их самостоятельно. Для удобства существуют дополнительные функции-обёртки для execve. Здесь можно посмотреть их: <a href="https://www.opennet.ru/docs/RUS/linux_parallel/node8.html" rel="noopener noreferrer nofollow">https://www.opennet.ru/docs/RUS/linux_parallel/node8.html .</a> Например, чтобы передать переменные среды, можно воспользоваться <code>execvp</code>.</p>
+
+<p>Наконец, если мы хотим начать новый процесс, но при этом продолжить выполнение старого, нам необходимо скомбинировать execve с fork-ом. Напомню, что ребёнку fork возвращает ноль, а родителю pid ребёнка, который больше нуля.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int pid = fork();
+    if (pid == 0) {
+        char *argv[] = {"/usr/bin/pwd", NULL};
+        char *envp[] = {NULL};
+        execve("/usr/bin/pwd", argv, envp);
+    }
+    else {
+        printf("Check\n");
+    }
+    return 0;
+}</code></pre>
+
+<p>В таком случае будет присутствовать и вывод программы pwd, и строка <code>Check</code>.</p>
+
+<p>При завершении родительского процесса, дочерний продолжит выполняться. (При этом, в иерархии процессов будут интересные действия, но мы их обсуждать не будем.) Однако, вы можете остановить родительский процесс до завершения дочернего с помощью системного вызова <code>wait4</code>. Это довольно сложный СВ, так как он позволяет также прочитать состояние интересующего нас процесса в специальной структуре. Я же просто здесь покажу, как подождать завершения процесса по его pid.</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main() {
+    int pid = fork();
+    if (pid == 0) {
+        char *argv[] = {"/usr/bin/sleep", "5", NULL};
+        char *envp[] = {NULL};
+        execve("/usr/bin/sleep", argv, envp);
+    }
+    else {
+        wait4(pid, NULL, 0, NULL);
+        printf("Check\n");
+    }
+    return 0;
+}</code></pre>
+
+<p>Строка <code>Check</code> будет выведена после завершения программы <code>sleep</code>.</p>
