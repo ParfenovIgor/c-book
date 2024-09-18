@@ -1,0 +1,205 @@
+<p>Контент этого шага сложный и необязательный для полного понимания. Здесь я покажу, как читать машинный код.</p>
+
+<p>Информацию обо всех инструкциях мы можем найти в instruction set architecture (ISA), который предоставляется производителем процессора. Научимся их читать. Откройте ISA AMD. (Это один из производителей процессоров архитектуры x86. Возможно, на вашем компьютере процессор AMD.)  <a href="https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24594.pdf" rel="noopener noreferrer nofollow">https://www.amd.com/content/dam/amd/en/documents/processor-tech-docs/programmer-references/24594.pdf</a></p>
+
+<p>Давайте откроем страницу с описанием инструкции <code>mov</code>.</p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width: 800px;">
+	<tbody>
+		<tr>
+			<td>Mnemonic</td>
+			<td>Opcode</td>
+			<td>Description</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem8, reg8</td>
+			<td>88 /r</td>
+			<td>Move the contents of an 8-bit register to an 8-bit<br>
+			destination register or memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem16, reg16</td>
+			<td>89 /r</td>
+			<td>Move the contents of a 16-bit register to a 16-bit<br>
+			destination register or memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem32, reg32</td>
+			<td>89 /r</td>
+			<td>Move the contents of a 32-bit register to a 32-bit<br>
+			destination register or memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem64, reg64</td>
+			<td>89 /r</td>
+			<td>Move the contents of a 64-bit register to a 64-bit<br>
+			destination register or memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg8, reg/mem8</td>
+			<td>8A /r</td>
+			<td>Move the contents of an 8-bit register or memory<br>
+			operand to an 8-bit destination register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg16, reg/mem16</td>
+			<td>8B /r</td>
+			<td>Move the contents of a 16-bit register or memory<br>
+			operand to a 16-bit destination register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg32, reg/mem32</td>
+			<td>8B /r</td>
+			<td>Move the contents of a 32-bit register or memory<br>
+			operand to a 32-bit destination register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg64, reg/mem64</td>
+			<td>8B /r</td>
+			<td>Move the contents of a 64-bit register or memory<br>
+			operand to a 64-bit destination register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg16/32/64/mem16,<br>
+			segReg</td>
+			<td>8C /r</td>
+			<td>Move the contents of a segment register to a 16-bit, 32-<br>
+			bit, or 64-bit destination register or to a 16-bit memory<br>
+			operand.</td>
+		</tr>
+		<tr>
+			<td>MOV segReg, reg/mem16</td>
+			<td>8E /r</td>
+			<td>Move the contents of a 16-bit register or memory<br>
+			operand to a segment register.</td>
+		</tr>
+		<tr>
+			<td>MOV AL, moffset8</td>
+			<td>A0</td>
+			<td>Move 8-bit data at a specified memory offset to the AL<br>
+			register.</td>
+		</tr>
+		<tr>
+			<td>MOV AX, moffset16</td>
+			<td>A1</td>
+			<td>Move 16-bit data at a specified memory offset to the AX<br>
+			register.</td>
+		</tr>
+		<tr>
+			<td>MOV EAX, moffset32</td>
+			<td>A1</td>
+			<td>Move 32-bit data at a specified memory offset to the<br>
+			EAX register.</td>
+		</tr>
+		<tr>
+			<td>MOV RAX, moffset64</td>
+			<td>A1</td>
+			<td>Move 64-bit data at a specified memory offset to the<br>
+			RAX register.</td>
+		</tr>
+		<tr>
+			<td>MOV moffset8, AL</td>
+			<td>A2</td>
+			<td>Move the contents of the AL register to an 8-bit memory<br>
+			offset.</td>
+		</tr>
+		<tr>
+			<td>MOV moffset16, AX</td>
+			<td>A3</td>
+			<td>Move the contents of the AX register to a 16-bit memory<br>
+			offset.</td>
+		</tr>
+		<tr>
+			<td>MOV moffset32, EAX</td>
+			<td>A3</td>
+			<td>Move the contents of the EAX register to a 32-bit<br>
+			memory offset.</td>
+		</tr>
+		<tr>
+			<td>MOV moffset64, RAX</td>
+			<td>A3</td>
+			<td>Move the contents of the RAX register to a 64-bit<br>
+			memory offset.</td>
+		</tr>
+		<tr>
+			<td>MOV reg8, imm8</td>
+			<td>B0 +rb ib</td>
+			<td>Move an 8-bit immediate value into an 8-bit register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg16, imm16</td>
+			<td>B8 +rw iw</td>
+			<td>Move a 16-bit immediate value into a 16-bit register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg32, imm32</td>
+			<td>B8 +rd id</td>
+			<td>Move an 32-bit immediate value into a 32-bit register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg64, imm64</td>
+			<td>B8 +rq iq</td>
+			<td>Move an 64-bit immediate value into a 64-bit register.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem8, imm8</td>
+			<td>C6 /0 ib</td>
+			<td>Move an 8-bit immediate value to an 8-bit register or<br>
+			memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem16, imm16</td>
+			<td>C7 /0 iw</td>
+			<td>Move a 16-bit immediate value to a 16-bit register or<br>
+			memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem32, imm32</td>
+			<td>C7 /0 id</td>
+			<td>Move a 32-bit immediate value to a 32-bit register or<br>
+			memory operand.</td>
+		</tr>
+		<tr>
+			<td>MOV reg/mem64, imm32</td>
+			<td>C7 /0 id</td>
+			<td>Move a 32-bit signed immediate value to a 64-bit<br>
+			register or memory operand.</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>Вспомним пример:</p>
+
+<pre><code class="language-no-highlight">    .bss
+arr:
+    .zero   8
+
+    .text
+    .globl  main
+main:
+    movq    arr(%rip), %rax
+    movq    $1, (%rax)
+    ret</code></pre>
+
+<pre><code class="language-no-highlight">...
+0000000000001129 &lt;main&gt;:
+    1129:	48 8b 05 e1 2e 00 00 	mov    0x2ee1(%rip),%rax        # 4011 &lt;arr&gt;
+    1130:	48 c7 00 01 00 00 00 	movq   $0x1,(%rax)
+    1137:	c3                   	ret
+...</code></pre>
+
+<p>Первая инструкция <code>mov</code> записывает значение, хранящееся по адресу (не сам адрес), в регистр. Найдем opcode <code>0x8b</code> в таблице. В первой колонке мы видим:</p>
+
+<pre><code class="language-no-highlight">MOV regXX, reg/memXX</code></pre>
+
+<p>Здесь мы видим, что первых аргументом должен быть регистр, а вторым регистр или адрес в памяти (который трактуется, как содержимое по этому адресу). Разве не наоборот? Да. Дело в том, что в данном ISA используется синтаксис Intel, в котором первым аргументом стоит destination. Поэтому нам придётся визуально поменять эти аргументы местами. Мы посмотрим синтаксис Intel чуть позже.</p>
+
+<p>Посмотрим чуть внимательнее на инструкцию:</p>
+
+<pre><code class="language-no-highlight">48 8b 05 e1 2e 00 00</code></pre>
+
+<p>Обратите внимание: последние четыре байта — это число <code>0x00002ee1</code>. Оно хранится байтами наоборот (как и всё в архитектуре x86) как есть. Что же говорит о том, что это адрес, а не регистр, и что перемещение идёт в регистр <code>rax</code>? Третий байт, равный <code>0x05</code>. Это <code>ModR/M</code> байт, о наличии которого сообщает приписка <code>/r</code> во втором столбце. Можете найти таблицу кодирования этого байта, она общая для всех инструкций. Я же просто скажу, что число <code>0x05</code> находится на пересечении регистра <code>rax</code> и <code>disp32</code>.</p>
+
+<p>Байт <code>0x48</code> является префиксом инструкции и, полагаю, говорит о том, что число в инструкции имеет размер четыре байта.</p>
+
+<p>Напомню, что метка — это не более, чем число. Поэтому, и число, и метка относятся к <code>immXX</code>.</p>

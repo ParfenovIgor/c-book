@@ -1,0 +1,78 @@
+<p>Мы уже увидели некоторую проблему в синтаксисе <code>AT&amp;T</code>, поэтому не будет ошибкой попробовать перейти на синтаксис <code>Intel</code>.</p>
+
+<pre><code class="language-no-highlight">    .intel_syntax   noprefix
+
+    .bss
+arr:
+    .zero   8
+
+    .text
+    .globl  main
+main:
+    lea     rax, arr[rip]
+    movq    [rax], 1
+    ret</code></pre>
+
+<p>Что изменилось:</p>
+
+<ul>
+	<li>Операнды в инструкциях поменялись местами.</li>
+	<li>Вместо круглых скобок используются квадратные.</li>
+	<li>Перед названиями регистров и константами больше нет знаков <code>%</code> и <code>$</code>.</li>
+</ul>
+
+<p>Есть проблема в том, что обычно на gnu assembly не используют синтаксис intel, и в разных ассемблерах директивы разные. Мы будем использовать ассемблер <code>nasm</code>, так как он более известен среди ассемблеров с синтаксисом intel.</p>
+
+<p>Итак, установите <code>nasm</code>. Обычно, его файлы имеют расширение <code>.asm</code>.</p>
+
+<pre><code class="language-no-highlight">section .bss
+arr:
+    resb    8
+
+section .text
+global _start
+_start:
+    lea     rax, [rel arr] ; comment
+    mov     qword [rax], 1
+    ret</code></pre>
+
+<p>Это та же самая программа на nasm-е. Обратите внимание: директивы теперь выглядят совсем по другому.</p>
+
+<ul>
+	<li>При объявлении секции присутствует ключевое слово <code>section</code></li>
+	<li>Вместо <code>.globl</code> теперь <code>global</code></li>
+	<li>Другой синтаксис обозначения размерности инструкции: вместо <code>movq</code> теперь <code>mov qword</code></li>
+	<li>Другой синтаксис обозначения того, что адрес относительно <code>rip</code>: вместо <code>arr[rip]</code> теперь <code>[rel arr]</code></li>
+	<li>Комментарии начинаются с символа <code>;</code>.</li>
+</ul>
+
+<p>В общем, хоть синтаксис и одинаковый, код для этих ассемблеров плохо совместим.</p>
+
+<p>Обратите внимание на метку: теперь используется метка <code>_start</code>. Это стартовая метка для стандартного linker script-а ассемблера <code>nasm</code>. В отличии от gnu assembly исполнение здесь начинается непосредственно с нашего кода.</p>
+
+<p>Выполним компиляцию и компоновку.</p>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 main.asm -o main.o
+$ ld main.o -o main</code></pre>
+
+<p>При запуске программы вы получите SIGSEGV. Это происходит из-за инструкции <code>ret</code>, так как она переходит к внешней функции с помощью стека, а на данный момент у нас стек пустой.</p>
+
+<p>Проверим entry point.</p>
+
+<pre><code class="language-no-highlight">$ objdump -d main
+
+main:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000401000 &lt;_start&gt;:
+  401000:	48 8d 05 f9 0f 00 00 	lea    0xff9(%rip),%rax        # 402000 &lt;__bss_start&gt;
+  401007:	48 c7 00 01 00 00 00 	movq   $0x1,(%rax)
+  40100e:	c3                   	ret    
+$ readelf -h main
+...
+  Entry point address:               0x401000
+...</code></pre>
+
+<p>Entry point (то есть, первая исполняемая инструкция) действительно метка <code>_start</code>.</p>

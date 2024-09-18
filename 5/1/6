@@ -1,0 +1,92 @@
+<p>Рассмотрим, как писать 32-bit код.</p>
+
+<pre><code class="language-no-highlight">    .bss
+arr:
+    .zero   4
+
+    .text
+    .globl  main
+main:
+    leal    arr, %eax
+    movl    $1, (%eax)
+    ret</code></pre>
+
+<p>Здесь произошли следующие изменения:</p>
+
+<ul>
+	<li>Использованы 32-битные регисты. Их названия начинаются с буквы <code>e</code>, вместо буквы <code>r</code>.</li>
+	<li>Использованы команды с размерностью четыре байта, которые определяются суффиксом <code>l</code>, так как восьмибайтных команд нет.</li>
+	<li>Отсутствует директива <code>(%rip)</code>, так как теперь мы можем написать position independent executable (PIE) (для этого нужен дополнительный флаг <code>-no-pie</code>).</li>
+</ul>
+
+<p>Для компиляции в 32-bit необходимы дополнительные зависимости в системе, которые в некоторых дистрибутивах может быть непросто поставить. Выполнять компиляцию в 32-bit необязательно. Я просто хочу показать, что это такое.</p>
+
+<p>Скомпилируем программу: <code>gcc main.s -o main -m32 -no-pie</code>. Флаг <code>-m32</code> выполняет компиляцию в 32-bit.</p>
+
+<p>Посмотрим теперь на суффиксы размерностей инструкций.</p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width: 500px;">
+	<tbody>
+		<tr>
+			<td> </td>
+			<td>AT&amp;T</td>
+			<td>Intel</td>
+		</tr>
+		<tr>
+			<td>1</td>
+			<td>b</td>
+			<td>byte</td>
+		</tr>
+		<tr>
+			<td>2</td>
+			<td>w</td>
+			<td>word</td>
+		</tr>
+		<tr>
+			<td>4</td>
+			<td>l</td>
+			<td>dword</td>
+		</tr>
+		<tr>
+			<td>8</td>
+			<td>q</td>
+			<td>qword</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>Теперь посмотрим на регистр <code>rax</code>. Когда мы писали 32-bit код, мы использовали регистр <code>eax</code>. Однако этот же регистр есть и в 64-bit коде и он является младшими четырьмя байтами регистра <code>rax</code>.</p>
+
+<p> Рассмотрим программу:</p>
+
+<pre><code class="language-no-highlight">    .bss
+arr:
+    .zero   8
+
+    .text
+    .globl  main
+main:
+    movq    $0x1122334455667788, %rax
+    movl    $0xeeff, %eax
+    ret</code></pre>
+
+<p>С помощью дебаггера убедитесь, что обе инструкции действительно меняют значение регистра <code>rax</code>. Обратите также внимание на то, что инструкция <code>movl</code> также зануляет старшие четыре байта регистра.</p>
+
+<p>Регистр <code>eax</code> имеет более маленькие составные части. Его младшие два байта покрываются регистром <code>ax</code>, первый байт покрывается регистром <code>al</code>, а второй байт покрывается регистром <code>ah</code>.</p>
+
+<p>Рассмотрим теперь такую программу:</p>
+
+<pre><code class="language-no-highlight">    .bss
+arr:
+    .zero   8
+
+    .text
+    .globl  main
+main:
+    movl    $0x12345678, %eax
+    movw    $0xabcd, %ax
+    movb    $0xee, %al
+    movb    $0xff, %ah
+    ret</code></pre>
+
+<p>Выполните её в дебаггере и обратите внимание на то, что инструкция <code>movw</code> занулила старшие два байта регистра <code>eax</code>. То же самое происходит и при использовании инструкции <code>movb</code> с регистрами <code>al</code> и <code>ah</code>.</p>

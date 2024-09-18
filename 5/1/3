@@ -1,0 +1,84 @@
+<p>Научимся отлаживать (debug) код на языке ассемблера. Сама отладка, по моему мнению, по большей части бессмысленна, но конкретно сейчас она хорошо покажет, как выполняется программа на уровне регистров и памяти.</p>
+
+<p>Установите <code>GNU Debugger</code> — <code>gdb</code>. Запустите его на нашей программе из прошлого шага: <code>gdb main</code>. Начнётся интерактивная сессия, подобная тем, которые используются в текстовых редакторах.</p>
+
+<p>Я хочу выполнить четыре инструкции в нашей программе и посмотреть на то, что происходит с регистрами.</p>
+
+<ul>
+	<li>Чтобы видеть наши инструкции, следует написать <code>layout asm</code>. Это выполнит дизассемблирование, поэтому директивы мы не увидим.</li>
+	<li>Чтобы видет регистры, следует написать <code>layout regs</code>.</li>
+	<li>На самом деле, до и после выполнения функции main выполняется немало другого кода. Поэтому начинать с самого начала нам пока не следует (хотя позже мы изучим, что это за код, и как он генерируется). Поставьте точку останова (breakpoint) на метке main: <code>b main</code></li>
+	<li>Наконец, запустите программу: <code>r</code>. Чтобы перейти к следующей инструкции, напишите <code>ni</code>. Наблюдайте за подсвеченной командой в коде и значениями регистров <code>rax</code> и <code>rbx</code>.</li>
+</ul>
+
+<p>Что вы должны видеть в процессе ввода команд <code>ni</code>.</p>
+
+<pre><code class="language-no-highlight">┌─Register group: general───────────────────────────────────────────────────────────────────────────────┐
+│rax            0x2                 2                                                                   │
+│rbx            0x0                 0                                                                   │
+│rcx            0x555555557df8      93824992247288                                                      │
+│rdx            0x7fffffffdc98      140737488346264                                                     │
+│rsi            0x7fffffffdc88      140737488346248                                                     │
+│rdi            0x1                 1                                                                   │
+│rbp            0x1                 0x1                                                                 │
+│rsp            0x7fffffffdb78      0x7fffffffdb78                                                      │
+│r8             0x7ffff7e1bf10      140737352154896                                                     │
+│r9             0x7ffff7fc9040      140737353912384                                                     │
+│r10            0x7ffff7fc3908      140737353890056                                                     │
+│r11            0x7ffff7fde660      140737353999968                                                     │
+│r12            0x7fffffffdc88      140737488346248                                                     │
+│r13            0x555555555129      93824992235817                                                      │
+│r14            0x555555557df8      93824992247288                                                      │
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│B+  0x555555555129 &lt;main&gt;           mov    $0x2,%rax                                                   │
+│  &gt; 0x555555555130 &lt;main+7&gt;         mov    $0x3,%rbx                                                   │
+│    0x555555555137 &lt;main+14&gt;        add    %rax,%rbx                                                   │
+│    0x55555555513a &lt;main+17&gt;        ret                                                                │
+│    0x55555555513b                  add    %dh,%bl                                                     │
+│    0x55555555513d &lt;_fini+1&gt;        nop    %edx                                                        │
+│    0x555555555140 &lt;_fini+4&gt;        sub    $0x8,%rsp                                                   │
+│    0x555555555144 &lt;_fini+8&gt;        add    $0x8,%rsp                                                   │
+│    0x555555555148 &lt;_fini+12&gt;       ret                                                                │
+│    0x555555555149                  add    %al,(%rax)                                                  │
+│    0x55555555514b                  add    %al,(%rax)                                                  │
+│    0x55555555514d                  add    %al,(%rax)                                                  │
+│    0x55555555514f                  add    %al,(%rax)                                                  │
+│    0x555555555151                  add    %al,(%rax)                                                  │
+│    0x555555555153                  add    %al,(%rax)                                                  │
+│    0x555555555155                  add    %al,(%rax)                                                  │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────┘
+multi-thre Thread 0x7ffff7f9c7 In: main                                         L??   PC: 0x555555555130 
+(gdb) layout regs
+(gdb) b main
+Breakpoint 1 at 0x1129
+(gdb) r
+Starting program: /home/igor/test/main
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, 0x0000555555555129 in main ()
+(gdb) ni
+0x0000555555555130 in main ()
+(gdb) 
+</code></pre>
+
+<p>Чтобы не вводить постоянно эти команды, можно написать скрипт.</p>
+
+<p><code>.gdbinit</code></p>
+
+<pre><code class="language-no-highlight">layout asm
+layout regs
+b main
+r</code></pre>
+
+<p>После того, как вы запустите в следующий раз gdb, среди текста вам будет выведено такое сообщение с вашими путями.</p>
+
+<pre><code class="language-no-highlight">warning: File "/home/igor/test/.gdbinit" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/igor/test/.gdbinit
+line to your configuration file "/home/igor/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/igor/.config/gdb/gdbinit".</code></pre>
+
+<p>Удовлетворите это условие, и при следующих запусках gdb будет выполнять скрипт.</p>

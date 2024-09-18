@@ -1,0 +1,52 @@
+<p>Далее для удобства мы будем использовать ассемблер <code>nasm</code>.</p>
+
+<p>Изучим арифметические инструкции. Инструкции <code>add</code> и <code>sub</code> для сложения и вычитания являются очевидными. Посмотрим на инструкцию <code>mul</code> для умножения.</p>
+
+<p>В ISA AMD написано:</p>
+
+<blockquote>
+<p>Multiplies the unsigned byte, word, doubleword, or quadword value in the specified register or<br>
+memory location by the value in AL, AX, EAX, or RAX and stores the result in AX, DX:AX,<br>
+EDX:EAX, or RDX:RAX (depending on the operand size). It puts the high-order bits of the product in<br>
+AH, DX, EDX, or RDX.</p>
+
+<p>If the upper half of the product is non-zero, the instruction sets the carry flag (CF) and overflow flag<br>
+(OF) both to 1. Otherwise, it clears CF and OF to 0. The other arithmetic flags (SF, ZF, AF, PF) are<br>
+undefined.</p>
+</blockquote>
+
+<p>Данная инструкция принимает только один операнд (причём, не imm), а в качестве второго использует регистр <code>*A*</code>. При размерности операндов равной <code>X</code> младшие <code>X</code> байт результата помещается в регистр <code>*A*</code>, а старшие в регистр <code>*D*</code>. Во втором абзаце упоминаются некие флаги.</p>
+
+<p>В x86 есть специальный регистр <code>FLAGS/EFLAGS/RFLAGS</code>, к которому у нас нет свободного доступа, но на который влияют многие инструкции. В данном случае при переполнения младших <code>X</code> байт результата нас дополнительно уведомляют об этом, включая биты, соответствующие флагам <code>carry</code> (перевод в следующий разряд) и <code>overflow</code> (переполнение). (Эти флаги не эквивалентны при знаковых вычислениях.) Здесь есть странность терминологии: часто под "включает флаг, если X" подразумевается также "выключает флаг, если не X".</p>
+
+<pre><code class="language-no-highlight">section .text
+global _start
+_start:
+    mov     eax, 0xffffffff
+    mov     ebx, 0x2
+    mul     ebx
+    ret</code></pre>
+
+<p>Посмотрим на это в gdb (не забудьте поставить точку останова на метку <code>_start</code>). Мы можем вывести флаги с помощью команды <code>p $eflags</code>.</p>
+
+<pre><code class="language-no-highlight">(gdb) p $eflags
+$4 = [ CF IF OF ]</code></pre>
+
+<p> Помимо carry flag и overflow flag у нас также есть следующие арифметические флаги (это их примерные словесные описания, так как инструкции, работающие с ними, разные):</p>
+
+<ul>
+	<li>Parity flag — чётность количества единичных битов в результате (когда это может быть полезно?).</li>
+	<li>Zero flag — равен ли результат нулю.</li>
+	<li>Sign flag — отрицателен ли результат.</li>
+	<li>Direction flag — в какое направление будет идти итерирование по массиву при выполнении инструкций циклов. Мы сами управляем этим флагом.</li>
+</ul>
+
+<p>На остальные флаги мы влиять не можем или они для нас бесполезны. IF — это interrupt flag, который выключается инструкцией <code>cli</code>. Что будет, если мы её выполним?</p>
+
+<pre><code class="language-no-highlight">section .text
+global _start
+_start:
+    cli
+    ret</code></pre>
+
+<p>При выполнении этой инструкции мы получим SIGSEGV. Некоторые инструкции, например, cli, требуют большие права для выполнения. Условно, на текущий уровень прав ссылаются сегментные регистры, и мы на них влиять не можем (иначе в чём смысл такой защиты?).</p>

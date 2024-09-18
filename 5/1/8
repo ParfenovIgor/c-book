@@ -1,0 +1,8 @@
+<p>Выполните анализ второй инструкции.</p>
+
+<pre><code class="language-no-highlight">...
+0000000000001129 &lt;main&gt;:
+    1129:	48 8b 05 e1 2e 00 00 	mov    0x2ee1(%rip),%rax        # 4011 &lt;arr&gt;
+    1130:	48 c7 00 01 00 00 00 	movq   $0x1,(%rax)
+    1137:	c3                   	ret
+...</code></pre>

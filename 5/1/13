@@ -1,0 +1,95 @@
+<p>В x86_64 есть следующие регистры общего назначения: <code>rax</code>, <code>rbx</code>, <code>rcx</code>, <code>rdx</code>, <code>rdi</code>, <code>rsi</code>, <code>rbp</code>, <code>rsp</code>, <code>r8</code>, <code>r9</code>, <code>r10</code>, <code>r11</code>, <code>r12</code>, <code>r13</code>, <code>r14</code>, <code>r15</code>. Изучить их составные регистры можно по этой картинке: <a href="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" rel="noopener noreferrer nofollow">https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg</a></p>
+
+<p>У этих регистров есть роли. Некоторые из этих ролей задаются самой архитектурой (например, инструкция mul выполняла перемножение строго с регистром rax), некоторые задаются "стилем" написания кода, который называется Application Binary Interface (ABI).</p>
+
+<p>Посмотрим на роли со стороны архитектуры. Для работы с массивами мы используем инструкции <code>stos</code> и <code>lods</code>. Первая инструкция копирует данные в маcсив, в вторая — их массива. Прочитаем их описание в ISA.</p>
+
+<blockquote>
+<p>STOS<br>
+STOSB<br>
+STOSW<br>
+STOSD<br>
+STOSQ</p>
+
+<p>Copies a byte, word, doubleword, or quadword from the AL, AX, EAX, or RAX registers to the<br>
+memory location pointed to by ES:rDI and increments or decrements the rDI register according to the<br>
+state of the DF flag in the rFLAGS register.<br>
+If the DF flag is 0, the instruction increments the pointer; otherwise, it decrements the pointer. It<br>
+increments or decrements the pointer by 1, 2, 4, or 8, depending on the size of the value being copied.</p>
+</blockquote>
+
+<p>Рассмотрим код, выполняющий эту инструкцию.</p>
+
+<pre><code class="language-no-highlight">section .bss
+arr:
+    resb 32
+
+section .text
+global _start
+_start:
+    mov     rax, 0x1122334455667788
+    lea     rdi, arr
+    stosq
+    stosq
+    stosq
+    stosq
+    ret</code></pre>
+
+<p>Здесь мы четыре раза кладём значение регистра rax в очередные восемь байт массива. Посмотрим содержимое массива после выполнения этих инструкций. (Здесь <code>32</code> — это количество блоков, <code>x</code> — это формат вывода (шестнадцатеричный), <code>b</code> — это размерность блока.)</p>
+
+<pre><code class="language-no-highlight">...
+(gdb) x/32xb &amp;arr
+0x402000:       0x88    0x77    0x66    0x55    0x44    0x33    0x22    0x11
+0x402008:       0x88    0x77    0x66    0x55    0x44    0x33    0x22    0x11
+0x402010:       0x88    0x77    0x66    0x55    0x44    0x33    0x22    0x11
+0x402018:       0x88    0x77    0x66    0x55    0x44    0x33    0x22    0x11
+...</code></pre>
+
+<p>Обратите внимание на второй абзац описания инструкции — там упоминается о том, что есть мы установим direction flag, то итерирование будет в обратную сторону. Чтобы включить и выключить DF, следует использовать инструкции <code>std</code> и <code>cld</code>. Помните, что он глобальный, что может поломать функции, которые вы вызываете.</p>
+
+<pre><code class="language-no-highlight">section .bss
+arr:
+    resb    32
+
+section .text
+global _start
+_start:
+    std
+    mov     rax, 0x1122334455667788
+    lea     rdi, arr
+    stosq
+    stosq
+    stosq
+    stosq
+    ret</code></pre>
+
+<p>После выполнения первой инструкции <code>stosq</code> у вас будет такая картина:</p>
+
+<pre><code class="language-no-highlight">...
+(gdb) x/32xb &amp;arr
+0x402000:       0x88    0x77    0x66    0x55    0x44    0x33    0x22    0x11
+0x402008:       0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
+0x402010:       0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
+0x402018:       0x00    0x00    0x00    0x00    0x00    0x00    0x00    0x00
+...</code></pre>
+
+<p>При выполнении второй инструкции вы получите SIGSEGV, так как значение регистра edi будет на <code>0x402000</code>, а <code>0x401ff8</code>.</p>
+
+<p>Самостоятельно прочитайте описание инструкции <code>lods</code>. Рассмотрим программу:</p>
+
+<pre><code class="language-no-highlight">section .data
+arr:
+    dw      0xaaaa, 0xbbbb, 0xcccc
+
+section .text
+global _start
+_start:
+    lea     rsi, arr
+    lodsw
+    lodsw
+    lodsw
+    ret</code></pre>
+
+<p>Чтобы было, что копировать из памяти, я создал инициализированный массив. Он должен находиться в секции <code>data</code> (так как секция <code>bss</code> хранит только нули). Директива <code>dw</code> означает, что мы хотим положить в секцию words (2 байта), которые перечислены далее (аналогично, есть директивы <code>db</code>, <code>dd</code>, и <code>dq</code>).</p>
+
+<p>Выполните программу в дебаггере и убедитесь, что значние регистра <code>al</code> меняется после каждого выполнения инструкции <code>lodsw</code> на очередной элемент массива.</p>
