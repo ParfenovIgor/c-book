@@ -1,0 +1,56 @@
+<p>Научимся выводить текст без помощи libc. Для этого нужно воспользоваться СВ write, которые, в отличии от СВ fork, имеет несколько аргументов: дескриптор stream-а (в нашем случае, stdout, то есть, <code>1</code>), буфер для вывода (никакое форматирование не поддерживается) и длина буфера (буфер не обязан заканчиваться нулём).</p>
+
+<pre><code class="language-no-highlight">section .data
+buffer:
+    db      "Check...", 0xA
+length: 
+    dd      length - buffer
+
+section .text
+global _start
+_start:
+    mov     rax, 0x39
+    syscall
+    
+    mov     rax, 0x1
+    mov     rdi, 0x1
+    mov     rsi, buffer
+    mov     rdx, [length]
+    syscall
+    ret</code></pre>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 main.asm -o main.o
+$ ld main.o -o main</code></pre>
+
+<p>Чтобы добыть длину буфера, мы вычитаем из метки, находящейся после буфера метку, находящеюся до буфера. Длина числа, согласно документации — четыре байта.</p>
+
+<p>Так мы можем написать программу, которая считывает строку и выводит её же.</p>
+
+<pre><code class="language-no-highlight">%define LENGTH 1024
+
+section .bss
+buffer:
+    resb    LENGTH
+length:
+    resb    4
+
+section .text
+global _start
+_start:
+    mov     rax, 0x0
+    mov     rdi, 0x0
+    mov     rsi, buffer
+    mov     rdx, LENGTH
+    syscall
+    mov     [length], rax
+
+    mov     rax, 0x1
+    mov     rdi, 0x1
+    mov     rsi, buffer
+    mov     rdx, [length]
+    syscall
+    ret</code></pre>
+
+<p>Здесь я для удобства использовал макрос <code>%define</code>. Макросы работают в nasm-е так же, как и в gcc.</p>
+
+<p>Если подать СВ write длину, равную <code>LENGTH</code>, то оставшиеся в буфере нули мы никак в терминале не увидим. Тем не менее, следует вывести ровно столько байт, сколько мы считали. СВ возвращают значение в регистре <code>rax</code>. СВ read возвращает количество символов, которые он считал. Сохраним это число и используем как длину сообщения, которое следует вывести.</p>

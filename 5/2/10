@@ -1,0 +1,44 @@
+<p>Посмотрим, как gcc компилирует в 32-bit ту же программу. Из-за того, что на стеке теперь хранятся и аргументы функций, манипуляции с ним стали чуть сложнее.</p>
+
+<pre><code class="language-no-highlight">$ gcc main.c -o main.S -S -m32 -masm=intel -fno-asynchronous-unwind-tables -fno-pie</code></pre>
+
+<pre><code class="language-no-highlight">boo:
+	push	ebp
+	mov	ebp, esp
+	mov	eax, DWORD PTR [ebp+8]
+	imul	eax, DWORD PTR [ebp+12]
+	pop	ebp
+	ret</code></pre>
+
+<p>Посмотрите, где теперь функция boo берёт аргументы. Напомню, что в 32-bit мы передаём все аргументы на стеке, причем кладём их справа налево в порядке, который указан в сигнатуре функции. То есть, левые аргументы будут ближе к верху стека (иметь меньшие адреса). Мы знаем, что в <code>ebp</code> хранится старый ebp, а в <code>ebp + 4</code> хранится адрес возврата. Тогда в <code>ebp + 8</code> хранится первый аргумент, а в <code>ebp + 12</code> хранится второй аргумент.</p>
+
+<pre><code class="language-no-highlight">foo:
+	push	ebp
+	mov	ebp, esp
+	sub	esp, 16
+
+	mov	edx, DWORD PTR [ebp+8]
+	mov	eax, DWORD PTR [ebp+12]
+	add	eax, edx
+	mov	DWORD PTR [ebp-8], eax
+
+	mov	eax, DWORD PTR [ebp+8]
+	sub	eax, DWORD PTR [ebp+12]
+	mov	DWORD PTR [ebp-4], eax
+
+	push	DWORD PTR [ebp-4]
+	push	DWORD PTR [ebp-8]
+	call	boo
+	add	esp, 8
+
+	leave
+	ret</code></pre>
+
+<p>Здесь фаза сохранения аргументов из регистров на стек отсутствует (так как они изначально на стеке). Здесь стек использован несколько оптимальнее: локальная переменная <code>a</code> хранится в <code>ebp - 8</code>, а локальная переменная <code>b</code> хранится в <code>ebp - 4</code>. При этом стек всё равно сдвигается на <code>16</code>: <code>sub esp, 16</code>. Полагаю, чтобы значение esp по прежнему делилось на <code>16</code>.</p>
+
+<p>Я заметил пару забаных вещей по сравнению с 32-bit компиляцией.</p>
+
+<ul>
+	<li>Здесь появилась инструкция <code>add esp, 8</code>. Её смысл понятен — она возвращает вершину стека на место после того, как мы положили на него аргументы функции <code>boo</code>. Но из-за логики работы инструкции <code>leave</code>, в этой инструкции <code>add</code> нет смысла.</li>
+	<li>Почему-то в 64-bit адреса пишутся в формате <code>-4[rbp]</code>, а в 32-bit в формате <code>[ebp-4]</code>. (Насколько я знаю, они ничем не отличаются.)</li>
+</ul>

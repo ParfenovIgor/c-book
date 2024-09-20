@@ -1,0 +1,92 @@
+<p>С ABI всё довольно запутано. По хорошему, мы будем стремиться использовать <code>System V</code>. В основном, нас интересуют только две вещи в очередном ABI:</p>
+
+<ul>
+	<li>Как передаются аргументы в функции.</li>
+	<li>Какие регистры являются scratch/caller saved и какие регистры являются preserved/callee saved.</li>
+</ul>
+
+<p>Посмотрим на таблицу с System V для 32-bit и 64-bit. (На самом деле, <code>cdecl</code>, который используется в C — это не совсем System V.) <a href="https://wiki.osdev.org/Calling_Conventions" rel="noopener noreferrer nofollow">https://wiki.osdev.org/Calling_Conventions</a></p>
+
+<table border="1" cellpadding="4" cellspacing="0" style="background: #f9f9f9; border: 1px #aaaaaa solid;">
+	<tbody>
+		<tr>
+			<th>Platform</th>
+			<th>Return Value</th>
+			<th>Parameter Registers</th>
+			<th>Additional Parameters</th>
+			<th>Stack Alignment</th>
+			<th>Scratch Registers</th>
+			<th>Preserved Registers</th>
+			<th>Call List</th>
+		</tr>
+		<tr>
+			<td>System V i386</td>
+			<td>eax, edx</td>
+			<td>none</td>
+			<td>stack (right to left)<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note1" rel="noopener noreferrer nofollow">1</a></sup></td>
+			<td> </td>
+			<td>eax, ecx, edx</td>
+			<td>ebx, esi, edi, ebp, esp</td>
+			<td>ebp</td>
+		</tr>
+		<tr>
+			<td>System V X86_64<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note2" rel="noopener noreferrer nofollow">2</a></sup></td>
+			<td>rax, rdx</td>
+			<td>rdi, rsi, rdx, rcx, r8, r9</td>
+			<td>stack (right to left)<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note1" rel="noopener noreferrer nofollow">1</a></sup></td>
+			<td>16-byte at call<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note3" rel="noopener noreferrer nofollow">3</a></sup></td>
+			<td>rax, rdi, rsi, rdx, rcx, r8, r9, r10, r11</td>
+			<td>rbx, rsp, rbp, r12, r13, r14, r15</td>
+			<td>rbp</td>
+		</tr>
+		<tr>
+			<td>Microsoft x64</td>
+			<td>rax</td>
+			<td>rcx, rdx, r8, r9</td>
+			<td>stack (right to left)<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note1" rel="noopener noreferrer nofollow">1</a></sup></td>
+			<td>16-byte at call<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note3" rel="noopener noreferrer nofollow">3</a></sup></td>
+			<td>rax, rcx, rdx, r8, r9, r10, r11</td>
+			<td>rbx, rdi, rsi, rsp, rbp, r12, r13, r14, r15</td>
+			<td>rbp</td>
+		</tr>
+		<tr>
+			<td>ARM (32-bit)</td>
+			<td>r0, r1</td>
+			<td>r0, r1, r2, r3</td>
+			<td>stack</td>
+			<td>8 byte<sup><a href="https://wiki.osdev.org/Calling_Conventions#Note4" rel="noopener noreferrer nofollow">4</a></sup></td>
+			<td>r0, r1, r2, r3, r12</td>
+			<td>r4, r5, r6, r7, r8, r9, r10, r11, r13, r14</td>
+			<td> </td>
+		</tr>
+	</tbody>
+</table>
+
+<p>Разберёмся для начала с 32-bit (i386 (история x86 полна сюрпризов)).</p>
+
+<ul>
+	<li>Ранее я говорил, что результат функции возвращается в регистре <code>*ax</code>. Напомню также, что результат умножения хранится в регистрах <code>*dx:*ax</code>.</li>
+	<li>Аргументы в функции не передаются в регистрах (мы этого и не наблюдали).</li>
+	<li>Дополнительные (а, так как аргументов в регистрах и нет, то все) аргументы передаются на стеке, и кладутся вызываемой функцией справа налево (есть ABI, где наоборот) в порядке, указанном в сигнатуре функции.</li>
+</ul>
+
+<p>Обратим внимание на scratch и preserved registers. Напомню, что регистры являются глобальными, поэтому за ними нужно очень внимательно наблюдать. Если вы выполняете какое-либо вычисление в регистрах, и в процессе этого вызываете функцию, значения регистров могут быть изменены. Для того, чтобы не потерять промежуточные вычисления, следует либо сохранить эти регистры на стек перед вызовом функции, либо поверить, что вызываемая функция их не изменит.</p>
+
+<p>Итак, регистры, которые функция обязана не менять называются preserved (callee (вызываемый) saved), а регистры, которые функция может изменить (а поэтому их должна сохранить на стек вызывающая функция) называются scratch (caller (вызывающий) saved).</p>
+
+<p>Зачем нужны scratch регистры, если без проблем можно сохранять все регистры? Для экономии времени выполнения, так как мы можем намеренно не хранить промежуточные вычисления в этих регистрах и не сохранять их вообще.</p>
+
+<p>Помните, что "недобросовестная" функция без каких либо проблем может не сохранить preserved регистры (может быть, она была написана под особым ABI).</p>
+
+<pre><code class="language-no-highlight">foo:
+    push    rbx
+    mov     rcx, 1
+    mov     rbx, 1
+    mov     rax, rbx
+    add     rax, rcx
+    pop     rbx
+    ret</code></pre>
+
+<p>Посмотрите на эту функцию-пример. Она использует для своих вычислений регистры rbx и rcx. При этом, так как регистр rbx является preserved, она его сохраняет на стеке, а затем восстанавливает.</p>
+
+<p>Обратите внимание, что некоторые регистры в 32-bit и 64-bit имеют разную принадлежность. Например, esi в 32-bit является preserved, а rdi в 64-bit является scratch.</p>

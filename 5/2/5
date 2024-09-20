@@ -1,0 +1,90 @@
+<p>Обратим теперь внимание на 64-bit ABI. Помимо добавления новых регистров <code>r8-15</code> (которые ничем не отличаются от первых восьми) и перераспределения их по группам scratch/preserved, теперь первые аргументы функций передаются в регистрах (так как операции с регистрами быстрее, а раньше регистров не хватало).</p>
+
+<p><code>main.asm</code></p>
+
+<pre><code class="language-no-highlight">section .data
+format:
+    db      "Check... %d", 0xA, 0x0
+
+section .text
+
+extern printf
+
+global main
+main:
+    sub     rsp, 8 ; for printf
+    mov     rdi, format
+    mov     rsi, 123
+    call    printf
+    add     rsp, 8 ; for printf
+    ret</code></pre>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 main.asm -o main.o
+$ gcc main.o -o main -no-pie
+$ ./main
+Check... 123</code></pre>
+
+<p>Посмотрев на таблицу, мы видим, что первый аргумент передаётся в регистре <code>rdi</code>, а второй — в регистре <code>rsi</code>.</p>
+
+<p>(Здесь я добавил сдвиг стека для удовлетворения printf-а.)</p>
+
+<p>Откроем таблицу системных вызовов: <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md" rel="noopener noreferrer nofollow">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md</a></p>
+
+<p>Мы готовы вызывать системные вызовы самостоятельно!</p>
+
+<p>Начнём с простейшего СВ — fork. Посмотрите на таблицу. Функция кодируется значеним регистра rax. У СВ fork это значение — <code>0x39</code>. Аргументы в СВ передаются в регистрах почти также, как и в функции в System V (единственное отличие — третий аргумент передаётся в регистре <code>r10</code>, вместо <code>rcx</code>).</p>
+
+<pre><code class="language-no-highlight">section .data
+format:
+    db      "Check... %d", 0xA, 0x0
+
+section .text
+
+extern printf
+
+global main
+main:
+    mov     rax, 0x39
+    syscall
+    
+    push    rbp
+    mov     rdi, format
+    mov     rsi, 123
+    call    printf
+    pop     rbp
+    ret</code></pre>
+
+<p>Чтобы выполнить СВ, мы заполняем регистры нужными значениями, а затем выполняем инструкцию <code>syscall</code>.</p>
+
+<pre><code class="language-no-highlight">$ ./main
+Check... 123
+Check... 123</code></pre>
+
+<p>Для 32-bit дейтвия чуть другие.</p>
+
+<pre><code class="language-no-highlight">section .data
+format:
+    db      "Check... %d", 0xA, 0x0
+
+section .text
+
+extern printf
+
+global main
+main:
+    mov     eax, 0x2
+    int     0x80
+
+    push    dword 123
+    push    format
+    call    printf
+    add     esp, 8
+    ret</code></pre>
+
+<pre><code class="language-no-highlight">$ nasm -felf32 main.asm -o main.o
+$ gcc -m32 -no-pie main.o -o main
+$ ./main
+Check... 123
+Check... 123</code></pre>
+
+<p>Во-первых, номер СВ теперь <code>0x2</code> (другая таблица), а во-вторых, нам необходимо использовать инструкцию <code>int</code> с аргументов <code>0x80</code> (об этой инструкции позже).</p>
