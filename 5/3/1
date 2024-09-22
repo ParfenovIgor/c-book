@@ -1,0 +1,103 @@
+<p>В коде на языке C мы без ограничений можем вызывать функции, которые определены в отдельном объектном файле, который был ассемблирован nasm-ом или любым другим ассемблером. Необходимо лишь, чтобы названия меток были одинаковыми.</p>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int my_fork();
+
+int main() {
+    int x = my_fork();
+    printf("%d\n", x);
+}</code></pre>
+
+<p><code>fork.asm</code></p>
+
+<pre><code class="language-no-highlight">section .text
+global my_fork
+my_fork:
+    mov     rax, 0x39
+    syscall</code></pre>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 fork.asm -o fork.o
+$ gcc main.c -c -o main.o
+$ gcc main.o fork.o -o main
+$ ./main
+51517
+0
+</code></pre>
+
+<p>Так ли реализована функция fork, которую мы вызываем в C? Проверим это с помощью дебаггера.</p>
+
+<pre><code class="language-cpp">#include &lt;unistd.h&gt;
+
+int main() {
+    fork();
+}</code></pre>
+
+<pre><code class="language-no-highlight">    0x7ffff7ceab30 &lt;__GI__Fork&gt;     endbr64                                                            │
+    0x7ffff7ceab34 &lt;__GI__Fork+4&gt;   mov    %fs:0x10,%rax                                               │
+    0x7ffff7ceab3d &lt;__GI__Fork+13&gt;  xor    %r8d,%r8d                                                   │
+    0x7ffff7ceab40 &lt;__GI__Fork+16&gt;  xor    %edx,%edx                                                   │
+    0x7ffff7ceab42 &lt;__GI__Fork+18&gt;  xor    %esi,%esi                                                   │
+    0x7ffff7ceab44 &lt;__GI__Fork+20&gt;  mov    $0x1200011,%edi                                             │
+    0x7ffff7ceab49 &lt;__GI__Fork+25&gt;  lea    0x2d0(%rax),%r10                                            │
+    0x7ffff7ceab50 &lt;__GI__Fork+32&gt;  mov    $0x38,%eax                                                  │
+  &gt; 0x7ffff7ceab55 &lt;__GI__Fork+37&gt;  syscall                                                            │
+</code></pre>
+
+<p>В моём случае функция сделала некоторую подготовительную работу и вызвала системный вызов <code>0x38</code> (что видно по инструкции перед syscall). Номер <code>0x38</code> имеет СВ clone, частным случаем которого является fork.</p>
+
+<p>Сделаем еще один эксперимент и проверим, какой системный вызов использует функция <code>malloc</code>.</p>
+
+<pre><code class="language-cpp">#include &lt;stdlib.h&gt;
+
+int main() {
+    void *a = malloc(1);
+}</code></pre>
+
+<pre><code class="language-no-highlight">┌─Register group: general───────────────────────────────────────────────────────────────────────────────┐
+│rax            0xc                 12                                                                  │
+│rbx            0x21000             135168                                                              │
+│rcx            0x2b0               688                                                                 │
+│rdx            0x0                 0                                                                   │
+│rsi            0x7ffff7e1ac80      140737352150144                                                     │
+│rdi            0x0                 0                                                                   │
+│rbp            0x7ffff7e22218      0x7ffff7e22218 &lt;__curbrk&gt;                                           │
+│rsp            0x7fffffffd998      0x7fffffffd998                                                      │
+│r8             0x2                 2                                                                   │
+│r9             0x7ffff7fc9040      140737353912384                                                     │
+│r10            0x7ffff7e1ace0      140737352150240                                                     │
+│r11            0x7ffff7e1ace0      140737352150240                                                     │
+│r12            0x0                 0                                                                   │
+│r13            0x7ffff7e1ace0      140737352150240                                                     │
+│r14            0x1000              4096                                                                │
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│    0x7ffff7d1a820 &lt;__brk&gt;          endbr64                                                            │
+│    0x7ffff7d1a824 &lt;__brk+4&gt;        mov    $0xc,%eax                                                   │
+│  &gt; 0x7ffff7d1a829 &lt;__brk+9&gt;        syscall                                                            │
+│    0x7ffff7d1a82b &lt;__brk+11&gt;       mov    0xff62e(%rip),%rdx        # 0x7ffff7e19e60                  │
+│    0x7ffff7d1a832 &lt;__brk+18&gt;       mov    %rax,(%rdx)                                                 │
+│    0x7ffff7d1a835 &lt;__brk+21&gt;       cmp    %rdi,%rax                                                   │
+│    0x7ffff7d1a838 &lt;__brk+24&gt;       jb     0x7ffff7d1a840 &lt;__brk+32&gt;                                   │
+│    0x7ffff7d1a83a &lt;__brk+26&gt;       xor    %eax,%eax                                                   │
+│    0x7ffff7d1a83c &lt;__brk+28&gt;       ret                                                                │
+│    0x7ffff7d1a83d &lt;__brk+29&gt;       nopl   (%rax)                                                      │
+│    0x7ffff7d1a840 &lt;__brk+32&gt;       mov    0xff5c9(%rip),%rax        # 0x7ffff7e19e10                  │
+│    0x7ffff7d1a847 &lt;__brk+39&gt;       movl   $0xc,%fs:(%rax)                                             │
+│    0x7ffff7d1a84e &lt;__brk+46&gt;       mov    $0xffffffff,%eax                                            │
+│    0x7ffff7d1a853 &lt;__brk+51&gt;       ret                                                                │
+│    0x7ffff7d1a854                  cs nopw 0x0(%rax,%rax,1)                                           │
+│    0x7ffff7d1a85e                  xchg   %ax,%ax                                                     │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+
+<p>На этот раз подготовительного кода было намного больше, и вам скорее всего потребуется несколько попыток, чтобы разобраться в нём и не потеряться. В конечном итоге будет вызван СВ с номером <code>0xC</code>, то есть, <code>brk</code>.</p>
+
+<p>Скажу просто как факт: malloc использует два системного вызова в зависимости от ситуации: <code>brk</code> и <code>mmap/mmunmap</code>.</p>
+
+<p>СВ brk изменяет размер сегмента <code>.data</code> (данный СВ считается устаревшим и информацию о нём найте непросто), а <code>mmap/munmap</code> работают примерно как <code>malloc/free</code>, но дают больший контроль над адресами, которые мы можем получить.</p>
+
+<p>В любом случае, мы не можем делать системный вызов на каждый вызов malloc-а, поскольку выполнение любого системного вызова довольно медленное (поэтому, например, printf выполняет буферизацию). Вместо этого для реализации malloc-а мы должны один раз выделить большой отрезок памяти а затем построить на нём структуру данных "куча/heap" (не путать с кучей из теории алгоритмов (здесь терминология совпала и на английском языке)).</p>
+
+<p>Сейчас мы выполнили reverse engineering. Будьте аккуратны — это в общем случае незаконно.</p>

@@ -1,0 +1,91 @@
+<p>Попробуем прикомпоновать функцию, написанную на языке ассемблера, к программе, написанной на языке C++. Воспользуемся GNU GCC компилятором — <code>g++</code>. Его использование ничем не отличается, от использования компилятора gcc.</p>
+
+<p><code>main.cpp</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+int foo(int x);
+
+int main() {
+    printf("%d\n", foo(2));
+    return 0;
+}</code></pre>
+
+<p><code>foo.asm</code></p>
+
+<pre><code class="language-no-highlight">section .text
+global foo
+foo:
+    mov     rax, rdi
+    add     rax, 1
+    ret</code></pre>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 foo.asm -o foo.o
+$ g++ main.cpp -c -o main.o
+$ g++ main.o foo.o -o main
+/usr/bin/ld: main.o: in function `main':
+main.cpp:(.text+0xe): undefined reference to `foo(int)'
+collect2: error: ld returned 1 exit status</code></pre>
+
+<p>Хм, компоновщик сообщает, что функция foo не определена. На самом деле, он немного лжёт и говорит о другой функции. Посмотрим на файл <code>main.o</code> подробнее с помощью readelf.</p>
+
+<pre><code class="language-no-highlight">$ readelf -a main.o
+...
+Symbol table '.symtab' contains 7 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS main.cpp
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 .text
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 .rodata
+     4: 0000000000000000    47 FUNC    GLOBAL DEFAULT    1 main
+     5: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND _Z3fooi
+     6: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND printf
+...</code></pre>
+
+<p>Секция <code>.symtab</code>, которую автоматически генерирует ассемблер, хранит метки, используемые в файле. Посмотрите на список: в нём нет метки <code>foo</code>, но есть некая метка <code>_Z3fooi</code>. Это и есть наша функция foo.</p>
+
+<p>Если вы ещё не знали, в C++ существует перегрузка функций (function overloading). Это означает, что вы можете определить несколько функций, которые имеют одинаковое название, на разную сигнатуру, и компилятор будет подставлять нужную функцию, исходя из типов аргументов.</p>
+
+<p><code>main.cpp</code></p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int foo(int x) {
+    return x + 1;
+}
+
+int foo(const char *str) {
+    return strlen(str);
+}
+
+int main() {
+    printf("%d %d\n", foo(2), foo("Hello"));
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ g++ main.cpp -o main
+$ ./main
+3 5</code></pre>
+
+<p>Компоновщик не знает о перегрузке функций, поэтому компилятор языка C++ просто кодирует сигнутуру функции прямо в название её метки. Это называется mangling (на русском, полагаю, можно назвать экранированием). Чтобы расшифровать метку, можно использовать программу <code>c++filt</code>.</p>
+
+<pre><code class="language-no-highlight">$ c++filt
+_Z3fooi
+foo(int)</code></pre>
+
+<p>Чтобы g++ не выполнил mangle, следует в объявлении функции написать директиву <code>extern "C"</code>. (Либо же можно в файле ассемблера объявить метку <code>_Z3fooi</code>, что, конечно, неудобно.)</p>
+
+<pre><code class="language-cpp">#include &lt;stdio.h&gt;
+
+extern "C" int foo(int x);
+
+int main() {
+    printf("%d\n", foo(2));
+    return 0;
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ g++ main.cpp -c -o main.o
+$ g++ main.o foo.o -o main
+$ ./main
+3</code></pre>

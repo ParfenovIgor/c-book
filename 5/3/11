@@ -1,0 +1,30 @@
+<p>Проверим тезис о том, что после изучения ассемблера одной архитектуры, ассемблеры других архитектур изучаются легко и быстро (речь, конечно, идёт о прикладном уровне).</p>
+
+<p>Вы можете компилировать код на другие архитектуры локально. Причём легко — zig с этим отлично справляется.</p>
+
+<p><code>main.c</code></p>
+
+<pre><code class="language-cpp">int boo(int x, int y) {
+    return x * y;
+}
+
+int foo(int x, int y) {
+    int a = x + y;
+    int b = x - y;
+    return boo(a, b);
+}
+
+int main() {
+    int x = 2;
+    int y = 3;
+    int z = foo(x, y);
+}</code></pre>
+
+<pre><code class="language-no-highlight">$ zig build-obj -target arm-linux main.c
+$ arm-linux-gnueabihf-objdump -d main</code></pre>
+
+<p>Так вы можете выполнить компиляцию на arm, а затем дизассемблировать и посмотреть инструкции. К сожалению, запуск хоть и возможен (например, с помощью эмулятора qemu), весьма непрост.</p>
+
+<p>Изучите регистры, формат инструкций и протокол вызова функций в архитектурах arm и risc-v.</p>
+
+<p>Альтернативно вы можете воспользоваться <a href="https://godbolt.org/" rel="noopener noreferrer nofollow">https://godbolt.org/</a></p>

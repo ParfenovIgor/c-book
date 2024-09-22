@@ -1,0 +1,182 @@
+<p>Добавим в нашу программу модуль с реализацией функции <code>exit</code>, скомпонуем их вместе и посмотрим на структуру полученного исполняемого файла.</p>
+
+<p><code>exit.asm</code></p>
+
+<pre><code class="language-no-highlight">global exit
+exit:
+    mov     rax, 0x3C
+    mov     rdi, 0x0
+    syscall</code></pre>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 exit.asm -o exit.o
+$ ld exit.o -o exit
+ld: warning: cannot find entry symbol _start; defaulting to 0000000000401000
+$ ./exit
+$ objdump -d exit
+
+exit:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000401000 &lt;exit&gt;:
+  401000:	b8 3c 00 00 00       	mov    $0x3c,%eax
+  401005:	bf 00 00 00 00       	mov    $0x0,%edi
+  40100a:	0f 05                	syscall</code></pre>
+
+<p>Если мы скомпонуем только этот файл, то компоновщик не найдет метку _start, и сделать entry point-ом начало секции (в данном случае, функцию exit).</p>
+
+<pre><code class="language-no-highlight">$ ld main.o exit.o -o main
+$ readelf -a main
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x401000
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          8584 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         3
+  Size of section headers:           64 (bytes)
+  Number of section headers:         7
+  Section header string table index: 6
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .text             PROGBITS         0000000000401000  00001000
+       000000000000003c  0000000000000000  AX       0     0     16
+  [ 2] .data             PROGBITS         0000000000402000  00002000
+       000000000000000d  0000000000000000  WA       0     0     4
+  [ 3] .bss              NOBITS           0000000000402010  0000200d
+       0000000000000010  0000000000000000  WA       0     0     4
+  [ 4] .symtab           SYMTAB           0000000000000000  00002010
+       0000000000000108  0000000000000018           5     6     8
+  [ 5] .strtab           STRTAB           0000000000000000  00002118
+       0000000000000044  0000000000000000           0     0     1
+  [ 6] .shstrtab         STRTAB           0000000000000000  0000215c
+       000000000000002c  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), l (large), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x00000000000000e8 0x00000000000000e8  R      0x1000
+  LOAD           0x0000000000001000 0x0000000000401000 0x0000000000401000
+                 0x000000000000003c 0x000000000000003c  R E    0x1000
+  LOAD           0x0000000000002000 0x0000000000402000 0x0000000000402000
+                 0x000000000000000d 0x0000000000000020  RW     0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .text 
+   02     .data .bss 
+
+There is no dynamic section in this file.
+
+There are no relocations in this file.
+No processor specific unwind information to decode
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS main.asm
+     2: 0000000000402000     0 NOTYPE  LOCAL  DEFAULT    2 buffer
+     3: 0000000000402009     0 NOTYPE  LOCAL  DEFAULT    2 length
+     4: 0000000000402010     0 NOTYPE  LOCAL  DEFAULT    3 zeros
+     5: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS exit.asm
+     6: 0000000000401000     0 NOTYPE  GLOBAL DEFAULT    1 _start
+     7: 000000000040200d     0 NOTYPE  GLOBAL DEFAULT    3 __bss_start
+     8: 000000000040200d     0 NOTYPE  GLOBAL DEFAULT    2 _edata
+     9: 0000000000402020     0 NOTYPE  GLOBAL DEFAULT    3 _end
+    10: 0000000000401030     0 NOTYPE  GLOBAL DEFAULT    1 exit
+
+No version information found in this file.</code></pre>
+
+<p>Начнём со списка секций. Здесь есть одно изменение: пропала секция <code>.rela.text</code>. Это логично, так как она уже была использована по назначению — для подстановки адресов меток.</p>
+
+<p>Теперь посмотрите на эту таблицу:</p>
+
+<pre><code class="language-no-highlight"> Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .text 
+   02     .data .bss </code></pre>
+
+<p>Загрузчик, который будет создавать процесс, выполняющий нашу программу, будет загружать его по сегментам, а не секциям. Данная таблица говорит о наличии трёх сегментов:</p>
+
+<ul>
+	<li>Первый фиктивный</li>
+	<li>Второй с секцией <code>.text</code></li>
+	<li>Третий с секциями <code>.data</code> и <code>.bss</code></li>
+</ul>
+
+<p>В одном сегменте может быть несколько секций.</p>
+
+<p>Посмотрите на поле Address у секций:</p>
+
+<pre><code class="language-no-highlight">Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .text             PROGBITS         0000000000401000  00001000
+       000000000000003c  0000000000000000  AX       0     0     16
+  [ 2] .data             PROGBITS         0000000000402000  00002000
+       000000000000000d  0000000000000000  WA       0     0     4
+  [ 3] .bss              NOBITS           0000000000402010  0000200d
+       0000000000000010  0000000000000000  WA       0     0     4
+...</code></pre>
+
+<p>Ранее там были записаны нули. Теперь же там записаны числа, например, <code>0x401000</code> для секции <code>.text</code>, <code>0x402000</code> для секции <code>.data</code> и <code>0x402010</code> для секции <code>.bss</code>. Какое это влияние оказывает на загрузчик? На самом деле, никакое. Эти числа здесь только как подсказка о том, где в процессе исполнения будут находиться в памяти данные секции.</p>
+
+<p>Запустим программу в дебаггере.</p>
+
+<pre><code class="language-no-highlight">└───────────────────────────────────────────────────────────────────────────────────────────────────────┘
+│B+&gt; 0x401000 &lt;_start&gt;       mov    $0x1,%eax                                                           │
+│    0x401005 &lt;_start+5&gt;     mov    $0x1,%edi                                                           │
+│    0x40100a &lt;_start+10&gt;    movabs $0x402000,%rsi                                                      │
+</code></pre>
+
+<pre><code class="language-no-highlight">(gdb) x/8c 0x402000
+0x402000:       67 'C'  104 'h' 101 'e' 99 'c'  107 'k' 46 '.'  46 '.'  46 '.'</code></pre>
+
+<p>Действительно, выполнение начинается с адреса <code>0x401000</code>, а по адресу <code>0x402000</code> записана наша строка.</p>
+
+<p>Посмотрим на сегменты. (Здесь program header = заголовки сегментов. Отличная терминология.)</p>
+
+<pre><code class="language-no-highlight">Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x00000000000000e8 0x00000000000000e8  R      0x1000
+  LOAD           0x0000000000001000 0x0000000000401000 0x0000000000401000
+                 0x000000000000003c 0x000000000000003c  R E    0x1000
+  LOAD           0x0000000000002000 0x0000000000402000 0x0000000000402000
+                 0x000000000000000d 0x0000000000000020  RW     0x1000</code></pre>
+
+<p>Начнём с поля Offset. Здесь снова речь о позиции в файле. Первый сегмент начинается с позиции <code>0x0</code> и по сути делает так, чтобы весь исполняемый файл был покрыт сегментами. Обратите внимание, что в секциях поле Offset тоже изменилось и теперь оно соответствует сегментам. В самом файле сегменты с секциями и сами секции не дублируются.</p>
+
+<p>Теперь о поле VirtAddr. Именно на это поле смотрит загрузчик, когда определяет, где в памяти должен быть данный сегмент. Аналогичное поле в таблице сегментов совпадает с ним. Для сегмента <code>.bss</code> это значение сдвинуто на <code>0x10</code>. При этом, Offset сдвинут только на <code>0xd</code>, то есть, формат elf старается не хранить в себе лишние байты ради выравнивания во время исполнения.</p>
+
+<p>Посмотрите на поле Flags, которое говорит о правах (permissions) для данных сегментов. Например, сегмент с секцией <code>.text</code> можно исполнять, но нельзя менять, а сегмент с секциями <code>.data</code> и <code>.bss</code> можно менять, но нельзя исполнять. При нарушении этого мы получим SIGSEGV.</p>
+
+<p>Поле PhysAddr в современных ОС не используется.</p>

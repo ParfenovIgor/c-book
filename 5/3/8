@@ -1,0 +1,146 @@
+<p>Изучим linker script-ы. Начнём с изменения entry point-а и VirtAddr-а.</p>
+
+<p><code>mymain.asm</code></p>
+
+<pre><code class="language-no-highlight">section .code exec
+global mymain
+extern hismain
+mymain:
+    call    hismain
+    mov     rax, 0x3C
+    mov     rdi, 0x0
+    syscall</code></pre>
+
+<p><code>hismain.asm</code></p>
+
+<pre><code class="language-no-highlight">section .code exec
+global hismain
+hismain:
+    mov     rax, 0x0
+    ret</code></pre>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(mymain)
+
+SECTIONS {
+    . = 0x100000;
+    .code : {
+        *(.code)
+    }
+}</code></pre>
+
+<p><code>ENTRY(mymain)</code> говорит о том, что entry point-ом будет метка <code>mymain</code>.</p>
+
+<p>Конструкция <code>SECTIONS</code> объединяет секции (пока что в большие секции, а не сегменты) и распологает их в определённом порядке во время исполнения программы, и в том же порядке в самом файле.</p>
+
+<p>Первая строка <code>. = 0x100000</code> говорит о том, что следующая секция будут располагаться по адресу <code>0x100000</code>, а следующие за ней — ещё дальше.</p>
+
+<p>Строка <code>.code : { *(.code) }</code> говорит следующее: необходимо взять со всех поданных на вход файлов (<code>*</code>) секцию <code>.code</code> и объединить их в одну секцию под названием <code>.code</code> (справа в конструкции — название выходной секции).</p>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 mymain.asm -o mymain.o
+$ nasm -felf64 hismain.asm -o hismain.o
+$ ld mymain.o hismain.o -o main -T script.ld
+$ ./main
+$ readelf -a main
+...
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .code             PROGBITS         0000000000100000  00001000
+       0000000000000017  0000000000000000  AX       0     0     1
+  [ 2] .symtab           SYMTAB           0000000000000000  00001018
+       0000000000000078  0000000000000018           3     3     8
+  [ 3] .strtab           STRTAB           0000000000000000  00001090
+       0000000000000027  0000000000000000           0     0     1
+  [ 4] .shstrtab         STRTAB           0000000000000000  000010b7
+       0000000000000021  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), l (large), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+                 0x0000000000000017 0x0000000000000017  R E    0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .code 
+...</code></pre>
+
+<p>Обратите внимание на то, что у единственного сегмента VirtAddr теперь равен <code>0x100000</code>, а Offset теперь не <code>0x0</code> (то есть теперь таблицы, которые мы сейчас видим, не будут загружены в память при запуске программы (это нужно регулировать отдельно)).</p>
+
+<p>Мы можем включать в выходной файл секции их стандартных файлов (например, файлов стандартной библиотеки).</p>
+
+<p><code>stdlib.asm</code></p>
+
+<pre><code class="language-no-highlight">section .code exec
+global sqrt
+sqrt:
+    mov     rax, 0x42
+    ret</code></pre>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(mymain)
+
+SECTIONS {
+    . = 0x100000;
+    .stdlib : {
+        stdlib.o(.code)
+    }
+    .code : {
+        *(.code)
+    }
+}</code></pre>
+
+<p>Мы образовали ещё одну секцию <code>.stdlib</code> из секции <code>.code</code> в файле <code>stdlib.o</code>. Обратите внимание, что теперь секция <code>.code</code> в файле <code>stdlib.o</code> не попадет в выходную секцию <code>.code</code>. При этом, если мы поменяем порядок объявления выходных секций <code>.stdlib</code> и <code>.code</code>, то секция <code>.code</code> в файле <code>stdlib.o</code> попадёт в выходную секцию <code>.code</code>, а секция <code>.stdlib</code> будет выброшена, так как в неё не попало ничего.</p>
+
+<pre><code class="language-no-highlight">$ nasm -felf64 stdlib.asm -o stdlib.o
+$ ld mymain.o hismain.o -o main -T script.ld
+$ ./main
+$ readelf -a main
+...
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .stdlib           PROGBITS         0000000000100000  00001000
+       0000000000000006  0000000000000000  AX       0     0     1
+  [ 2] .code             PROGBITS         0000000000100006  00001006
+       0000000000000017  0000000000000000  AX       0     0     1
+  [ 3] .symtab           SYMTAB           0000000000000000  00001020
+       00000000000000a8  0000000000000018           4     4     8
+  [ 4] .strtab           STRTAB           0000000000000000  000010c8
+       0000000000000037  0000000000000000           0     0     1
+  [ 5] .shstrtab         STRTAB           0000000000000000  000010ff
+       0000000000000029  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), l (large), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+                 0x000000000000001d 0x000000000000001d  R E    0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .stdlib .code 
+...</code></pre>
+
+<p>Обратите внимание, что обе секции попали в первый сегмент. Как управлять сегментами, мы увидим чуть позже.</p>

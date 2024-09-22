@@ -1,0 +1,1 @@
+<p>Напишите программу и linker script к ней, которые поддерживают другие секции (<code>.data</code>, <code>.bss</code>, <code>.rodata</code>), выставляя им правильные права. При этом эти секции переименованы (например, <code>.bss</code> -&gt; <code>.uninit</code>).</p>

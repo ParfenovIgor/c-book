@@ -1,0 +1,166 @@
+<p>Посмотрим более сложные случаи организации секций и сегментов. Здесь я снова обнаруживал странное и неочевидное поведение компоновщика.</p>
+
+<p><code>mymain.asm</code></p>
+
+<pre><code class="language-no-highlight">section .code exec
+global mymain
+extern hismain
+mymain:
+    call    hismain
+    mov     rax, 0x3C
+    mov     rdi, 0x0
+    syscall
+
+section .foo
+foo:
+    db      0x1, 0x2</code></pre>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(mymain)
+
+SECTIONS {
+    . = 0x100000;
+    .stdlib : {
+        stdlib.o(.code)
+    }
+    .code : {
+        *(.code)
+    }
+    .foo : {
+        *(.foo)
+    }
+}</code></pre>
+
+<p>Представим, что мы хотим дополнительно иметь секцию только с правами на чтение. Оставим всё остальное, как было на прошлом шаге.</p>
+
+<pre><code class="language-no-highlight">$ readelf -a main
+...
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+                 0x000000000000001f 0x000000000000001f  R E    0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .stdlib .code .foo 
+...</code></pre>
+
+<p>Наша секция <code>.foo</code> является executable так как компоновщик положил её в один сегмент с остальными! (Проверьте с помощью дебаггера, что вы действительно можете выполнять код в этой секции. Для этого, напишите в неё инструкции.)</p>
+
+<p>Попробуем сделать секцию <code>.foo</code> writable.</p>
+
+<pre><code class="language-no-highlight">section .code exec
+global mymain
+extern hismain
+mymain:
+    call    hismain
+    mov     rax, 0x3C
+    mov     rdi, 0x0
+    syscall
+
+section .foo write
+foo:
+    db      0x1, 0x2</code></pre>
+
+<pre><code class="language-no-highlight">$ readelf -a main
+...
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+                 0x000000000000001f 0x000000000000001f  RWE    0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .stdlib .code .foo 
+...</code></pre>
+
+<p>Теперь секция с кодом тоже стала writable (что неприемлемо). То есть, компоновщик ставит в права сегмента объединение прав всех составляющих его секций.</p>
+
+<p>Я не смог найти информацию о конструкциях, явно указывающих распределение секций по сегментам. Вместо этого мы делаем это так.</p>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(mymain)
+
+SECTIONS {
+    . = 0x100000;
+    .stdlib : {
+        stdlib.o(.code)
+    }
+    .code : {
+        *(.code)
+    }
+    . = 0x200000;
+    .foo : {
+        *(.foo)
+    }
+}</code></pre>
+
+<p>Мы снова явно установили значение VirtAddr на большую величину.</p>
+
+<pre><code class="language-no-highlight">$ readelf -a main
+...
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+                 0x000000000000001d 0x000000000000001d  R E    0x1000
+  LOAD           0x0000000000002000 0x0000000000200000 0x0000000000200000
+                 0x0000000000000002 0x0000000000000002  RW     0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .stdlib .code 
+   01     .foo 
+...</code></pre>
+
+<p>Теперь у нас две сегмента с правильным распределением секций в них, правильными значениями VirtAddr и правильными правами.</p>
+
+<p>Обратите внимание на эти конструкции: <code>. = 0x100000;</code>. Мы можем этим адресам давать имена, а затем использовать эти метки в коде — компоновщик подставит их значения. Кроме того, мы можем давать имена не только адресам, которые мы написали явно, но и тем, которые вывел компоновщик — например, адресу начала секции <code>.code</code>, которая попадает второй секцией к первому сегменту.</p>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(mymain)
+
+SECTIONS {
+    . = 0x100000;
+    .stdlib : {
+        stdlib.o(.code)
+    }
+    code_begin = .;
+    .code : {
+        *(.code)
+    }
+    foo_begin = 0x200000;
+    .foo : {
+        *(.foo)
+    }
+}</code></pre>
+
+<p>Мы создали две метки: <code>code_begin</code> хранит адрес начала секции <code>.code</code>, а <code>foo_begin</code> хранит адрес начала секции <code>.foo</code>. Мы можем использовать это как обычные метки, определённые в других модулях.</p>
+
+<p><code>mymain.asm</code></p>
+
+<pre><code class="language-no-highlight">section .code exec
+global mymain
+extern hismain
+extern code_begin
+extern foo_begin
+mymain:
+    mov     rax, code_begin
+    mov     rbx, foo_begin
+    call    hismain
+    mov     rax, 0x3C
+    mov     rdi, 0x0
+    syscall
+
+section .foo write
+foo:
+    db      0x1, 0x2</code></pre>
+
+<pre><code class="language-no-highlight">└───────────────────────────────────────────────────────────────────────────────────────────────────────┘
+│B+&gt; 0x100006 &lt;mymain&gt;       movabs $0x100006,%rax                                                      │
+│    0x100010 &lt;mymain+10&gt;    movabs $0x200000,%rbx                                                      │</code></pre>

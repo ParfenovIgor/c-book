@@ -91,6 +91,10 @@ $book = [
         "name" => "Application Binary Interface",
         "size" => 11,
       ],
+      3 => [
+        "name" => "Компоновка",
+        "size" => 11,
+      ],
     ]
   ],
 ];
