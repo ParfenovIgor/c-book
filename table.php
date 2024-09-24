@@ -95,6 +95,10 @@ $book = [
         "name" => "Компоновка",
         "size" => 11,
       ],
+      4 => [
+        "name" => "Введение в Embedded Programming",
+        "size" => 10,
+      ],
     ]
   ],
 ];

@@ -1,0 +1,3 @@
+<p>Выполните "Bare Bones" для архитектур arm и risc-v на <a href="https://wiki.osdev.org" rel="noopener noreferrer nofollow">https://wiki.osdev.org</a> , включая запуск в qemu.</p>
+
+<p>Попробуйте отдавать предпочтение компилятору zig, вместо gcc.</p>

@@ -1,0 +1,105 @@
+<p>Я сразу покажу все файлы, а затем мы выполним анализ этого.</p>
+
+<p><code>src/boot.asm</code></p>
+
+<pre><code class="language-no-highlight">%define FLAGS 0x3
+%define MAGIC 0x1BADB002
+%define CHECKSUM -(MAGIC + FLAGS)
+
+section .multiboot
+    align   0x4
+    dd      MAGIC
+    dd      FLAGS
+    dd      CHECKSUM
+
+section .text
+global _start
+_start:
+    lea     edi, 0xB8000
+    mov     byte [edi + 0], 'H'
+    mov     byte [edi + 2], 'e'
+    mov     byte [edi + 4], 'l'
+    mov     byte [edi + 6], 'l'
+    mov     byte [edi + 8], 'o'
+
+    cli
+.1: hlt
+    jmp .1</code></pre>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(_start)
+
+SECTIONS {
+	. = 0x200000;
+	.text : ALIGN(0x1000) {
+		*(.multiboot)
+		*(.text)
+	}
+}</code></pre>
+
+<p><code>grub.cfg</code></p>
+
+<pre><code class="language-no-highlight">menuentry "Rach" {
+	multiboot /boot/kernel
+}</code></pre>
+
+<p><code>Makefile</code></p>
+
+<pre><code class="language-makefile">BUILD_DIR=$(abspath build)
+
+SRCS_ASM=$(wildcard src/*.asm)
+OBJS_ASM=$(patsubst src/%.asm, $(BUILD_DIR)/%.o, $(SRCS_ASM))
+
+ASFLAGS=-felf32
+LDFLAGS=-T script.ld -m elf_i386
+
+$(BUILD_DIR)/%.o: src/%.asm prepare
+	nasm $(ASFLAGS) $&lt; -o $@
+
+kernel: $(OBJS_ASM) $(OBJS_C)
+	ld $(LDFLAGS) $(OBJS_ASM) $(OBJS_C) -o $(BUILD_DIR)/kernel
+
+image: kernel
+	mkdir -p isodir/boot/grub
+	cp $(BUILD_DIR)/kernel isodir/boot/kernel
+	cp grub.cfg isodir/boot/grub/grub.cfg
+	grub-mkrescue -o $(BUILD_DIR)/kernel.iso isodir
+	rm -rf isodir
+
+qemu: image
+	qemu-system-i386 -cdrom $(BUILD_DIR)/kernel.iso
+
+prepare:
+	mkdir -p $(BUILD_DIR)
+
+clean:
+	rm -rf $(BUILD_DIR)</code></pre>
+
+<p>Для запуска этого вам необходимо поставить в систему:</p>
+
+<ul>
+	<li>grub</li>
+	<li>xorriso</li>
+	<li>mtools</li>
+	<li>qemu</li>
+	<li>zig</li>
+</ul>
+
+<p>Начнём с файла <code>src/boot.asm</code></p>
+
+<p>Данный файл начинается с секции, которая хранит только последовательность чисел, по которой grub увидит этот файл. (Зачем это нужно, ведь полученный диск является обычным диском, partition-ы которого имеют обычные файловые системы (можете потом это проверить), и grub может просто найти наш elf-файл по заданному в конфигурационном файле пути? Полагаю, чтобы grub мог загружать ядро и из неизвестной ему файловой системы.)</p>
+
+<p>В самой программе я записываю простым способом строку в адрес <code>0xB8000</code> с шагом в <code>2</code> байта. Это выглядит как что-то бессмысленное, но это не так. По умолчанию BIOS устанавливает монитор в специальный режим терминала (ищите по запросу VESA), при котором всё, что вы будете писать в адрес <code>0xB8000</code> будет дублироваться на мониторе. При этом, каждый чётный байт обозначает символ, а каждый нечётный байт — цвет этого символа. Я это сделал, чтобы наша ОС показала хоть какие-то признаки жизни.</p>
+
+<p>Инструкция <code>cli</code>, грубо говоря, ставит на паузу анализ прерываний (interrupts), приходящих от оборудования. Когда какое-то оборудование хочет нам что-то сказать, оно "пингует" нас прерыванием. При этом, само прерывание не несёт в себе информации — получив его, мы просто вступаем в "диалог" с оборудованием. BIOS автоматически настраивает некие прерывания (я не знаю, перезаписывает ли их grub).</p>
+
+<p>Инструкция <code>hlt</code> останавливает процессор. Однако, если придет прерывание от оборудования, то после его обработки, процессор продолжит своё выполнение. Поэтому мы и используем инструкцию cli. (Про jmp на hlt мне мало известно. Говорят, что процессор всё равно может возобновить работу, поэтому мы и добавляем этот прыжок.)</p>
+
+<p>Linker script <code>script.ld</code>, полагаю, должен быть почти очевиден. Мы добавили сдвиг на <code>0x200000</code>, так как на меньших адресах grub хранит свою информацию. Аттрибут <code>ALIGN</code> выравнивает секцию на соответствующую величину.</p>
+
+<p>Конфигурационный файл для grub-а <code>grub.cfg</code> содержит лишь путь до нашего исполняемого файла.</p>
+
+<p>Посмотрим на файл <code>Makefile</code>. Мы добавляем компоновщику флаг <code>-m elf_i386</code>, чтобы выполнить компоновку в elf 32-bit. (По какой-то причине компоновщик у меня игнорировал OUTPUT_FORMAT в linker script-е.) После компиляции мы кладём исполняемый файл и конфигурационный файл grub-а в отдельную директорию и вызываем grub-mkrescue, который создаёт загрузочный диск. Наконец, мы запускаем виртуальную машину qemu, передав ей загрузочный диск в cd-rom.</p>
+
+<p>Выполните <code>make qemu</code>. qemu запустится в обычном окне. Вы на долю секунды увидете текст от BIOS-а в qemu, затем появится grub, который предложит вам выбрать ОС для загрузки из списка, в котором будет только одна ОС. После загрузки ОС вы увидете текст <code>Hello</code> и мигающий курсор на первом символе (как поменять его позицию, можете почитать самостоятельно).</p>

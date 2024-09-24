@@ -1,0 +1,75 @@
+<p>Писать программы на ассемблере очень сложно. Как и в случае с языком C, мы хотим как можно скорее перейти на более высокоуровневый язык программирования. Перейти к C на самом деле довольно просто. Однако обычным gcc пользоваться очень сложно, так как он то и дело использует оптимизации, которые непросто поддерживать: shared objects и секцию <code>.rela.dyn</code>, position independent code и секцию <code>.got</code>, stdlib, даже если есть флаг на неиспользование её, и т. д.</p>
+
+<p>Чтобы эффективно отключить всё это, следуем скомпилировать себе gcc со специальными <code>freestanding</code> настройками. Здесь указано, как это сделать: <a href="https://wiki.osdev.org/GCC_Cross-Compiler" rel="noopener noreferrer nofollow">https://wiki.osdev.org/GCC_Cross-Compiler</a> . Однако, я решил пойти немного другим путём, так как компиляция компилятора — довольно затратное действие (на слабой машине процесс компиляции будет длиться несколько часов). Мы воспользуемся компилятором <code>zig</code>, так как он отлично поддерживает freestanding-компиляцию. Позволю вам прикоснуться к прекрасному.</p>
+
+<p><code>Makefile</code></p>
+
+<pre><code class="language-makefile">...
+SRCS_C=$(wildcard src/*.c)
+OBJS_C=$(patsubst src/%.c, $(BUILD_DIR)/%.o, $(SRCS_C))
+...
+ZIGFLAGS=-target x86-freestanding
+...
+$(BUILD_DIR)/%.o: src/%.c prepare
+	zig build-obj $(ZIGFLAGS) $&lt; -femit-bin=$@
+...</code></pre>
+
+<p>Мы передаём zig-у флаг <code>-target x86-freestanding</code>. Я не буду здесь это показывать, можете проверить самостоятельно, что структура исполняемого файла корректная.</p>
+
+<p><code>kernel.c</code></p>
+
+<pre><code class="language-cpp">void kernel_main() {
+    char *ptr = (char*)0xB8000;
+    char str[6] = "Hello";
+    int i;
+    for (i = 0; i &lt; 5; i++) {
+        ptr[i * 2] = str[i];
+    }
+}</code></pre>
+
+<p>Сделаем то же самое, что и в коде на языке ассемблера в прошлый раз. Здесь нам нужно подумать внимательно: а не пользуемся ли мы неправильными секциями? Мы создали локальный массив. Где он хранится? На стеке, как и адрес возврата для фукнции <code>kernel_main</code>. А где стек? Наверное, grub нам его создал, но чёткого ответа на то, где он, нет. Тогда создадим стек сами.</p>
+
+<p>Мы поместим стек в секцию <code>.bss</code>. (Кстати, а если объявить строку как <code>const char*</code>, то в какой секции она будет?)</p>
+
+<p><code>boot.asm</code></p>
+
+<pre><code class="language-no-highlight">...
+section .bss
+    align   0x10
+stack_bottom:
+    resb    16384
+stack_top:
+
+section .text
+extern kernel_main
+global _start
+_start:
+    lea     esp, stack_top
+    call    kernel_main
+
+    cli
+.1: hlt
+    jmp .1</code></pre>
+
+<p>Мы создали секцию <code>.bss</code>, в которой объявили последовательность, размера <code>16384</code>. (Число взято с неба. Но имейте ввиду: если вы переполните стек, понять это при отладке может быть очень непросто.) Напомню, что стек растет в сторону уменьшения адреса.</p>
+
+<p>Далее мы устанавливаем значение регистра <code>esp</code> на вершину нашего стека и вызываем функцию, определённую на языке C.</p>
+
+<p><code>script.ld</code></p>
+
+<pre><code class="language-no-highlight">ENTRY(_start)
+
+SECTIONS {
+	. = 0x200000;
+	.text : ALIGN(0x1000) {
+		*(.multiboot)
+		*(.text)
+	}
+	.bss : ALIGN(0x1000) {
+		*(.bss)
+	}
+}</code></pre>
+
+<p>Нам нужно добавить секцию <code>.bss</code>. Здесь есть очередная странность в логике работы компоновщика: секция <code>.bss</code> попадает в отдельный сегмент только из-за того, что мы добавили аттрибут <code>ALING</code>.</p>
+
+<p>При запуске этой ОС вы снова увидете строку <code>Hello</code>.</p>
