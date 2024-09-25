@@ -1,4 +1,4 @@
-<p>Функция <code>int sprintf( char* buffer, const char* format, ... );<span style=""> </span><span style=""> </span><span style=""> </span><span style=""> </span><span style=""> </span><span style=""> </span></code> работает, как функция <code>printf</code>, но она принимает своим первых аргументом строку <code>buffer</code>, в которую и происходит печать. При этом содержимое строки <code>buffer</code>  никак не проверяется на переполнение.</p>
+<p>Функция <code>int sprintf( char* buffer, const char* format, ... );</code> работает, как функция <code>printf</code>, но она принимает своим первых аргументом строку <code>buffer</code>, в которую и происходит печать. При этом содержимое строки <code>buffer</code>  никак не проверяется на переполнение.</p>
 
 <pre><code class="language-cpp">int main() {
     char str[100];
@@ -8,7 +8,7 @@
 
 <p>Вывод этой программы: <code>32 85</code></p>
 
-<p>Функция <code>char *strcpy( char *dest, const char *src );</code> выполняет копирование строки из второго аргумента в первый (поэтому тип первого аргумента лишен <code>const</code>). Копирование выполняется до обнаружения нулевого символа в <code>src</code>. При этом содержимое строки <code>dest</code> никак не проверяется на переполнение.</p>
+<p>Функция <code>char *strcpy( char *dest, const char *src );</code> выполняет копирование строки из второго аргумента в первый (поэтому тип первого аргумента лишён <code>const</code>). Копирование выполняется до обнаружения нулевого символа в <code>src</code>. При этом содержимое строки <code>dest</code> никак не проверяется на переполнение.</p>
 
 <pre><code class="language-cpp">int main() {
     const char *a = "abacaba";
@@ -22,7 +22,7 @@
 
 <p>Обратите внимание, что функция <code>strcpy</code> закладывает нулевой символ в конец строки <code>dest</code>. Не забывайте оставлять под него место.</p>
 
-<p>Часто необходимо ограничить длины копируемой строки. Вместо добавления <code>if</code>-а можно использовать стандартную функцию <code>char *strncpy( char *dest, const char *src, size_t count );</code>, которая копирует не более <code>count</code> символов, <strong>включая нулевой символ</strong> (то есть, может оставить строку без нуля на конце).</p>
+<p>Часто необходимо ограничить длину копируемой строки. Вместо добавления <code>if</code>-а можно использовать стандартную функцию <code>char *strncpy( char *dest, const char *src, size_t count );</code>, которая копирует не более <code>count</code> символов, <strong>включая нулевой символ</strong> (то есть, может оставить строку без нуля на конце).</p>
 
 <pre><code class="language-cpp">int main() {
     const char *a = "abacaba";

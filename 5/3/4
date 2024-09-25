@@ -138,7 +138,7 @@ No version information found in this file.</code></pre>
        000000000000000d  0000000000000000  WA       0     0     4
 ...</code></pre>
 
-<p>Поле Address получит смысл только после выполнения компоновки. Поле Offset — это позиция секции в самом файле. Например, позиция секции <code>.data</code> — <code>0x200</code> байт. Проверим это.</p>
+<p>Поле Address получит смысл только после выполнения компоновки. Поле Offset — это позиция секции в самом файле. Например, позиция секции <code>.data</code> — <code>0x240</code> байт. Проверим это.</p>
 
 <pre><code class="language-no-highlight">$ hd main.o
 ...

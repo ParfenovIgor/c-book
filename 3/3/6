@@ -67,13 +67,15 @@ $(BUILD_DIR)/fboo/%.o: src/%.c prepare
 $(BUILD_DIR)/fboo/libfboo.a: $(OBJS)
 	ar -rc $@ $^
 
+fboo: $(BUILD_DIR)/fboo/libfboo.a
+
 prepare:
 	mkdir -p $(BUILD_DIR)/fboo
 
 clean:
 	rm -rf $(BUILD_DIR)/fboo</code></pre>
 
-<p>Здесь переменная <code>$(BUILD_DIR)</code> равна абсолютному пути директории <code>build</code>, и будет нам передана "верхним" make-файлом. Для того, чтобы уже сейчас проверить этот файл, мы можем добавить <code>BUILD_DIR=../../build</code> и вызвать <code>make</code> из директории <code>lib/fboo</code>. В данном случае, если мы вызовем <code>make</code> без названия рецепта, будут выполнены все рецепты. (В общем случае это не так: там упоротые правила, которые я не знаю.) Флаг <code>-Iinclude</code> нам необходим, чтобы файлы в директории <code>lib/fboo/include</code> были видимы. С помощью рецепта <code>prepare</code> мы создаём директорию <code>build/fboo</code>, так как <code>gcc</code> не создает её самостоятельно.</p>
+<p>Здесь переменная <code>$(BUILD_DIR)</code> равна абсолютному пути директории <code>build</code>, и будет нам передана "верхним" make-файлом. Для того, чтобы уже сейчас проверить этот файл, мы можем добавить <code>BUILD_DIR=../../build</code> и вызвать <code>make fboo</code> из директории <code>lib/fboo</code>. Флаг <code>-Iinclude</code> нам необходим, чтобы файлы в директории <code>lib/fboo/include</code> были видимы. С помощью рецепта <code>prepare</code> мы создаём директорию <code>build/fboo</code>, так как <code>gcc</code> не создаёт её самостоятельно.</p>
 
 <p>Организуем таким же образом библиотеку <code>doo</code>.</p>
 
@@ -99,6 +101,9 @@ $(BUILD_DIR)/doo/%.o: src/%.c prepare
 $(BUILD_DIR)/doo/libdoo.a: $(OBJS)
 	ar -rc $@ $^
 
+doo: $(BUILD_DIR)/doo/libdoo.a
+	echo $(BUILD_DIR)
+
 prepare:
 	mkdir -p $(BUILD_DIR)/doo
 
@@ -121,10 +126,10 @@ $(BUILD_DIR)/%.o: src/%.c prepare
 	gcc $(CFLAGS) $&lt; -c -o $@
 
 $(BUILD_DIR)/fboo/libfboo.a:
-	$(MAKE) -C lib/fboo BUILD_DIR=$(BUILD_DIR)
+	$(MAKE) -C lib/fboo fboo BUILD_DIR=$(BUILD_DIR)
 
 $(BUILD_DIR)/doo/libdoo.a:
-	$(MAKE) -C lib/doo BUILD_DIR=$(BUILD_DIR)
+	$(MAKE) -C lib/doo doo BUILD_DIR=$(BUILD_DIR)
 
 $(BUILD_DIR)/program: $(OBJS) $(LIBS)
 	gcc $(OBJS) $(LIBS) -o $@
@@ -137,6 +142,10 @@ prepare:
 clean:
 	rm -rf $(BUILD_DIR)</code></pre>
 
-<p>Для начала, мы создаём переменную <code>BUILD_DIR</code>, в которую записываем абсолютный путь директории <code>build</code>, который мы добываем с помощью функции <code>abspath</code>. К флагам мы добавляем флаг <code>-Ilib</code>, чтобы мы могли добавлять файлы из библиотек. С помощью <code>$(MAKE) -C dir</code> мы рекурсивно вызываем <code>make</code> в директории <code>dir</code>. Для того, чтобы получить исполняемый файл <code>build/program</code> необходимо ввести <code>make program</code> (либо <code>make dir</code>, где <code>dir</code> это абсолютный путь до исполняемого файла, но так менее удобно).</p>
+<p>Для начала, мы создаём переменную <code>BUILD_DIR</code>, в которую записываем абсолютный путь директории <code>build</code>, который мы добываем с помощью функции <code>abspath</code>. К флагам мы добавляем флаг <code>-Ilib</code>, чтобы мы могли добавлять файлы из библиотек.</p>
+
+<p>С помощью <code>$(MAKE) -C dir recipe</code> мы рекурсивно вызываем <code>make</code> в директории <code>dir</code> с рецептом <code>recipe</code>. Мы проталкиваем к дочернему <code>make</code> переменную <code>BUILD_DIR</code> с помощью <code>BUILD_DIR=$(BUILD_DIR)</code>.</p>
+
+<p>Для того, чтобы получить исполняемый файл <code>build/program</code> необходимо ввести <code>make program</code> (либо <code>make dir</code>, где <code>dir</code> это абсолютный путь до исполняемого файла, но так менее удобно).</p>
 
 <p>В этом make-файле есть недостатки. Например, названия библиотек недостаточно абстрагированы. Я намеренно не стал этим усложнять пример.</p>

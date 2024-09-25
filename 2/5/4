@@ -45,4 +45,11 @@
     return 0;
 }</code></pre>
 
-<p>, можно использовать функцию <code>char * strdup( const char *str1 );</code>, которая делает то же самое: <code>char *b = strdup(a);</code>.</p>
+<p>, можно использовать функцию <code>char * strdup( const char *str1 );</code>, которая делает то же самое.</p>
+
+<pre><code class="language-cpp">int main() {
+    const char *a = "abacaba";
+    char *b = strdup(a);
+    printf("%s\n", b);
+    return 0;
+}</code></pre>

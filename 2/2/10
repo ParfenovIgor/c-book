@@ -4,8 +4,8 @@
 
 <p>Первая строка входных данных содержит одно целое число <span class="math-tex">\(n\)</span> (<span class="math-tex">\(1 \le n \le 10^3\)</span>)</p>
 
-<p>Вторая строка входных данных <span class="math-tex">\(n\)</span> целых чисел <span class="math-tex">\(a_1, a_2, \ldots, a_n\)</span> (<span class="math-tex">\(1 \le a_i \le 10^6\)</span>)</p>
+<p>Вторая строка входных данных содержит <span class="math-tex">\(n\)</span> целых чисел <span class="math-tex">\(a_1, a_2, \ldots, a_n\)</span> (<span class="math-tex">\(1 \le a_i \le 10^6\)</span>)</p>
 
 <h4>Формат вывода</h4>
 
-<p>Выведите единственное число — наибольшая разность <span class="math-tex">\(a_q - a_p\)</span>.</p>
+<p>Выведите единственное число — наибольшую разность <span class="math-tex">\(a_q - a_p\)</span>.</p>

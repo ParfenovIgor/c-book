@@ -30,7 +30,7 @@
     return 0;
 }</code></pre>
 
-<p>Вывод этой программы будет состоять из четырёх чисел, первый три из которых: <code>1 2 3</code></p>
+<p>Вывод этой программы будет состоять из четырёх чисел, первые три из которых: <code>1 2 3</code></p>
 
 <p>Функция <code>int memcmp(const void *buf1, const void *buf2, size_t count)</code> сравнивает первые <code>count</code> элементов массивов <code>buf1</code> и <code>buf2</code> лексикографически так же, как и функция <code>strcmp</code>.</p>
 

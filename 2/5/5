@@ -1,4 +1,4 @@
-<p>Реализуется функции <code>strcpy</code>, <code>strncpy</code>, <code>strcmp</code> и <code>strncmp</code> так, как ранее была реализована функция <code>strlen</code>. Добавьте в начало из названия символ <code>_</code>, чтобы не было конфликтов имен.</p>
+<p>Реализуйте функции <code>strcpy</code>, <code>strncpy</code>, <code>strcmp</code> и <code>strncmp</code> так, как ранее была реализована функция <code>strlen</code>. Добавьте в начало их названия символ <code>_</code>, чтобы не было конфликтов имен.</p>
 
 <p>Подставьте следующую функцию <code>main</code>:</p>
 
