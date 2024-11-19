@@ -34,9 +34,9 @@ foreach ($book as $i => $value1) {
     echo "<li><a href=\"#" . $i . "." . $j . "\">" .
          $i . "." . $j . ". " . $value2["name"] .
          "</a><ul>";
-    for ($k = 1; $k <= $value2["size"]; $k++) {
+    foreach ($value2["content"] as $k => $value3) {
       echo "<li><a href=\"#" . $i . "." . $j . "." . $k . "\">" .
-           $i . "." . $j . "." . $k .
+           $i . "." . $j . "." . $k . ". " . $value3 .
            "</a></li>";
     }
     echo "</ul></li>";
@@ -61,9 +61,9 @@ foreach ($book as $i => $value1) {
     echo "<h3 id=\"" . $i . "." . $j . "\">" .
          $i . "." . $j . ". " . $value2["name"] .
          "</h3>";
-    for ($k = 1; $k <= $value2["size"]; $k++) {
+    foreach ($value2["content"] as $k => $value3) {
       echo "<h3 id=\"" . $i . "." . $j . "." . $k . "\">" .
-           $i . "." . $j . "." . $k . "</h3>";
+           $i . "." . $j . "." . $k . ". " . $value3 . "</h3>";
       include $i . "/" . $j . "/" . $k;
     }
   }
