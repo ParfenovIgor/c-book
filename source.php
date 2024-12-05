@@ -26,22 +26,25 @@
         <ul>
 
 <?php
+// Three level structure
 foreach ($book as $i => $value1) {
   echo "<li><a href=\"#" . $i . "\">" .
        $i . ". " . $value1["name"] .
-       "</a><ul>";
+       "</a><ul>\n";
   foreach ($value1["content"] as $j => $value2) {
     echo "<li><a href=\"#" . $i . "." . $j . "\">" .
          $i . "." . $j . ". " . $value2["name"] .
-         "</a><ul>";
-    foreach ($value2["content"] as $k => $value3) {
-      echo "<li><a href=\"#" . $i . "." . $j . "." . $k . "\">" .
-           $i . "." . $j . "." . $k . ". " . $value3 .
-           "</a></li>";
+         "</a><ul>\n";
+    if (!($i == 1 && $j == 1)) { // Subsection 1.1 has only one subsubsection 1.1.1
+      foreach ($value2["content"] as $k => $value3) {
+        echo "<li><a href=\"#" . $i . "." . $j . "." . $k . "\">" .
+            $i . "." . $j . "." . $k . ". " . $value3 .
+            "</a></li>\n";
+      }
     }
-    echo "</ul></li>";
+    echo "</ul></li>\n";
   }
-  echo "</ul></li>";
+  echo "</ul></li>\n";
 }
 ?>
 
@@ -56,15 +59,22 @@ foreach ($book as $i => $value1) {
 foreach ($book as $i => $value1) {
   echo "<h2 id=\"" . $i . "\">" .
        $i . ". " . $value1["name"] .
-       "</h2>";
+       "</h2>\n";
   foreach ($value1["content"] as $j => $value2) {
     echo "<h3 id=\"" . $i . "." . $j . "\">" .
          $i . "." . $j . ". " . $value2["name"] .
-         "</h3>";
-    foreach ($value2["content"] as $k => $value3) {
-      echo "<h3 id=\"" . $i . "." . $j . "." . $k . "\">" .
-           $i . "." . $j . "." . $k . ". " . $value3 . "</h3>";
-      include $i . "/" . $j . "/" . $k;
+         "</h3>\n";
+    if (!($i == 1 && $j == 1)) {
+      foreach ($value2["content"] as $k => $value3) {
+        echo "<h3 id=\"" . $i . "." . $j . "." . $k . "\">" .
+             $i . "." . $j . "." . $k . ". " . $value3 . "</h3>\n";
+        include $i . "/" . $j . "/" . $k;
+        echo "\n";
+      }
+    }
+    else {
+      include $i . "/" . $j . "/1";
+      echo "\n";
     }
   }
 }
